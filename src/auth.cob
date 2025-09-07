@@ -17,6 +17,11 @@ ENVIRONMENT DIVISION.
                ACCESS MODE IS SEQUENTIAL
                FILE STATUS IS UACTIONS-FILE-STATUS.
 
+               SELECT APPLOG ASSIGN TO "InCollege-Output.txt"
+               ORGANIZATION IS SEQUENTIAL
+               ACCESS MODE IS SEQUENTIAL
+               FILE STATUS IS APPLOG-FILE-STATUS.
+
 DATA DIVISION.
        FILE SECTION.
            FD USERINFO.
@@ -25,44 +30,100 @@ DATA DIVISION.
                    05 IN-PASSWORD PIC X(20).
 
            FD USERACTIONS.
-               01 ACTION-REC PIC X(20).
+               01 ACTION-RECORD.
+                   05 ACTION-TEXT PIC A(100).
+
+           FD  APPLOG.
+               01  SAVE-RECORD.
+                   05  SAVE-TEXT PIC A(100).
+
 
        WORKING-STORAGE SECTION.
            01 UINFO-FILE-STATUS PIC XX.
            01 UACTIONS-FILE-STATUS PIC XX.
+           01 APPLOG-FILE-STATUS PIC XX.
            01 INFOEOF PIC A(1).
            01 ACTIONSEOF PIC A(1).
 
-       01     INPUT-ACTION Pic X(20).
        01     CURRENT-ACTION Pic X(20).
        01     INFO Pic X(20).
        01     WS-LOGIN Pic A(5) VALUE 'LOGIN'.
        01     WS-NEW Pic A(18) VALUE 'CREATE NEW ACCOUNT'.
+       01     WS-NAME PIC A(15).
+       01     WS-PASSWORD PIC A(15).
+       01     WS-STATUS PIC A(1) VALUE 'N'.   *> Y = logged in, N = not
 
 PROCEDURE DIVISION.
+
     OPEN INPUT USERINFO.
     OPEN INPUT USERACTIONS.
-    IF UINFO-FILE-STATUS NOT = "00"
-       DISPLAY "ERROR OPENING FILE: " UINFO-FILE-STATUS.
-       STOP RUN.
+    OPEN EXTEND APPLOG.
 
-    IF UINFO-FILE-STATUS NOT = "00"
-       DISPLAY "ERROR OPENING FILE: " UACTIONS-FILE-STATUS.
-       STOP RUN.
+    MOVE "Welcome to InCollege!" TO SAVE-TEXT.
+    PERFORM SHOW.
+    MOVE "Log In" TO SAVE-TEXT.
+    PERFORM SHOW.
+    MOVE "Create New Account" TO SAVE-TEXT.
+    PERFORM SHOW.
 
-    DISPLAY "Welcome to InCollege!".
-    DISPLAY "Log In".
-    DISPLAY "Create New Account".
+    *>PERFORM PARSEACTION UNTIL ACTIONSEOF='Y'
 
     PERFORM UNTIL ACTIONSEOF='Y'
-       READ USERACTIONS INTO INPUT-ACTION
-           EVA
-
+       READ USERACTIONS INTO ACTION-RECORD
            AT END MOVE 'Y' TO ACTIONSEOF
-           NOT AT END DISPLAY 'g'
+           NOT AT END
+               PERFORM PARSEACTION
        END-READ
     END-PERFORM
 
-    CLOSE USERINFO
-    CLOSE USERACTIONS
+    CLOSE USERINFO.
+    CLOSE USERACTIONS.
+    CLOSE APPLOG.
     STOP RUN.
+
+SHOW.
+DISPLAY SAVE-TEXT.
+WRITE SAVE-RECORD.
+
+LOGIN.
+
+SIGNIN.
+
+AUTH-USER.
+IF IN-USERNAME IS EQUAL TO WS-NAME THEN
+    IF IN-PASSWORD IS EQUAL TO WS-PASSWORD THEN
+        MOVE 'Y' TO WS-STATUS
+        MOVE "You have successfully logged in." TO SAVE-TEXT
+        PERFORM SHOW
+    ELSE
+        MOVE "Wrong username or password. Try again." TO SAVE-TEXT
+        PERFORM SHOW
+    END-IF
+ELSE
+    MOVE "Wrong username or password. Try again." TO SAVE-TEXT
+    PERFORM SHOW
+END-IF.
+
+PARSEACTION.
+DISPLAY ACTION-TEXT
+display WS-LOGIN
+IF ACTION-TEXT IS EQUAL TO WS-LOGIN THEN
+       DISPLAY "ggggggggg"
+       PERFORM UNTIL INFOEOF='Y'
+              READ USERINFO INTO USER-REC
+              AT END MOVE 'Y' TO INFOEOF
+              NOT AT END
+                   READ USERACTIONS INTO ACTION-RECORD
+                   END-READ
+                   MOVE ACTION-TEXT TO WS-NAME
+                   READ USERACTIONS INTO ACTION-RECORD
+                   END-READ
+                   MOVE ACTION-TEXT TO WS-PASSWORD
+                   PERFORM AUTH-USER
+         END-READ
+       END-PERFORM
+
+IF ACTION-TEXT IS EQUAL TO WS-NEW then
+      display ""
+END-IF.
+
