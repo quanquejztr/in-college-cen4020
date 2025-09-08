@@ -52,13 +52,19 @@ DATA DIVISION.
        01     WS-NAME PIC A(15).
        01     WS-PASSWORD PIC A(15).
        01     WS-STATUS PIC A(1) VALUE 'N'.   *> Y = logged in, N = not
+       01     WS-HASCAPITAL PIC A(1) VALUE 'N'.
+       01     WS-HASDIGIT PIC A(1) VALUE 'N'.
+       01     WS-HASSPECIAL PIC A(1) VALUE 'N'.
        01     WS-CHARCOUNT PIC 9(2) VALUE 0.
        01     WS-MINPASSWORDCOUNT PIC 9(1) VALUE 8.
        01     WS-MAXPASSWORDCOUNT PIC 9(2) VALUE 12.
+       01     WS-INSPECTEDCHAR PIC X(1).
+       01     WS-NUMACCOUNTS PIC 9(1) VALUE 0.
+       01     I PIC 9(2) VALUE 1.  *>Iterator I variable
+
 
 PROCEDURE DIVISION.
 
-    OPEN INPUT USERINFO.
     OPEN INPUT USERACTIONS.
     OPEN EXTEND APPLOG.
 
@@ -70,6 +76,15 @@ PROCEDURE DIVISION.
     PERFORM SHOW.
 
     *>PERFORM PARSEACTION UNTIL ACTIONSEOF='Y'
+    OPEN INPUT USERINFO.
+           PERFORM UNTIL INFOEOF='Y'
+              READ USERINFO INTO USER-REC
+                  AT END MOVE 'Y' TO INFOEOF
+                  NOT AT END
+                      ADD 1 TO WS-NUMACCOUNTS
+              END-READ
+           END-PERFORM
+    CLOSE USERINFO.
 
     PERFORM UNTIL ACTIONSEOF='Y'
        READ USERACTIONS INTO ACTION-RECORD
@@ -79,7 +94,6 @@ PROCEDURE DIVISION.
        END-READ
     END-PERFORM
 
-    CLOSE USERINFO.
     CLOSE USERACTIONS.
     CLOSE APPLOG.
     STOP RUN.
@@ -92,11 +106,58 @@ LOGIN.
 
 SIGNIN.
 
+CHECKPASSWORD.
+MOVE 'N' TO WS-HASDIGIT
+MOVE 'N' TO WS-HASCAPITAL
+MOVE 'N' TO WS-HASSPECIAL
+
+INSPECT FUNCTION TRIM(IN-PASSWORD) TALLYING WS-CHARCOUNT FOR ALL CHARACTERS.
+IF WS-CHARCOUNT >= WS-MINPASSWORDCOUNT THEN
+       IF WS-CHARCOUNT <= WS-MAXPASSWORDCOUNT THEN
+           PERFORM VARYING I FROM 1 BY 1 UNTIL I > LENGTH OF FUNCTION TRIM(IN-PASSWORD)
+               MOVE FUNCTION TRIM(IN-PASSWORD)(I:1) TO WS-INSPECTEDCHAR
+               IF WS-INSPECTEDCHAR >= 'A' AND WS-INSPECTEDCHAR <= 'Z' THEN
+                   MOVE 'Y' TO WS-HASCAPITAL
+
+               ELSE IF WS-INSPECTEDCHAR >= '0' AND WS-INSPECTEDCHAR <= '9' THEN
+                   MOVE 'Y' TO WS-HASDIGIT
+
+               ELSE IF WS-INSPECTEDCHAR >= '!' AND WS-INSPECTEDCHAR <= '/' THEN
+                   MOVE 'Y' TO WS-HASSPECIAL
+
+               END-IF
+           END-PERFORM
+           IF WS-HASCAPITAL IS EQUAL TO 'Y' AND WS-HASDIGIT IS EQUAL TO 'Y' AND WS-HASSPECIAL IS EQUAL TO 'Y' THEN
+               MOVE 'Y' TO WS-STATUS
+               MOVE "Account created successfully." TO SAVE-TEXT
+               PERFORM SHOW
+               STRING "Welcome, " DELIMITED BY SIZE IN-USERNAME DELIMITED BY SIZE INTO SAVE-TEXT
+               PERFORM SHOW
+               OPEN EXTEND USERINFO    *> Write new user info.
+               WRITE USER-REC
+               END-WRITE
+               CLOSE USERINFO
+               DISPLAY 'DATA WRITTEN'
+           ELSE
+               MOVE "Password requirements not met!" TO SAVE-TEXT
+               PERFORM SHOW
+           END-IF
+       ELSE
+           MOVE "Password requirements not met!" TO SAVE-TEXT
+           PERFORM SHOW
+       END-IF
+ELSE
+       MOVE "Password requirements not met!" TO SAVE-TEXT
+       PERFORM SHOW
+END-IF.
+
 AUTH-USER.
 IF IN-USERNAME IS EQUAL TO WS-NAME THEN
     IF IN-PASSWORD IS EQUAL TO WS-PASSWORD THEN
         MOVE 'Y' TO WS-STATUS
         MOVE "You have successfully logged in." TO SAVE-TEXT
+        PERFORM SHOW
+        STRING "Welcome, " DELIMITED BY SIZE WS-NAME DELIMITED BY SIZE INTO SAVE-TEXT
         PERFORM SHOW
     ELSE
         MOVE "Wrong credentials. Try again." TO SAVE-TEXT
@@ -108,40 +169,42 @@ ELSE
 END-IF.
 
 PARSEACTION.
-DISPLAY ACTION-TEXT
 IF ACTION-TEXT IS EQUAL TO WS-LOGIN THEN
        PERFORM UNTIL INFOEOF='Y'
               IF WS-STATUS = 'Y' THEN
                    MOVE 'Y' TO INFOEOF
               ELSE
+                   OPEN INPUT USERINFO
                    READ USERINFO INTO USER-REC
                    AT END MOVE 'Y' TO INFOEOF
                    NOT AT END
+                        MOVE "Please enter your username:" TO SAVE-TEXT
+                        PERFORM SHOW
                         READ USERACTIONS INTO ACTION-RECORD
                         END-READ
                         MOVE ACTION-TEXT TO WS-NAME
+                        MOVE "Please enter your password:" TO SAVE-TEXT
+                        PERFORM SHOW
                         READ USERACTIONS INTO ACTION-RECORD
                         END-READ
                         MOVE ACTION-TEXT TO WS-PASSWORD
                         PERFORM AUTH-USER
                    END-READ
+                   CLOSE USERINFO
        END-PERFORM
 
-IF ACTION-TEXT IS EQUAL TO WS-NEW THEN
-       READ USERACTIONS INTO ACTION-RECORD
-       END-READ
-       MOVE ACTION-TEXT TO IN-PASSWORD
-       READ USERACTIONS INTO ACTION-RECORD
-       END-READ
-       MOVE ACTION-TEXT TO IN-PASSWORD
-       INSPECT IN-PASSWORD TALLYING WS-CHARCOUNT FOR CHARACTER.
-       IF WS-CHARCOUNT > WS-MINPASSWORDCOUNT THEN
-           IF WS-CHARCOUNT < WS-MAXPASSWORDCOUNT THEN
-               
-       OPEN EXTEND USERINFO
-       WRITE USER-REC
-       END-WRITE
-       MOVE "New account created!" TO SAVE-TEXT
-       PERFORM SHOW
+ELSE IF ACTION-TEXT IS EQUAL TO WS-NEW THEN
+       IF WS-NUMACCOUNTS < 5 THEN
+           READ USERACTIONS INTO ACTION-RECORD
+           END-READ
+           MOVE ACTION-TEXT TO IN-USERNAME
+           READ USERACTIONS INTO ACTION-RECORD
+           END-READ
+           MOVE ACTION-TEXT TO IN-PASSWORD
+           PERFORM CHECKPASSWORD
+       ELSE
+           MOVE "Account limit reached!" TO SAVE-TEXT
+           PERFORM SHOW
+       END-IF
 END-IF.
 
