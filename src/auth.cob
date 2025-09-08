@@ -31,11 +31,11 @@ DATA DIVISION.
 
            FD USERACTIONS.
                01 ACTION-RECORD.
-                   05 ACTION-TEXT PIC A(100).
+                   05 ACTION-TEXT PIC A(32).
 
            FD  APPLOG.
                01  SAVE-RECORD.
-                   05  SAVE-TEXT PIC A(100).
+                   05  SAVE-TEXT PIC A(32).
 
 
        WORKING-STORAGE SECTION.
@@ -52,6 +52,9 @@ DATA DIVISION.
        01     WS-NAME PIC A(15).
        01     WS-PASSWORD PIC A(15).
        01     WS-STATUS PIC A(1) VALUE 'N'.   *> Y = logged in, N = not
+       01     WS-CHARCOUNT PIC 9(2) VALUE 0.
+       01     WS-MINPASSWORDCOUNT PIC 9(1) VALUE 8.
+       01     WS-MAXPASSWORDCOUNT PIC 9(2) VALUE 12.
 
 PROCEDURE DIVISION.
 
@@ -96,34 +99,49 @@ IF IN-USERNAME IS EQUAL TO WS-NAME THEN
         MOVE "You have successfully logged in." TO SAVE-TEXT
         PERFORM SHOW
     ELSE
-        MOVE "Wrong username or password. Try again." TO SAVE-TEXT
+        MOVE "Wrong credentials. Try again." TO SAVE-TEXT
         PERFORM SHOW
     END-IF
 ELSE
-    MOVE "Wrong username or password. Try again." TO SAVE-TEXT
+    MOVE "Wrong credentials. Try again." TO SAVE-TEXT
     PERFORM SHOW
 END-IF.
 
 PARSEACTION.
 DISPLAY ACTION-TEXT
-display WS-LOGIN
 IF ACTION-TEXT IS EQUAL TO WS-LOGIN THEN
-       DISPLAY "ggggggggg"
        PERFORM UNTIL INFOEOF='Y'
-              READ USERINFO INTO USER-REC
-              AT END MOVE 'Y' TO INFOEOF
-              NOT AT END
-                   READ USERACTIONS INTO ACTION-RECORD
+              IF WS-STATUS = 'Y' THEN
+                   MOVE 'Y' TO INFOEOF
+              ELSE
+                   READ USERINFO INTO USER-REC
+                   AT END MOVE 'Y' TO INFOEOF
+                   NOT AT END
+                        READ USERACTIONS INTO ACTION-RECORD
+                        END-READ
+                        MOVE ACTION-TEXT TO WS-NAME
+                        READ USERACTIONS INTO ACTION-RECORD
+                        END-READ
+                        MOVE ACTION-TEXT TO WS-PASSWORD
+                        PERFORM AUTH-USER
                    END-READ
-                   MOVE ACTION-TEXT TO WS-NAME
-                   READ USERACTIONS INTO ACTION-RECORD
-                   END-READ
-                   MOVE ACTION-TEXT TO WS-PASSWORD
-                   PERFORM AUTH-USER
-         END-READ
        END-PERFORM
 
-IF ACTION-TEXT IS EQUAL TO WS-NEW then
-      display ""
+IF ACTION-TEXT IS EQUAL TO WS-NEW THEN
+       READ USERACTIONS INTO ACTION-RECORD
+       END-READ
+       MOVE ACTION-TEXT TO IN-PASSWORD
+       READ USERACTIONS INTO ACTION-RECORD
+       END-READ
+       MOVE ACTION-TEXT TO IN-PASSWORD
+       INSPECT IN-PASSWORD TALLYING WS-CHARCOUNT FOR CHARACTER.
+       IF WS-CHARCOUNT > WS-MINPASSWORDCOUNT THEN
+           IF WS-CHARCOUNT < WS-MAXPASSWORDCOUNT THEN
+               
+       OPEN EXTEND USERINFO
+       WRITE USER-REC
+       END-WRITE
+       MOVE "New account created!" TO SAVE-TEXT
+       PERFORM SHOW
 END-IF.
 
