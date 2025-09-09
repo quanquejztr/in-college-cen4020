@@ -29,25 +29,25 @@ FD USERINFO.
 
 FD INPUT-FILE.
        01 INPUT-REC.
-           05 INPUT-TEXT PIC A(32).
+           05 INPUT-TEXT PIC A(24).
 
 FD APPLOG.
        01 SAVE-RECORD.
-           05 SAVE-TEXT PIC X(120).
+           05 SAVE-TEXT PIC X(64).
 
 WORKING-STORAGE SECTION.
        01 UINFO-FILE-STATUS PIC XX.
        01 INPUT-FILE-STATUS PIC XX.
        01 APPLOG-FILE-STATUS PIC XX.
        01 INFOEOF PIC A(1) VALUE 'N'.
-       01 ACTIONSEOF PIC A(1) VALUE 'N'.
+       01 INPUTSEOF PIC A(1) VALUE 'N'.
 
        01 CURRENT-ACTION PIC X(20).
        01 WS-LOGIN PIC X(5) VALUE 'LOGIN'.
        01 WS-NEW   PIC X(18) VALUE 'CREATE NEW ACCOUNT'.
        01 WS-NAME PIC X(20).
        01 WS-PASSWORD PIC X(20).
-       01 WS-STATUS PIC A(1) VALUE 'N'.   *> Y = logged in, N = not
+       01 WS-LOGGEDIN PIC A(1) VALUE 'N'.   *> Y = logged in, N = not
        01 WS-HASCAPITAL PIC A(1) VALUE 'N'.
        01 WS-HASDIGIT   PIC A(1) VALUE 'N'.
        01 WS-HASSPECIAL PIC A(1) VALUE 'N'.
@@ -56,6 +56,8 @@ WORKING-STORAGE SECTION.
        01 WS-MAXPASSWORDCOUNT PIC 9(2) VALUE 12.
        01 WS-INSPECTEDCHAR PIC X(1).
        01 WS-NUMACCOUNTS PIC 9(1) VALUE 0.
+       01 WS-NEWUSERNAME PIC X(20).
+       01 WS-UNIQUEUSERSTATUS PIC A(1) VALUE 'N'.
        01 I PIC 9(2) VALUE 1.  *>Iterator I variable
 
        77 CHOICE       PIC 9 VALUE 0.
@@ -84,11 +86,12 @@ PROCEDURE DIVISION.
            END-PERFORM
        CLOSE USERINFO
 
-       PERFORM UNTIL ACTIONSEOF='Y'
+       MOVE 'N' TO INFOEOF.
+       PERFORM UNTIL INPUTSEOF='Y'
            READ INPUT-FILE INTO INPUT-TEXT
-               AT END MOVE 'Y' TO ACTIONSEOF
+               AT END MOVE 'Y' TO INPUTSEOF
                    NOT AT END
-                     PERFORM PARSEACTION
+                     PERFORM PARSEINPUT
             END-READ
        END-PERFORM
 
@@ -129,7 +132,7 @@ CHECKPASSWORD.
                   IF WS-HASCAPITAL = 'Y'
                      AND WS-HASDIGIT = 'Y'
                      AND WS-HASSPECIAL = 'Y'
-                      MOVE 'Y' TO WS-STATUS
+                      MOVE 'Y' TO WS-LOGGEDIN
                       MOVE "Account created successfully." TO SAVE-TEXT
                       PERFORM SHOW
                       STRING "Welcome, " DELIMITED BY SIZE
@@ -150,16 +153,17 @@ CHECKPASSWORD.
            END-IF.
 
 AUTH-USER.
+DISPLAY WS-NAME
+DISPLAY WS-PASSWORD
        IF IN-USERNAME = WS-NAME
            IF IN-PASSWORD = WS-PASSWORD
-                   MOVE 'Y' TO WS-STATUS
+                   MOVE 'Y' TO WS-LOGGEDIN
                    MOVE "You have successfully logged in." TO SAVE-TEXT
                    PERFORM SHOW
                    STRING "Welcome, " DELIMITED BY SIZE
                           WS-NAME DELIMITED BY SIZE
                           INTO SAVE-TEXT
                    PERFORM SHOW
-                   PERFORM NAV-MENU
                ELSE
                    MOVE "Wrong credentials. Try again." TO SAVE-TEXT
                    PERFORM SHOW
@@ -167,43 +171,77 @@ AUTH-USER.
        ELSE
            MOVE "Wrong credentials. Try again." TO SAVE-TEXT
            PERFORM SHOW
+           STOP RUN
        END-IF.
-PARSEACTION.
+PARSEINPUT.
+DISPLAY INPUT-TEXT
        IF INPUT-TEXT = WS-LOGIN
+       DISPLAY 'GGGG'
+       IF WS-LOGGEDIN = 'Y' THEN
+           MOVE "You are already logged in." TO SAVE-TEXT
+           PERFORM SHOW
+       ELSE
            PERFORM UNTIL INFOEOF='Y'
-               IF WS-STATUS = 'Y'
-                   MOVE 'Y' TO INFOEOF
-               ELSE
-                   OPEN INPUT USERINFO
-                    READ USERINFO INTO USER-REC
-                          AT END MOVE 'Y' TO INFOEOF
-                           NOT AT END
-                               MOVE "Please enter your username:" TO SAVE-TEXT
-                               PERFORM SHOW
-                               READ INPUT-FILE INTO INPUT-TEXT
-                               MOVE INPUT-TEXT TO WS-NAME
-                               MOVE "Please enter your password:" TO SAVE-TEXT
-                               PERFORM SHOW
-                               READ INPUT-FILE INTO INPUT-TEXT
-                               MOVE INPUT-TEXT TO WS-PASSWORD
-                               PERFORM AUTH-USER
-                    END-READ
-                 CLOSE USERINFO
+               MOVE "Please enter your username:" TO SAVE-TEXT
+               PERFORM SHOW
+               MOVE "Please enter your password:" TO SAVE-TEXT
+               PERFORM SHOW
+               READ INPUT-FILE INTO INPUT-TEXT
+               MOVE INPUT-TEXT TO WS-NAME
+               READ INPUT-FILE INTO INPUT-TEXT
+               MOVE INPUT-TEXT TO WS-PASSWORD
+               OPEN INPUT USERINFO
+                  READ USERINFO INTO USER-REC
+                     AT END MOVE 'Y' TO INFOEOF
+                       NOT AT END
+                           PERFORM AUTH-USER
+                  END-READ
+               CLOSE USERINFO
+               IF WS-LOGGEDIN = 'Y' THEN
+                   PERFORM NAV-MENU
+               END-IF
            END-PERFORM
+       END-IF
        ELSE IF INPUT-TEXT = WS-NEW
-               IF WS-NUMACCOUNTS < 5
+               IF WS-LOGGEDIN = 'Y' THEN
+                   MOVE "You are already logged in." TO SAVE-TEXT
+                   PERFORM SHOW
+               ELSE IF WS-NUMACCOUNTS < 5
                    READ INPUT-FILE INTO INPUT-TEXT
-                   MOVE INPUT-TEXT TO IN-USERNAME
+                   MOVE INPUT-TEXT TO WS-NEWUSERNAME
                    READ INPUT-FILE INTO INPUT-TEXT
                    MOVE INPUT-TEXT TO IN-PASSWORD
-                   PERFORM CHECKPASSWORD
+                   OPEN INPUT USERINFO
+                   MOVE 'N' TO INFOEOF
+                   MOVE 'Y' TO WS-UNIQUEUSERSTATUS
+                   PERFORM UNTIL INFOEOF='Y'
+                       READ USERINFO INTO USER-REC
+                          AT END MOVE 'Y' TO INFOEOF
+                          NOT AT END
+                               IF WS-NEWUSERNAME = IN-USERNAME THEN
+                                   MOVE "Username already exists, please try again." TO SAVE-TEXT
+                                   PERFORM SHOW
+                                   MOVE 'Y' TO INFOEOF
+                                   MOVE 'N' TO WS-UNIQUEUSERSTATUS
+                               END-IF
+                       END-READ
+                   END-PERFORM
+                   CLOSE USERINFO
+
+                   IF WS-UNIQUEUSERSTATUS = 'Y' THEN
+                       MOVE WS-NEWUSERNAME TO IN-USERNAME
+                       PERFORM CHECKPASSWORD
+                   END-IF
                ELSE
                    MOVE "All permitted accounts have been created, please come back later" TO SAVE-TEXT
                    PERFORM SHOW
                END-IF
+       ELSE
+           MOVE "Invalid action, please try again." TO SAVE-TEXT
+           PERFORM SHOW
        END-IF.
 NAV-MENU.
-       PERFORM UNTIL CHOICE = 9 OR ACTIONSEOF = "Y"
+       PERFORM UNTIL CHOICE = 9 OR INPUTSEOF = "Y"
                MOVE " " TO SAVE-TEXT
                PERFORM SHOW
 
@@ -223,10 +261,10 @@ NAV-MENU.
                PERFORM SHOW
 
                READ INPUT-FILE INTO INPUT-TEXT
-                   AT END MOVE "Y" TO ACTIONSEOF
+                   AT END MOVE "Y" TO INPUT
                END-READ
 
-               IF ACTIONSEOF NOT = "Y"
+               IF INPUTSEOF NOT = "Y"
                    MOVE FUNCTION NUMVAL(INPUT-TEXT) TO CHOICE
                    EVALUATE CHOICE
                        WHEN 1
@@ -248,7 +286,7 @@ NAV-MENU.
            END-PERFORM.
 SKILL-MENU.
            MOVE 0 TO SKILLCHOICE
-           PERFORM UNTIL SKILLCHOICE = 9 OR ACTIONSEOF= "Y"
+           PERFORM UNTIL SKILLCHOICE = 9 OR INPUTSEOF = "Y"
                MOVE "Learn a New Skill:" TO SAVE-TEXT
                PERFORM SHOW
 
@@ -274,10 +312,10 @@ SKILL-MENU.
                PERFORM SHOW
 
                READ INPUT-FILE INTO INPUT-TEXT
-                   AT END MOVE "Y" TO ACTIONSEOF
+                   AT END MOVE "Y" TO INPUTSEOF
                END-READ
 
-               IF ACTIONSEOF NOT = "Y"
+               IF INPUTSEOF NOT = "Y"
                    MOVE FUNCTION NUMVAL(INPUT-TEXT) TO SKILLCHOICE
                    EVALUATE SKILLCHOICE
                        WHEN 1
