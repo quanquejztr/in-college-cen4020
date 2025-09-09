@@ -127,6 +127,7 @@ CHECKPASSWORD.
                STRING "Welcome, " DELIMITED BY SIZE IN-USERNAME DELIMITED BY SIZE
                    INTO SAVE-TEXT
                PERFORM SHOW
+               PERFORM NAV-MENU
                OPEN EXTEND USERINFO
                WRITE USER-REC
                CLOSE USERINFO
