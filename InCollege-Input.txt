@@ -1,11 +1,5 @@
 CREATE NEW ACCOUNT
-LunaA
-Password123!
+shortpass
+Pass1!
 1
-2
-3
-5
-7
-4
-9
 9
