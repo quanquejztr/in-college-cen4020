@@ -7,7 +7,7 @@ ENVIRONMENT DIVISION.
 INPUT-OUTPUT SECTION.
        FILE-CONTROL.
            SELECT USERINFO ASSIGN TO "userinfo.txt"
-               ORGANIZATION IS SEQUENTIAL
+               ORGANIZATION IS LINE SEQUENTIAL
                ACCESS MODE IS SEQUENTIAL
                FILE STATUS IS UINFO-FILE-STATUS.
 
@@ -29,7 +29,7 @@ FD USERINFO.
 
 FD INPUT-FILE.
        01 INPUT-REC.
-           05 INPUT-TEXT PIC A(24).
+           05 INPUT-TEXT PIC X(24).
 
 FD APPLOG.
        01 SAVE-RECORD.
@@ -153,13 +153,14 @@ CHECKPASSWORD.
            END-IF.
 
 AUTH-USER.
-DISPLAY WS-NAME
-DISPLAY WS-PASSWORD
+*>DISPLAY WS-NAME
+*>DISPLAY WS-PASSWORD
        IF IN-USERNAME = WS-NAME
            IF IN-PASSWORD = WS-PASSWORD
                    MOVE 'Y' TO WS-LOGGEDIN
                    MOVE "You have successfully logged in." TO SAVE-TEXT
                    PERFORM SHOW
+                   MOVE SPACES TO SAVE-TEXT
                    STRING "Welcome, " DELIMITED BY SIZE
                           WS-NAME DELIMITED BY SIZE
                           INTO SAVE-TEXT
@@ -171,12 +172,13 @@ DISPLAY WS-PASSWORD
        ELSE
            MOVE "Wrong credentials. Try again." TO SAVE-TEXT
            PERFORM SHOW
+           CLOSE INPUT-FILE
+           CLOSE APPLOG
            STOP RUN
        END-IF.
 PARSEINPUT.
-DISPLAY INPUT-TEXT
+*>DISPLAY INPUT-TEXT
        IF INPUT-TEXT = WS-LOGIN
-       DISPLAY 'GGGG'
        IF WS-LOGGEDIN = 'Y' THEN
            MOVE "You are already logged in." TO SAVE-TEXT
            PERFORM SHOW
@@ -242,8 +244,6 @@ DISPLAY INPUT-TEXT
        END-IF.
 NAV-MENU.
        PERFORM UNTIL CHOICE = 9 OR INPUTSEOF = "Y"
-               MOVE " " TO SAVE-TEXT
-               PERFORM SHOW
 
                MOVE "Search for a job (1)" TO SAVE-TEXT
                PERFORM SHOW
@@ -261,7 +261,7 @@ NAV-MENU.
                PERFORM SHOW
 
                READ INPUT-FILE INTO INPUT-TEXT
-                   AT END MOVE "Y" TO INPUT
+                   AT END MOVE "Y" TO INPUTSEOF
                END-READ
 
                IF INPUTSEOF NOT = "Y"
@@ -278,11 +278,15 @@ NAV-MENU.
                        WHEN 9
                            MOVE "Exiting navigation..." TO SAVE-TEXT
                            PERFORM SHOW
+                           CLOSE INPUT-FILE
+                           CLOSE APPLOG
+                           STOP RUN
                        WHEN OTHER
                            MOVE "Invalid choice, please try again." TO SAVE-TEXT
                            PERFORM SHOW
                    END-EVALUATE
                END-IF
+
            END-PERFORM.
 SKILL-MENU.
            MOVE 0 TO SKILLCHOICE
