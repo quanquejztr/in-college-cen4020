@@ -1,10 +1,8 @@
 Welcome to InCollege!
 Log In
 Create New Account
-Please enter your username:
-Please enter your password:
-You have successfully logged in.
-Welcome, Luna
+Account created successfully.
+Welcome, LunaA
 Search for a job (1)
 Find someone you know (2)
 Learn a new skill (3)

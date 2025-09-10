@@ -1,5 +1,5 @@
-LOGIN
-Luna
+CREATE NEW ACCOUNT
+LunaA
 Password123!
 1
 2

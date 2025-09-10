@@ -139,10 +139,10 @@ CHECKPASSWORD.
                              IN-USERNAME DELIMITED BY SIZE
                              INTO SAVE-TEXT
                       PERFORM SHOW
-                      PERFORM NAV-MENU
                       OPEN EXTEND USERINFO
                       WRITE USER-REC
                       CLOSE USERINFO
+                      PERFORM NAV-MENU
                   ELSE
                       MOVE "Password requirements not met!" TO SAVE-TEXT
                       PERFORM SHOW
@@ -179,31 +179,31 @@ AUTH-USER.
 PARSEINPUT.
 *>DISPLAY INPUT-TEXT
        IF INPUT-TEXT = WS-LOGIN
-       IF WS-LOGGEDIN = 'Y' THEN
-           MOVE "You are already logged in." TO SAVE-TEXT
-           PERFORM SHOW
-       ELSE
-           PERFORM UNTIL INFOEOF='Y'
-               MOVE "Please enter your username:" TO SAVE-TEXT
-               PERFORM SHOW
-               MOVE "Please enter your password:" TO SAVE-TEXT
-               PERFORM SHOW
-               READ INPUT-FILE INTO INPUT-TEXT
-               MOVE INPUT-TEXT TO WS-NAME
-               READ INPUT-FILE INTO INPUT-TEXT
-               MOVE INPUT-TEXT TO WS-PASSWORD
-               OPEN INPUT USERINFO
-                  READ USERINFO INTO USER-REC
-                     AT END MOVE 'Y' TO INFOEOF
-                       NOT AT END
-                           PERFORM AUTH-USER
-                  END-READ
-               CLOSE USERINFO
-               IF WS-LOGGEDIN = 'Y' THEN
-                   PERFORM NAV-MENU
-               END-IF
-           END-PERFORM
-       END-IF
+              IF WS-LOGGEDIN = 'Y' THEN
+                  MOVE "You are already logged in." TO SAVE-TEXT
+                  PERFORM SHOW
+              ELSE
+                  PERFORM UNTIL INFOEOF='Y'
+                      MOVE "Please enter your username:" TO SAVE-TEXT
+                      PERFORM SHOW
+                      MOVE "Please enter your password:" TO SAVE-TEXT
+                      PERFORM SHOW
+                      READ INPUT-FILE INTO INPUT-TEXT
+                      MOVE INPUT-TEXT TO WS-NAME
+                      READ INPUT-FILE INTO INPUT-TEXT
+                      MOVE INPUT-TEXT TO WS-PASSWORD
+                      OPEN INPUT USERINFO
+                         READ USERINFO INTO USER-REC
+                            AT END MOVE 'Y' TO INFOEOF
+                              NOT AT END
+                                  PERFORM AUTH-USER
+                         END-READ
+                      CLOSE USERINFO
+                      IF WS-LOGGEDIN = 'Y' THEN
+                          PERFORM NAV-MENU
+                      END-IF
+                  END-PERFORM
+              END-IF
        ELSE IF INPUT-TEXT = WS-NEW
                IF WS-LOGGEDIN = 'Y' THEN
                    MOVE "You are already logged in." TO SAVE-TEXT
