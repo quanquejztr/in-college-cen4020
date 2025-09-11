@@ -1,7 +1,7 @@
 Epic #1 Roles : Washington
 --------------------------------
-Scrum Master: Paige Leclair
-Coder #1:Jayson Lopez
-Coder #2: Brooklyn Luna
-Tester #1:Tri Cuong
-Tester #2. Joshua Maharaj
+Scrum Master: Joshua Maharaj
+Coder #1:Paige Leclair
+Coder #2: Jayson Lopez
+Tester #1:Brooklyn Luna
+Tester #2: Tri Cuong Luong
