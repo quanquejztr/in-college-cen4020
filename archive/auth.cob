@@ -62,16 +62,27 @@ DATA DIVISION.
        01     WS-NUMACCOUNTS PIC 9(1) VALUE 0.
        01     I PIC 9(2) VALUE 1.  *>Iterator I variable
 
+       *> ANSI color sequences for terminal output
+       01     ANSI-RESET   PIC X(4) VALUE X"1B[0m".
+       01     CLR-RED      PIC X(5) VALUE X"1B[31m".
+       01     CLR-GREEN    PIC X(5) VALUE X"1B[32m".
+       01     CLR-YELLOW   PIC X(5) VALUE X"1B[33m".
+       01     CLR-CYAN     PIC X(5) VALUE X"1B[36m".
+       01     WS-COLOR     PIC X(5) VALUE SPACES.
+
 
 PROCEDURE DIVISION.
 
     OPEN INPUT USERACTIONS.
     OPEN EXTEND APPLOG.
 
+    MOVE CLR-CYAN TO WS-COLOR
     MOVE "Welcome to InCollege!" TO SAVE-TEXT.
     PERFORM SHOW.
+    MOVE CLR-CYAN TO WS-COLOR
     MOVE "Log In" TO SAVE-TEXT.
     PERFORM SHOW.
+    MOVE CLR-CYAN TO WS-COLOR
     MOVE "Create New Account" TO SAVE-TEXT.
     PERFORM SHOW.
 
@@ -99,8 +110,9 @@ PROCEDURE DIVISION.
     STOP RUN.
 
 SHOW.
-DISPLAY SAVE-TEXT.
+DISPLAY WS-COLOR SAVE-TEXT ANSI-RESET.
 WRITE SAVE-RECORD.
+MOVE SPACES TO WS-COLOR.
 
 LOGIN.
 
@@ -129,24 +141,31 @@ IF WS-CHARCOUNT >= WS-MINPASSWORDCOUNT THEN
            END-PERFORM
            IF WS-HASCAPITAL IS EQUAL TO 'Y' AND WS-HASDIGIT IS EQUAL TO 'Y' AND WS-HASSPECIAL IS EQUAL TO 'Y' THEN
                MOVE 'Y' TO WS-STATUS
+               MOVE CLR-GREEN TO WS-COLOR
                MOVE "Account created successfully." TO SAVE-TEXT
                PERFORM SHOW
+               MOVE CLR-GREEN TO WS-COLOR
                STRING "Welcome, " DELIMITED BY SIZE IN-USERNAME DELIMITED BY SIZE INTO SAVE-TEXT
                PERFORM SHOW
                OPEN EXTEND USERINFO    *> Write new user info.
                WRITE USER-REC
                END-WRITE
                CLOSE USERINFO
-               DISPLAY 'DATA WRITTEN'
+               MOVE CLR-GREEN TO WS-COLOR
+               MOVE 'DATA WRITTEN' TO SAVE-TEXT
+               PERFORM SHOW
            ELSE
+               MOVE CLR-RED TO WS-COLOR
                MOVE "Password requirements not met!" TO SAVE-TEXT
                PERFORM SHOW
            END-IF
        ELSE
+           MOVE CLR-RED TO WS-COLOR
            MOVE "Password requirements not met!" TO SAVE-TEXT
            PERFORM SHOW
        END-IF
 ELSE
+       MOVE CLR-RED TO WS-COLOR
        MOVE "Password requirements not met!" TO SAVE-TEXT
        PERFORM SHOW
 END-IF.
@@ -155,15 +174,19 @@ AUTH-USER.
 IF IN-USERNAME IS EQUAL TO WS-NAME THEN
     IF IN-PASSWORD IS EQUAL TO WS-PASSWORD THEN
         MOVE 'Y' TO WS-STATUS
+        MOVE CLR-GREEN TO WS-COLOR
         MOVE "You have successfully logged in." TO SAVE-TEXT
         PERFORM SHOW
+        MOVE CLR-GREEN TO WS-COLOR
         STRING "Welcome, " DELIMITED BY SIZE WS-NAME DELIMITED BY SIZE INTO SAVE-TEXT
         PERFORM SHOW
     ELSE
+        MOVE CLR-RED TO WS-COLOR
         MOVE "Wrong credentials. Try again." TO SAVE-TEXT
         PERFORM SHOW
     END-IF
 ELSE
+    MOVE CLR-RED TO WS-COLOR
     MOVE "Wrong credentials. Try again." TO SAVE-TEXT
     PERFORM SHOW
 END-IF.
@@ -178,11 +201,13 @@ IF ACTION-TEXT IS EQUAL TO WS-LOGIN THEN
                    READ USERINFO INTO USER-REC
                    AT END MOVE 'Y' TO INFOEOF
                    NOT AT END
+                        MOVE CLR-CYAN TO WS-COLOR
                         MOVE "Please enter your username:" TO SAVE-TEXT
                         PERFORM SHOW
                         READ USERACTIONS INTO ACTION-RECORD
                         END-READ
                         MOVE ACTION-TEXT TO WS-NAME
+                        MOVE CLR-CYAN TO WS-COLOR
                         MOVE "Please enter your password:" TO SAVE-TEXT
                         PERFORM SHOW
                         READ USERACTIONS INTO ACTION-RECORD
@@ -203,8 +228,8 @@ ELSE IF ACTION-TEXT IS EQUAL TO WS-NEW THEN
            MOVE ACTION-TEXT TO IN-PASSWORD
            PERFORM CHECKPASSWORD
        ELSE
+           MOVE CLR-YELLOW TO WS-COLOR
            MOVE "Account limit reached!" TO SAVE-TEXT
            PERFORM SHOW
        END-IF
 END-IF.
-
