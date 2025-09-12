@@ -19,12 +19,7 @@ USER: savefix1
 FN: Alice
 LN: Zephyr
 UNIV: Uni A
-MAJOR: Software Engineering
-GRAD: 2027
-ABOUT: About A3
-Experience:
-Title: Third Exp
-Company: Third Co
-Dates: Winter 2027
-Description: Third desc
+MAJOR: CS
+GRAD: 2026
+ABOUT: About A
 END

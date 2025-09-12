@@ -1,5 +1,4 @@
 >>SOURCE FORMAT FREE
-*> NOTES: Min year 1990??
 IDENTIFICATION DIVISION.
 PROGRAM-ID. InCollege.
 *> AUTHOR. Washington.
@@ -183,12 +182,17 @@ PROCEDURE DIVISION.
         END-IF
     END-IF
 
-    MOVE "Welcome to InCollege!" TO SAVE-TEXT
-    PERFORM SHOW
-    MOVE "Log In" TO SAVE-TEXT
-    PERFORM SHOW
-    MOVE "Create New Account" TO SAVE-TEXT
-    PERFORM SHOW
+    MOVE "Welcome to InCollege!" TO SAVE-TEXT PERFORM SHOW
+    MOVE "1. Log In"            TO SAVE-TEXT PERFORM SHOW
+    MOVE "2. Create New Account" TO SAVE-TEXT PERFORM SHOW
+    MOVE "Enter your choice:"   TO SAVE-TEXT PERFORM SHOW
+    READ INPUT-FILE INTO INPUT-TEXT
+    EVALUATE FUNCTION TRIM(INPUT-TEXT)
+    WHEN "1" MOVE WS-LOGIN TO INPUT-TEXT
+    WHEN "2" MOVE WS-NEW   TO INPUT-TEXT
+    WHEN OTHER CONTINUE  *> allow existing text tokens for backwards compatibility
+    END-EVALUATE
+    PERFORM PARSEINPUT
 
 *> Count existing accounts
     OPEN INPUT USERINFO
@@ -266,6 +270,8 @@ CHECKPASSWORD.
                       INTO SAVE-TEXT
                END-STRING
                PERFORM SHOW
+               *> Ensure WS-NAME reflects the newly created username
+               MOVE IN-USERNAME TO WS-NAME
                OPEN EXTEND USERINFO
                WRITE USER-REC
                CLOSE USERINFO
@@ -310,6 +316,13 @@ AUTH-USER.
     END-IF.
 
 PARSEINPUT.
+    *> Map numeric pre-login choices to existing commands
+    IF FUNCTION TRIM(INPUT-TEXT) = "1"
+        MOVE WS-LOGIN TO INPUT-TEXT
+    ELSE IF FUNCTION TRIM(INPUT-TEXT) = "2"
+        MOVE WS-NEW   TO INPUT-TEXT
+    END-IF
+
     IF INPUT-TEXT = WS-LOGIN
         IF WS-LOGGEDIN = 'Y'
             MOVE "You are already logged in." TO SAVE-TEXT
@@ -469,8 +482,7 @@ EDIT-PROFILE.
         MOVE "Add Experience (optional, max 3 entries. Enter 'DONE' to finish):" TO SAVE-TEXT
         PERFORM SHOW
         READ INPUT-FILE INTO INPUT-TEXT
-        IF FUNCTION TRIM(INPUT-TEXT) = "DONE"
-           OR FUNCTION LENGTH(FUNCTION TRIM(INPUT-TEXT)) = 0
+        IF FUNCTION UPPER-CASE(FUNCTION TRIM(INPUT-TEXT)) = "DONE"
             EXIT PERFORM
         END-IF
 
@@ -517,20 +529,25 @@ EDIT-PROFILE.
         END-PERFORM
 
         *> Dates (required)
-        MOVE P-I TO WS-IDX-TXT
-        MOVE SPACES TO SAVE-TEXT
-        STRING "Experience #" DELIMITED BY SIZE
-               FUNCTION TRIM(WS-IDX-TXT) DELIMITED BY SIZE
-               " - Dates (e.g., Summer 2024):" DELIMITED BY SIZE
-               INTO SAVE-TEXT
-        END-STRING
-        PERFORM SHOW
-        READ INPUT-FILE INTO INPUT-TEXT
-        IF FUNCTION LENGTH(FUNCTION TRIM(INPUT-TEXT)) > 0
-            MOVE FUNCTION TRIM(INPUT-TEXT) TO P-EXP-DATES(P-I)
-        ELSE
-            MOVE SPACES TO P-EXP-DATES(P-I)
-        END-IF
+        MOVE "N" TO FIELD-OK
+        PERFORM UNTIL FIELD-OK = "Y"
+            MOVE P-I TO WS-IDX-TXT
+            MOVE SPACES TO SAVE-TEXT
+            STRING "Experience #" DELIMITED BY SIZE
+                   FUNCTION TRIM(WS-IDX-TXT) DELIMITED BY SIZE
+                   " - Dates (e.g., Summer 2024):" DELIMITED BY SIZE
+                   INTO SAVE-TEXT
+            END-STRING
+            PERFORM SHOW
+            READ INPUT-FILE INTO INPUT-TEXT
+            IF FUNCTION LENGTH(FUNCTION TRIM(INPUT-TEXT)) > 0
+                MOVE FUNCTION TRIM(INPUT-TEXT) TO P-EXP-DATES(P-I)
+                MOVE "Y" TO FIELD-OK
+            ELSE
+                MOVE "This field is required. Please enter a non-blank value." TO SAVE-TEXT
+                PERFORM SHOW
+            END-IF
+        END-PERFORM
 
         *> Description (optional)
         MOVE P-I TO WS-IDX-TXT
@@ -559,8 +576,7 @@ EDIT-PROFILE.
         MOVE "Add Education (optional, max 3 entries. Enter 'DONE' to finish):" TO SAVE-TEXT
         PERFORM SHOW
         READ INPUT-FILE INTO INPUT-TEXT
-        IF FUNCTION TRIM(INPUT-TEXT) = "DONE"
-           OR FUNCTION LENGTH(FUNCTION TRIM(INPUT-TEXT)) = 0
+        IF FUNCTION UPPER-CASE(FUNCTION TRIM(INPUT-TEXT)) = "DONE"
             EXIT PERFORM
         END-IF
 

@@ -1,16 +1,19 @@
-CREATE NEW ACCOUNT
-newuser
-P@ssw0rd!
+LOGIN
+savefix1
+Pass123!
 1
 Paige
 Leclair
-USF
-Computer Science
+Uni A
+Software Engineering
 2026
-InCollege test flow
+About A3
+GO
+Third Exp
+Third Co
+Winter 2027
+Third desc
 DONE
 DONE
 2
-4
-9
 9
