@@ -1,30 +1,8 @@
-USER:
-FN: First
-LN: Last
-UNIV: State University
-MAJOR: Computer Science
-GRAD: 2025
-ABOUT: About me
-Experience:
-Title: Intern
-Company: Acme Corp
-Dates: Summer 2024
-Description: Did stuff
-Education:
-Degree: BS
-University: State University
-Years: 2021-2025
-END
-USER: savefix1
-FN: Alice
-LN: Zephyr
+USER: persistuser
+FN: Paige
+LN: Leclair
 UNIV: Uni A
 MAJOR: Software Engineering
-GRAD: 2027
+GRAD: 2026
 ABOUT: About A3
-Experience:
-Title: Third Exp
-Company: Third Co
-Dates: Winter 2027
-Description: Third desc
 END
