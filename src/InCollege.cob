@@ -14,8 +14,8 @@ FILE-CONTROL.
         ACCESS MODE IS SEQUENTIAL
         FILE STATUS IS UINFO-FILE-STATUS.
 
-*> Define input file for reading test commands and user input
-    SELECT INPUT-FILE ASSIGN TO "src/InCollege-Test.txt"
+*> Define input file for reading commands and user input (Week 2 sample input)
+    SELECT INPUT-FILE ASSIGN TO "src/InCollege-Input.txt"
         ORGANIZATION IS LINE SEQUENTIAL
         ACCESS MODE IS SEQUENTIAL
         FILE STATUS IS INPUT-FILE-STATUS.

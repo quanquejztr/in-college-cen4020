@@ -1,6 +1,0 @@
-LOGIN
-persistuser
-Pass123!
-2
-9
-
