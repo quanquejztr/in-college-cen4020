@@ -596,6 +596,7 @@ NAV-MENU.
         MOVE "2. View My Profile"        TO SAVE-TEXT PERFORM SHOW
         MOVE "3. Search for User"        TO SAVE-TEXT PERFORM SHOW
         MOVE "4. Learn a New Skill"      TO SAVE-TEXT PERFORM SHOW
+        MOVE "9. Exit" TO SAVE-TEXT PERFORM SHOW
         MOVE "Enter your choice:"        TO SAVE-TEXT PERFORM SHOW
 
         READ INPUT-FILE INTO INPUT-TEXT

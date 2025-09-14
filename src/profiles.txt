@@ -1,10 +1,10 @@
-USER: user1
+USER: Paige
 FN: Paige
 LN: Leclair
-UNIV: University of South Florida
+UNIV: USF
 MAJOR: Computer Science
 GRAD: 2026
-ABOUT: Student.
+ABOUT:
 END
 USER: luna
 FN: Brooklyn

@@ -10,6 +10,7 @@ Welcome, luna!
 2. View My Profile
 3. Search for User
 4. Learn a New Skill
+9. Exit
 Enter your choice:
 --- Create/Edit Profile ---
 Enter First Name:
@@ -27,6 +28,7 @@ Profile saved successfully!
 2. View My Profile
 3. Search for User
 4. Learn a New Skill
+9. Exit
 Enter your choice:
 --- Your Profile ---
 Name: Brooklyn Luna
@@ -39,5 +41,6 @@ About Me:
 2. View My Profile
 3. Search for User
 4. Learn a New Skill
+9. Exit
 Enter your choice:
 --- END_OF_PROGRAM_EXECUTION ---
