@@ -1,1 +1,2 @@
-persistuser         Pass123!
+user1               Pass123!            
+luna                Password123!
