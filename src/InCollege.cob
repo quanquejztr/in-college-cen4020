@@ -373,6 +373,7 @@ CHECKPASSWORD.
                    INTO SAVE-TEXT
             END-STRING
             PERFORM SHOW
+            MOVE SPACES TO SAVE-TEXT PERFORM SHOW
 
             MOVE IN-USERNAME TO WS-NAME
 
@@ -428,6 +429,8 @@ AUTH-USER.
                INTO SAVE-TEXT
         END-STRING
         PERFORM SHOW
+        MOVE SPACES TO SAVE-TEXT PERFORM SHOW
+        PERFORM NAV-MENU
     ELSE
         MOVE "Wrong credentials. Try again." TO SAVE-TEXT PERFORM SHOW
     END-IF.
@@ -605,9 +608,9 @@ NAV-MENU.
     PERFORM UNTIL CHOICE = 9
         MOVE "1. Create/Edit My Profile" TO SAVE-TEXT PERFORM SHOW
         MOVE "2. View My Profile"        TO SAVE-TEXT PERFORM SHOW
-        MOVE "3. Search for User"        TO SAVE-TEXT PERFORM SHOW
-        MOVE "4. Learn a New Skill"      TO SAVE-TEXT PERFORM SHOW
-        MOVE "9. Exit" TO SAVE-TEXT PERFORM SHOW
+        MOVE "3. Search for a job"       TO SAVE-TEXT PERFORM SHOW
+        MOVE "4. Find someone you know"  TO SAVE-TEXT PERFORM SHOW
+        MOVE "5. Learn a New Skill"      TO SAVE-TEXT PERFORM SHOW
         MOVE "Enter your choice:"        TO SAVE-TEXT PERFORM SHOW
 
         READ INPUT-FILE INTO INPUT-TEXT
@@ -625,8 +628,10 @@ NAV-MENU.
             WHEN CHOICE = 2
                 PERFORM VIEW-PROFILE
             WHEN CHOICE = 3
-                MOVE "Search for User is under construction." TO SAVE-TEXT PERFORM SHOW
+                MOVE "Search for a job is under construction." TO SAVE-TEXT PERFORM SHOW
             WHEN CHOICE = 4
+                MOVE "Find someone you know is under construction." TO SAVE-TEXT PERFORM SHOW
+            WHEN CHOICE = 5
                 PERFORM SKILL-MENU
             WHEN CHOICE = 9
                 CONTINUE
