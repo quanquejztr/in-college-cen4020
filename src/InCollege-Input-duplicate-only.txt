@@ -1,0 +1,9 @@
+2
+luna
+3
+
+# Scenario: Create -> duplicate username -> back to main -> invalid choice (exit)
+# Notes:
+# - Line 1: 2 (Create New Account)
+# - Line 2: luna (existing username triggers duplicate handling)
+# - Line 3: 3 (main menu invalid choice to end program cleanly)

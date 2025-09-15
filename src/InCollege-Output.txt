@@ -2,45 +2,5 @@ Welcome to InCollege!
 1. Log In
 2. Create New Account
 Enter your choice:
-Enter new username:
-Enter password (8-12 chars, 1 capital, 1 digit, 1 special):
-Account created successfully.
-Welcome, luna!
-1. Create/Edit My Profile
-2. View My Profile
-3. Search for User
-4. Learn a New Skill
-9. Exit
-Enter your choice:
---- Create/Edit Profile ---
-Enter First Name:
-Enter Last Name:
-Enter University/College Attended:
-Enter Major:
-Enter Graduation Year (YYYY):
-Enter About Me (optional, max 200 chars, enter blank line to skip):
-Add Experience (optional, max 3 entries. Enter 'DONE' to finish):
-Experience #1 - Title:
-Add Education (optional, max 3 entries. Enter 'DONE' to finish):
-Education #1 - Degree:
-Profile saved successfully!
-1. Create/Edit My Profile
-2. View My Profile
-3. Search for User
-4. Learn a New Skill
-9. Exit
-Enter your choice:
---- Your Profile ---
-Name: Brooklyn Luna
-University: University of South Florida
-Major: Computer Science
-Graduation Year: 2026
-About Me:
---------------------
-1. Create/Edit My Profile
-2. View My Profile
-3. Search for User
-4. Learn a New Skill
-9. Exit
-Enter your choice:
+Invalid choice.
 --- END_OF_PROGRAM_EXECUTION ---

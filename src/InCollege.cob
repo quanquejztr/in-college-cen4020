@@ -116,6 +116,7 @@ WORKING-STORAGE SECTION.
 01 WS-NUMACCOUNTS      PIC 9(1) VALUE 0.
 01 WS-NEWUSERNAME      PIC X(20).
 01 WS-UNIQUEUSERSTATUS PIC A(1) VALUE 'N'.
+01 WS-ABORT-CREATE     PIC A(1) VALUE 'N'.
 
 *> Menus
 77 CHOICE      PIC 9 VALUE 0.
@@ -197,7 +198,16 @@ MAIN.
         CLOSE USERINFO
     END-IF
 
-    *> Welcome + first choice
+    PERFORM SHOW-MAIN-MENU
+
+    *> Done after the chosen flow returns
+    MOVE "--- END_OF_PROGRAM_EXECUTION ---" TO SAVE-TEXT PERFORM SHOW
+    CLOSE INPUT-FILE
+    CLOSE APPLOG
+    STOP RUN.
+
+SHOW-MAIN-MENU.
+    *> Welcome + first choice (reusable)
     MOVE "Welcome to InCollege!" TO SAVE-TEXT PERFORM SHOW
     MOVE "1. Log In"            TO SAVE-TEXT PERFORM SHOW
     MOVE "2. Create New Account" TO SAVE-TEXT PERFORM SHOW
@@ -207,9 +217,7 @@ MAIN.
         AT END
             MOVE "No input. Exiting." TO SAVE-TEXT
             PERFORM SHOW
-            CLOSE INPUT-FILE
-            CLOSE APPLOG
-            GOBACK
+            EXIT PARAGRAPH
         NOT AT END
             EVALUATE FUNCTION TRIM(INPUT-TEXT)
                 WHEN "1"
@@ -217,16 +225,9 @@ MAIN.
                 WHEN "2"
                     PERFORM CREATE-ACCOUNT-PROCESS
                 WHEN OTHER
-                    MOVE "Invalid choice." TO SAVE-TEXT
-                    PERFORM SHOW
+                    MOVE "Invalid choice." TO SAVE-TEXT PERFORM SHOW
             END-EVALUATE
-    END-READ
-
-    *> Done after the chosen flow returns
-    MOVE "--- END_OF_PROGRAM_EXECUTION ---" TO SAVE-TEXT PERFORM SHOW
-    CLOSE INPUT-FILE
-    CLOSE APPLOG
-    STOP RUN.
+    END-READ.
 
 LOGIN-PROCESS.
     IF WS-LOGGEDIN = 'Y'
@@ -256,6 +257,7 @@ CREATE-ACCOUNT-PROCESS.
     END-IF
 
     MOVE 'N' TO WS-UNIQUEUSERSTATUS
+    MOVE 'N' TO WS-ABORT-CREATE
     *> Ask until username is unique
     PERFORM UNTIL WS-UNIQUEUSERSTATUS = 'Y'
         MOVE "Enter new username:" TO SAVE-TEXT PERFORM SHOW
@@ -278,7 +280,8 @@ CREATE-ACCOUNT-PROCESS.
                         NOT AT END
                             IF FUNCTION TRIM(WS-NEWUSERNAME) = FUNCTION TRIM(IN-USERNAME)
                                 MOVE "Username already exists, please try again." TO SAVE-TEXT PERFORM SHOW
-                                MOVE 'N' TO WS-UNIQUEUSERSTATUS
+                                MOVE 'Y' TO WS-ABORT-CREATE
+                                MOVE 'Y' TO WS-UNIQUEUSERSTATUS
                                 MOVE 'Y' TO INFOEOF
                             END-IF
                     END-READ
@@ -286,6 +289,10 @@ CREATE-ACCOUNT-PROCESS.
             END-IF
         END-IF
         CLOSE USERINFO
+        IF WS-ABORT-CREATE = 'Y'
+            PERFORM SHOW-MAIN-MENU
+            EXIT PARAGRAPH
+        END-IF
     END-PERFORM
 
     *> Ask for password until valid
@@ -652,9 +659,12 @@ WRITE-PROFILE-BLOCK.
     STRING "GRAD: "  WS-GRAD-YEAR-DISPLAY INTO TEMP-LINE END-STRING
     WRITE TEMP-LINE
 
-    MOVE SPACES TO TEMP-LINE
-    STRING "ABOUT: " P-ABOUT      INTO TEMP-LINE END-STRING
-    WRITE TEMP-LINE
+    *> Only persist About when non-empty
+    IF FUNCTION LENGTH(FUNCTION TRIM(P-ABOUT)) > 0
+        MOVE SPACES TO TEMP-LINE
+        STRING "ABOUT: " P-ABOUT      INTO TEMP-LINE END-STRING
+        WRITE TEMP-LINE
+    END-IF
 
     IF P-EXP-COUNT > 0
         MOVE "Experience:" TO TEMP-LINE
@@ -698,7 +708,7 @@ WRITE-PROFILE-BLOCK.
         END-PERFORM
     END-IF
 
-    MOVE "END" TO TEMP-LINE
+    MOVE "-----END-----" TO TEMP-LINE
     WRITE TEMP-LINE.
 
 SAVE-PROFILE.
@@ -724,7 +734,7 @@ SAVE-PROFILE.
             MOVE PROFILES-LINE(7:) TO WS-BUF
             IF FUNCTION TRIM(WS-BUF) = FUNCTION TRIM(P-USERNAME)
                 *> Skip this block
-                PERFORM UNTIL PROFILES-LINE = "END"
+                PERFORM UNTIL PROFILES-LINE = "END" OR PROFILES-LINE = "-----END-----"
                     READ PROFILES INTO PROFILES-LINE
                         AT END EXIT PERFORM
                     END-READ
@@ -736,11 +746,15 @@ SAVE-PROFILE.
                 *> Copy other user's block
                 MOVE PROFILES-LINE TO TEMP-LINE
                 WRITE TEMP-LINE
-                PERFORM UNTIL PROFILES-LINE = "END"
+                PERFORM UNTIL PROFILES-LINE = "END" OR PROFILES-LINE = "-----END-----"
                     READ PROFILES INTO PROFILES-LINE
                         AT END EXIT PERFORM
                     END-READ
-                    MOVE PROFILES-LINE TO TEMP-LINE
+                    IF PROFILES-LINE = "END" OR PROFILES-LINE = "-----END-----"
+                        MOVE "-----END-----" TO TEMP-LINE
+                    ELSE
+                        MOVE PROFILES-LINE TO TEMP-LINE
+                    END-IF
                     WRITE TEMP-LINE
                 END-PERFORM
             END-IF
@@ -796,12 +810,12 @@ VIEW-PROFILE.
                 MOVE 0 TO P-GRAD-YEAR P-EXP-COUNT P-EDU-COUNT CUR-EXP-IDX CUR-EDU-IDX
                 MOVE SPACE TO WS-SECTION
 
-                PERFORM UNTIL PROFILES-LINE = "END"
+                PERFORM UNTIL PROFILES-LINE = "END" OR PROFILES-LINE = "-----END-----"
                     READ PROFILES INTO PROFILES-LINE
                         AT END EXIT PERFORM
                     END-READ
 
-                    IF PROFILES-LINE = "END"
+                    IF PROFILES-LINE = "END" OR PROFILES-LINE = "-----END-----"
                         EXIT PERFORM
                     ELSE IF PROFILES-LINE = "Experience:"
                         MOVE 'X' TO WS-SECTION
@@ -894,12 +908,15 @@ VIEW-PROFILE.
                 END-STRING
                 PERFORM SHOW
 
-                MOVE SPACES TO SAVE-TEXT
-                STRING "About Me: " DELIMITED BY SIZE
-                       FUNCTION TRIM(P-ABOUT) DELIMITED BY SIZE
-                       INTO SAVE-TEXT
-                END-STRING
-                PERFORM SHOW
+                *> Only display About when non-empty
+                IF FUNCTION LENGTH(FUNCTION TRIM(P-ABOUT)) > 0
+                    MOVE SPACES TO SAVE-TEXT
+                    STRING "About Me: " DELIMITED BY SIZE
+                           FUNCTION TRIM(P-ABOUT) DELIMITED BY SIZE
+                           INTO SAVE-TEXT
+                    END-STRING
+                    PERFORM SHOW
+                END-IF
 
                 IF P-EXP-COUNT > 0
                     MOVE "Experience:" TO SAVE-TEXT PERFORM SHOW
