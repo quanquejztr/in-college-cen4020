@@ -222,7 +222,11 @@ SHOW-MAIN-MENU.
             EVALUATE FUNCTION TRIM(INPUT-TEXT)
                 WHEN "1"
                     PERFORM LOGIN-PROCESS
+                WHEN "Log In"
+                    PERFORM LOGIN-PROCESS
                 WHEN "2"
+                    PERFORM CREATE-ACCOUNT-PROCESS
+                WHEN "Create New Account"
                     PERFORM CREATE-ACCOUNT-PROCESS
                 WHEN OTHER
                     MOVE "Invalid choice." TO SAVE-TEXT PERFORM SHOW
