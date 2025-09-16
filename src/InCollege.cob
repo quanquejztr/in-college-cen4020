@@ -97,10 +97,16 @@ WORKING-STORAGE SECTION.
 
 *> Display helpers
 01 WS-GRAD-YEAR-DISPLAY PIC X(4).
+01 WS-MIN-YEAR-TXT      PIC X(4).
+01 WS-MAX-YEAR-TXT      PIC X(4).
 01 WS-IDX-TXT           PIC 99.
 01 WS-SECTION           PIC X(1) VALUE SPACE.
 01 CUR-EXP-IDX          PIC 9 VALUE 0.
 01 CUR-EDU-IDX          PIC 9 VALUE 0.
+01 WS-YEAR-VALID        PIC A(1) VALUE 'N'.
+01 WS-YEAR-NUM          PIC 9(4) VALUE 0.
+01 WS-YEAR-TRIES        PIC 9   VALUE 0.
+01 WS-YEAR-MAX-TRIES    PIC 9   VALUE 3.
 
 *> Password validation
 01 WS-HASCAPITAL PIC A(1) VALUE 'N'.
@@ -146,8 +152,8 @@ WORKING-STORAGE SECTION.
       10 P-EDU-YEARS     PIC X(20).
 
 01 VALID-YEAR PIC A(1) VALUE 'N'.
-01 MIN-YEAR   PIC 9(4) VALUE 1980.
-01 MAX-YEAR   PIC 9(4) VALUE 2100.
+01 MIN-YEAR   PIC 9(4) VALUE 1950.
+01 MAX-YEAR   PIC 9(4) VALUE 2060.
 01 P-I        PIC 9 VALUE 0.
 
 PROCEDURE DIVISION.
@@ -430,7 +436,6 @@ AUTH-USER.
         END-STRING
         PERFORM SHOW
         MOVE SPACES TO SAVE-TEXT PERFORM SHOW
-        PERFORM NAV-MENU
     ELSE
         MOVE "Wrong credentials. Try again." TO SAVE-TEXT PERFORM SHOW
     END-IF.
@@ -458,10 +463,65 @@ EDIT-PROFILE.
     READ INPUT-FILE INTO INPUT-TEXT
     MOVE FUNCTION TRIM(INPUT-TEXT) TO P-MAJOR
 
-    *> Graduation Year (required)
-    MOVE "Enter Graduation Year (YYYY):" TO SAVE-TEXT PERFORM SHOW
-    READ INPUT-FILE INTO INPUT-TEXT
-    MOVE FUNCTION NUMVAL(FUNCTION TRIM(INPUT-TEXT)) TO P-GRAD-YEAR
+    *> Graduation Year (required, exactly 4 digits)
+    MOVE 'N' TO WS-YEAR-VALID
+    MOVE 0   TO WS-YEAR-TRIES
+    PERFORM UNTIL WS-YEAR-VALID = 'Y'
+        MOVE MIN-YEAR TO WS-MIN-YEAR-TXT
+        MOVE MAX-YEAR TO WS-MAX-YEAR-TXT
+        MOVE SPACES TO SAVE-TEXT
+        STRING "Enter Graduation Year (" DELIMITED BY SIZE
+               WS-MIN-YEAR-TXT           DELIMITED BY SIZE
+               "-"                       DELIMITED BY SIZE
+               WS-MAX-YEAR-TXT           DELIMITED BY SIZE
+               "):"                      DELIMITED BY SIZE
+               INTO SAVE-TEXT
+        END-STRING
+        PERFORM SHOW
+        READ INPUT-FILE INTO INPUT-TEXT
+            AT END
+                MOVE "No more input while editing profile." TO SAVE-TEXT PERFORM SHOW
+                EXIT PARAGRAPH
+        END-READ
+
+        MOVE FUNCTION TRIM(INPUT-TEXT) TO WS-BUF
+        IF FUNCTION UPPER-CASE(WS-BUF) = "BACK"
+            MOVE "Cancelled editing profile. Returning to menu." TO SAVE-TEXT PERFORM SHOW
+            EXIT PARAGRAPH
+        END-IF
+        *> Normalize CR/TAB like password path
+        INSPECT WS-BUF REPLACING ALL X"0D" BY SPACE
+        INSPECT WS-BUF REPLACING ALL X"09" BY SPACE
+        MOVE FUNCTION TRIM(WS-BUF) TO WS-BUF
+        IF FUNCTION LENGTH(FUNCTION TRIM(WS-BUF)) = 4
+            MOVE 'Y' TO WS-YEAR-VALID
+            PERFORM VARYING I FROM 1 BY 1 UNTIL I > 4 OR WS-YEAR-VALID = 'N'
+                MOVE WS-BUF(I:1) TO WS-INSPECTEDCHAR
+                IF WS-INSPECTEDCHAR < '0' OR WS-INSPECTEDCHAR > '9'
+                    MOVE 'N' TO WS-YEAR-VALID
+                END-IF
+            END-PERFORM
+        ELSE
+            MOVE 'N' TO WS-YEAR-VALID
+        END-IF
+
+        IF WS-YEAR-VALID = 'Y'
+            MOVE FUNCTION NUMVAL(FUNCTION TRIM(WS-BUF)) TO WS-YEAR-NUM
+            IF WS-YEAR-NUM >= MIN-YEAR AND WS-YEAR-NUM <= MAX-YEAR
+                MOVE WS-YEAR-NUM TO P-GRAD-YEAR
+            ELSE
+                MOVE 'N' TO WS-YEAR-VALID
+                MOVE "Invalid year. Please enter 1950-2060." TO SAVE-TEXT PERFORM SHOW
+            END-IF
+        ELSE
+            MOVE "Invalid year. Please enter 4 digits (YYYY)." TO SAVE-TEXT PERFORM SHOW
+            ADD 1 TO WS-YEAR-TRIES
+            IF WS-YEAR-TRIES >= WS-YEAR-MAX-TRIES
+                MOVE "Too many invalid attempts. Returning to main menu." TO SAVE-TEXT PERFORM SHOW
+                EXIT PARAGRAPH
+            END-IF
+        END-IF
+    END-PERFORM
 
     *> About (optional)
     MOVE "Enter About Me (optional, max 200 chars, enter blank line to skip):" TO SAVE-TEXT PERFORM SHOW
@@ -611,6 +671,7 @@ NAV-MENU.
         MOVE "3. Search for a job"       TO SAVE-TEXT PERFORM SHOW
         MOVE "4. Find someone you know"  TO SAVE-TEXT PERFORM SHOW
         MOVE "5. Learn a New Skill"      TO SAVE-TEXT PERFORM SHOW
+        MOVE "9. Log Out / Exit"         TO SAVE-TEXT PERFORM SHOW
         MOVE "Enter your choice:"        TO SAVE-TEXT PERFORM SHOW
 
         READ INPUT-FILE INTO INPUT-TEXT
