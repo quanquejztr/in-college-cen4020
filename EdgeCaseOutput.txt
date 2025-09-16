@@ -1,0 +1,165 @@
+Welcome to InCollege!
+1. Log In
+2. Create New Account
+Enter your choice:
+Please enter your username:
+Please enter your password:
+You have successfully logged in.
+Welcome, luna!
+
+1. Create/Edit My Profile
+2. View My Profile
+3. Search for a job
+4. Find someone you know
+5. Learn a New Skill
+9. Log Out / Exit
+Enter your choice:
+--- Create/Edit Profile ---
+Enter First Name:
+Enter Last Name:
+Enter University/College Attended:
+Enter Major:
+Enter Graduation Year (1950-2060):
+Enter About Me (optional, max 200 chars, enter blank line to skip):
+Add Experience (optional, max 3 entries. Enter 'DONE' to finish):
+Experience #1 - Title:
+Experience #1 - Company/Organization:
+Experience #1 - Dates (e.g., Summer 2024):
+Experience #1 - Description (optional, max 100 chars, blank to skip):
+Add Experience (optional, max 3 entries. Enter 'DONE' to finish):
+Experience #2 - Title:
+Experience #2 - Company/Organization:
+Experience #2 - Dates (e.g., Summer 2024):
+Experience #2 - Description (optional, max 100 chars, blank to skip):
+Add Experience (optional, max 3 entries. Enter 'DONE' to finish):
+Experience #3 - Title:
+Experience #3 - Company/Organization:
+Experience #3 - Dates (e.g., Summer 2024):
+Experience #3 - Description (optional, max 100 chars, blank to skip):
+Add Education (optional, max 3 entries. Enter 'DONE' to finish):
+Education #1 - Degree:
+Education #1 - University/College:
+Education #1 - Years Attended (e.g., 2023-2025):
+Add Education (optional, max 3 entries. Enter 'DONE' to finish):
+Education #2 - Degree:
+Education #2 - University/College:
+Education #2 - Years Attended (e.g., 2023-2025):
+Add Education (optional, max 3 entries. Enter 'DONE' to finish):
+Education #3 - Degree:
+Education #3 - University/College:
+Education #3 - Years Attended (e.g., 2023-2025):
+Profile saved successfully!
+1. Create/Edit My Profile
+2. View My Profile
+3. Search for a job
+4. Find someone you know
+5. Learn a New Skill
+9. Log Out / Exit
+Enter your choice:
+--- Your Profile ---
+Name: Brooklyn Luna
+University: University of South Florida
+Major: Computer Science
+Graduation Year: 2026
+About Me: I am a curious and motivated learner who enjoys solving problems, exploring new ideas, and creating meaningful projects. I value teamwork, growth, and making a positive impact through techno
+Experience:
+Title: Data Science Intern
+Company: Lockheed Martin
+Dates: Summer 2025 - Sept 2025
+Description: Analyzed datasets, created dashboards, and developed insights to guide data-driven decisions.
+Title: Reasearch Intern
+Company: Data Science Lab
+Dates: August 2024 - September 2024
+Description: Analyzed datasets, created dashboards, and developed insights to guide data-driven decisions.
+Title: Teaching Assistant
+Company: Programming Fundamentals
+Dates: August 2023 - December 2023
+Description: Supported C/C++ labs, graded assignments, and helped students understand programming concepts.
+Education:
+Degree: Bachelor of Science
+University: University of South Florida
+Years: 2024-2026
+Degree: Associate of Arts
+University: Tallahassee Community College
+Years: 2022-2024
+Degree: High School
+University: Fort Walton Beach High School
+Years: 2018-2022
+--------------------
+1. Create/Edit My Profile
+2. View My Profile
+3. Search for a job
+4. Find someone you know
+5. Learn a New Skill
+9. Log Out / Exit
+Enter your choice:
+Find someone you know is under construction.
+1. Create/Edit My Profile
+2. View My Profile
+3. Search for a job
+4. Find someone you know
+5. Learn a New Skill
+9. Log Out / Exit
+Enter your choice:
+--- Your Profile ---
+Name: Brooklyn Luna
+University: University of South Florida
+Major: Computer Science
+Graduation Year: 2026
+About Me: I am a curious and motivated learner who enjoys solving problems, exploring new ideas, and creating meaningful projects. I value teamwork, growth, and making a positive impact through techno
+Experience:
+Title: Data Science Intern
+Company: Lockheed Martin
+Dates: Summer 2025 - Sept 2025
+Description: Analyzed datasets, created dashboards, and developed insights to guide data-driven decisions.
+Title: Reasearch Intern
+Company: Data Science Lab
+Dates: August 2024 - September 2024
+Description: Analyzed datasets, created dashboards, and developed insights to guide data-driven decisions.
+Title: Teaching Assistant
+Company: Programming Fundamentals
+Dates: August 2023 - December 2023
+Description: Supported C/C++ labs, graded assignments, and helped students understand programming concepts.
+Education:
+Degree: Bachelor of Science
+University: University of South Florida
+Years: 2024-2026
+Degree: Associate of Arts
+University: Tallahassee Community College
+Years: 2022-2024
+Degree: High School
+University: Fort Walton Beach High School
+Years: 2018-2022
+--------------------
+1. Create/Edit My Profile
+2. View My Profile
+3. Search for a job
+4. Find someone you know
+5. Learn a New Skill
+9. Log Out / Exit
+Enter your choice:
+Learn a New Skill:
+1. Skill 1
+2. Skill 2
+3. Skill 3
+4. Skill 4
+5. Skill 5
+9. Go Back
+Enter your choice:
+This skill is under construction
+Learn a New Skill:
+1. Skill 1
+2. Skill 2
+3. Skill 3
+4. Skill 4
+5. Skill 5
+9. Go Back
+Enter your choice:
+1. Create/Edit My Profile
+2. View My Profile
+3. Search for a job
+4. Find someone you know
+5. Learn a New Skill
+9. Log Out / Exit
+Enter your choice:
+--- END_OF_PROGRAM_EXECUTION ---
