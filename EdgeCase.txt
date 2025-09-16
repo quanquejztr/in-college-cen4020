@@ -1,0 +1,33 @@
+1
+luna
+Password123!
+1
+Brooklyn
+Luna
+University of South Florida
+Computer Science
+2026
+I am a curious and motivated learner who enjoys solving problems, exploring new ideas, and creating meaningful projects. I value teamwork, growth, and making a positive impact through technology.
+Data Science Intern
+Lockheed Martin
+Summer 2025 - Sept 2025
+Analyzed datasets, created dashboards, and developed insights to guide data-driven decisions.
+Reasearch Intern
+Data Science Lab
+August 2024 - September 2024
+Analyzed datasets, created dashboards, and developed insights to guide data-driven decisions.
+Teaching Assistant
+Programming Fundamentals
+August 2023 - December 2023
+Supported C/C++ labs, graded assignments, and helped students understand programming concepts.
+Bachelor of Science
+University of South Florida
+2024-2026
+Associate of Arts
+Tallahassee Community College
+2022-2024
+High School
+Fort Walton Beach High School
+2018-2022
+2
+9

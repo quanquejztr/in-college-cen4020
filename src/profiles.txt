@@ -12,3 +12,35 @@ UNIV: USF
 MAJOR: CSE
 GRAD: 2025
 -----END-----
+
+USER: luna
+FN: Brooklyn
+LN: Luna
+UNIV: University of South Florida
+MAJOR: Computer Science
+GRAD: 2026
+ABOUT: I am a curious and motivated learner who enjoys solving problems, exploring new ideas, and creating meaningful projects. I value teamwork, growth, and making a positive impact through technology.
+Experience:
+Title: Data Science Intern
+Company: Lockheed Martin
+Dates: Summer 2025 - Sept 2025
+Description: Analyzed datasets, created dashboards, and developed insights to guide data-driven decisions.
+Title: Reasearch Intern
+Company: Data Science Lab
+Dates: August 2024 - September 2024
+Description: Analyzed datasets, created dashboards, and developed insights to guide data-driven decisions.
+Title: Teaching Assistant
+Company: Programming Fundamentals
+Dates: August 2023 - December 2023
+Description: Supported C/C++ labs, graded assignments, and helped students understand programming concepts.
+Education:
+Degree: Bachelor of Science
+University: University of South Florida
+Years: 2024-2026
+Degree: Associate of Arts
+University: Tallahassee Community College
+Years: 2022-2024
+Degree: High School
+University: Fort Walton Beach High School
+Years: 2018-2022
+-----END-----

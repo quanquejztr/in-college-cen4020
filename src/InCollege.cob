@@ -1014,3 +1014,4 @@ SKILL-MENU.
                 MOVE 0 TO SKILLCHOICE
         END-EVALUATE
     END-PERFORM.
+    
