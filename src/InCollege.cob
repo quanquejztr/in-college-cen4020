@@ -444,14 +444,32 @@ EDIT-PROFILE.
     MOVE "--- Create/Edit Profile ---" TO SAVE-TEXT PERFORM SHOW
 
     *> First Name (required)
-    MOVE "Enter First Name:" TO SAVE-TEXT PERFORM SHOW
-    READ INPUT-FILE INTO INPUT-TEXT
-    MOVE FUNCTION TRIM(INPUT-TEXT) TO P-FIRST-NAME
+    PERFORM UNTIL FUNCTION LENGTH(FUNCTION TRIM(P-FIRST-NAME)) > 0
+        MOVE "Enter First Name:" TO SAVE-TEXT PERFORM SHOW
+        READ INPUT-FILE INTO INPUT-TEXT
+            AT END
+                MOVE "No more input while editing profile." TO SAVE-TEXT PERFORM SHOW
+                EXIT PARAGRAPH
+        END-READ
+        MOVE FUNCTION TRIM(INPUT-TEXT) TO P-FIRST-NAME
+        IF FUNCTION LENGTH(FUNCTION TRIM(P-FIRST-NAME)) = 0
+            MOVE "First Name is required. Please try again." TO SAVE-TEXT PERFORM SHOW
+        END-IF
+    END-PERFORM
 
     *> Last Name (required)
-    MOVE "Enter Last Name:" TO SAVE-TEXT PERFORM SHOW
-    READ INPUT-FILE INTO INPUT-TEXT
-    MOVE FUNCTION TRIM(INPUT-TEXT) TO P-LAST-NAME
+    PERFORM UNTIL FUNCTION LENGTH(FUNCTION TRIM(P-LAST-NAME)) > 0
+        MOVE "Enter Last Name:" TO SAVE-TEXT PERFORM SHOW
+        READ INPUT-FILE INTO INPUT-TEXT
+            AT END
+                MOVE "No more input while editing profile." TO SAVE-TEXT PERFORM SHOW
+                EXIT PARAGRAPH
+        END-READ
+        MOVE FUNCTION TRIM(INPUT-TEXT) TO P-LAST-NAME
+        IF FUNCTION LENGTH(FUNCTION TRIM(P-LAST-NAME)) = 0
+            MOVE "Last Name is required. Please try again." TO SAVE-TEXT PERFORM SHOW
+        END-IF
+    END-PERFORM
 
     *> University (required)
     MOVE "Enter University/College Attended:" TO SAVE-TEXT PERFORM SHOW
@@ -1075,4 +1093,4 @@ SKILL-MENU.
                 MOVE 0 TO SKILLCHOICE
         END-EVALUATE
     END-PERFORM.
-    
+

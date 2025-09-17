@@ -1,7 +1,7 @@
 USER: Paige12
-FN: Paige
-LN: Leclair
-UNIV: University of South Florida
+FN: Stephen
+LN: Luong
+UNIV: USF
 MAJOR: Computer Science
 GRAD: 2026
 -----END-----
@@ -47,35 +47,17 @@ University: Fort Walton Beach High School
 Years: 2018-2022
 -----END-----
 USER: TestUser
-FN: John
+FN:
 LN: Doe
 UNIV: USF
 MAJOR: Computer Science
-GRAD: 1999
-ABOUT: Some random line of words that would exceed 200 characters requirements so that the program will fail or not just let the program determine it i have no idea whether it would halt or keep
+GRAD: 2026
+ABOUT: Hello!
 Experience:
-Title: SoftwareEngineer Done
-Company: DONE
-Dates: 9
-Description: 9
-Title: 9
-Company: 9
-Dates: 9
-Description: 9
-Title: 9
-Company: 9
-Dates: 9
-Description: 9
-Education:
-Degree: 9
-University: 9
-Years: 9
-Degree: 9
-University: 9
-Years: 9
-Degree: 9
-University: 9
-Years: 9
+Title: Software Engineer Intern
+Company: FPT Software
+Dates:
+Description: Helping with code
 -----END-----
 USER: TestUser2
 FN: John
@@ -107,4 +89,17 @@ Years: 9
 Degree: 9
 University: 9
 Years: 9
+-----END-----
+USER: alex
+FN: Alex
+LN: Johnson
+UNIV: Florida State University
+MAJOR: Software Engineering
+GRAD: 2027
+ABOUT: Passionate software engineer eager to apply problem-solving skills and creativity to meaningful projects. Dedicated to teamwork, continuous learning, and making a difference with technology.
+Experience:
+Title: Software Engineer Intern
+Company: Google
+Dates: May 2025 - Aug 2025
+Description: Developed backend services and optimized algorithms to improve system performance.
 -----END-----
