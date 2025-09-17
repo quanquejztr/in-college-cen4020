@@ -1,40 +1,13 @@
-2
-alex
-SecurePass99!
 1
-Alex
-Johnson
-Florida State University
-Software Engineering
-2027
-Passionate software engineer eager to apply problem-solving skills and creativity to meaningful projects. Dedicated to teamwork, continuous learning, and making a difference with technology.
-Software Engineer Intern
-Google
-May 2025 - Aug 2025
-Developed backend services and optimized algorithms to improve system performance.
-Robotics Research Assistant
-FSU Robotics Lab
-Jan 2024 - May 2024
-Designed navigation algorithms and tested robots in simulation and real environments.
-Teaching Assistant
-Data Structures
-Aug 2023 - Dec 2023
-Assisted students in labs, graded projects, and explained concepts in office hours.
-Bachelor of Science
-Florida State University
-2023-2027
-Associate of Science
-Miami Dade College
-2021-2023
-High School
-Miami Senior High School
-2017-2021
-2
-3
-2
-4
+TestUser2
+Pass123!
 1
-5
-3
-9
+John
+Doe
+USF
+Computer Science
+2060
+Some random line of words that would exceed 200 characters requirements so that the program will fail or not just let the program determine it i have no idea whether it would halt or keep
+SoftwareEngineer Done
+DONE
 9
