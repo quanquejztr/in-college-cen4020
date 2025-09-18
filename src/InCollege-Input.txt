@@ -1,18 +1,9 @@
 1
-alex
-Secure888!
-1
-Alex
-Johnson
-Florida State University
-Software Engineering
-2027
-Passionate software engineer eager to apply problem-solving skills and creativity to meaningful projects. Dedicated to teamwork, continuous learning, and making a difference with technology.
-Software Engineer Intern
-Google
-May 2025 - Aug 2025
-Developed backend services and optimized algorithms to improve system performance.
-DONE
-DONE
+Paige12
+Password123!
 2
+4
+Paige Leclair
+4
+Not A Realname
 9

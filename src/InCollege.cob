@@ -1,32 +1,36 @@
 >>SOURCE FORMAT FREE
+*> Program identity
 IDENTIFICATION DIVISION.
 PROGRAM-ID. InCollege.
 *> AUTHOR. Washington.
 *> DATE-WRITTEN. 09/06/2025.
-*> Rewritten I/O flow for predictable scripted input
+*> Simple I/O setup for scripted runs
 
+*> Environment and file assignments
 ENVIRONMENT DIVISION.
+*> I/O configuration
 INPUT-OUTPUT SECTION.
+*> Files used by this program
 FILE-CONTROL.
-    *> User accounts (username/password)
+    *> Where we store usernames/passwords
     SELECT USERINFO ASSIGN TO "src/userinfo.txt"
         ORGANIZATION IS LINE SEQUENTIAL
         ACCESS MODE IS SEQUENTIAL
         FILE STATUS IS UINFO-FILE-STATUS.
 
-    *> Scripted input (keep static or make dynamic later)
+    *> Test input file (can make dynamic later)
     SELECT INPUT-FILE ASSIGN TO "src/InCollege-Input.txt"
         ORGANIZATION IS LINE SEQUENTIAL
         ACCESS MODE IS SEQUENTIAL
         FILE STATUS IS INPUT-FILE-STATUS.
 
-    *> Human/log transcript (dynamic path via WS-OUTFILE default)
+    *> Output transcript (path comes from WS-OUTFILE)
     SELECT APPLOG ASSIGN TO DYNAMIC WS-OUTFILE
         ORGANIZATION IS LINE SEQUENTIAL
         ACCESS MODE IS SEQUENTIAL
         FILE STATUS IS APPLOG-FILE-STATUS.
 
-    *> Profile persistence
+    *> Profile data files
     SELECT PROFILES    ASSIGN TO "src/profiles.txt"
         ORGANIZATION IS LINE SEQUENTIAL
         ACCESS MODE IS SEQUENTIAL
@@ -40,33 +44,42 @@ FILE-CONTROL.
         ACCESS MODE IS SEQUENTIAL
         FILE STATUS IS NEW-FILE-STATUS.
 
+*> Data descriptions
 DATA DIVISION.
+*> File record layouts
 FILE SECTION.
+*> Accounts file: username/password pairs
 FD USERINFO.
 01 USER-REC.
     05 IN-USERNAME PIC X(20).
     05 IN-PASSWORD PIC X(20).
 
+*> Scripted input file for automation
 FD INPUT-FILE.
 01 INPUT-REC.
     05 INPUT-TEXT PIC X(256).
 
+*> Transcript/output log
 FD APPLOG.
 01 SAVE-RECORD.
     05 SAVE-TEXT PIC X(200).
 
+*> Persisted user profiles
 FD PROFILES.
 01 PROFILES-LINE PIC X(256).
 
+*> Temp file used while rewriting profiles
 FD TEMP-FILE.
 01 TEMP-LINE PIC X(256).
 
+*> New file target for atomic replace
 FD NEW-FILE.
 01 NEW-LINE PIC X(256).
 
+*> Variables, flags, and helpers
 WORKING-STORAGE SECTION.
    77 WS-OUTFILE PIC X(256) VALUE "src/InCollege-Output.txt".
-*> File status
+*> File status codes
 01 UINFO-FILE-STATUS PIC XX.
 01 INPUT-FILE-STATUS PIC XX.
 01 APPLOG-FILE-STATUS PIC XX.
@@ -77,26 +90,30 @@ WORKING-STORAGE SECTION.
 *> EOF flags
 01 INFOEOF   PIC A(1) VALUE 'N'.
 
-*> Flow / actions
+*> Menu choices
 01 CURRENT-ACTION PIC X(20).
 01 WS-LOGIN PIC X(5)  VALUE 'LOGIN'.
 01 WS-NEW   PIC X(18) VALUE 'CREATE NEW ACCOUNT'.
 
-*> Auth
+*> Login fields
 01 WS-NAME      PIC X(20).
 01 WS-PASSWORD  PIC X(20).
 01 WS-LOGGEDIN  PIC A(1) VALUE 'N'.
 
-*> Scratch buffers
+*> Scratch strings
 01 LINE-K     PIC X(32).
 01 LINE-V     PIC X(224).
 01 WS-BUF     PIC X(256).
 
-*> Profile flags
+*> Profile state
 01 PROFILE-FOUND PIC A(1) VALUE 'N'.
 
-*> Display helpers
+*> Print helpers
 01 WS-GRAD-YEAR-DISPLAY PIC X(4).
+01 WS-IND1              PIC X(4)  VALUE "    ".
+01 WS-IND2              PIC X(8)  VALUE "        ".
+01 WS-IND3              PIC X(12) VALUE "            ".
+01 WS-HEADER            PIC X(60).
 01 WS-MIN-YEAR-TXT      PIC X(4).
 01 WS-MAX-YEAR-TXT      PIC X(4).
 01 WS-IDX-TXT           PIC 99.
@@ -108,7 +125,7 @@ WORKING-STORAGE SECTION.
 01 WS-YEAR-TRIES        PIC 9   VALUE 0.
 01 WS-YEAR-MAX-TRIES    PIC 9   VALUE 3.
 
-*> Password validation
+*> Password rule tracking
 01 WS-HASCAPITAL PIC A(1) VALUE 'N'.
 01 WS-HASDIGIT   PIC A(1) VALUE 'N'.
 01 WS-HASSPECIAL PIC A(1) VALUE 'N'.
@@ -118,17 +135,22 @@ WORKING-STORAGE SECTION.
 01 WS-INSPECTEDCHAR PIC X(1).
 01 I PIC 9(2) VALUE 1.
 
-*> Account management
+*> Account creation helpers
 01 WS-NUMACCOUNTS      PIC 9(1) VALUE 0.
 01 WS-NEWUSERNAME      PIC X(20).
 01 WS-UNIQUEUSERSTATUS PIC A(1) VALUE 'N'.
 01 WS-ABORT-CREATE     PIC A(1) VALUE 'N'.
 
+*> Search helpers
+01 WS-DONE            PIC A(1)  VALUE 'N'.
+01 WS-BLOCK-LINES     PIC 9(4)  VALUE 0.
+01 WS-CANDIDATE-NAME  PIC X(128).
+
 *> Menus
 77 CHOICE      PIC 9 VALUE 0.
 77 SKILLCHOICE PIC 9 VALUE 0.
 
-*> Profile record in memory
+*> In-memory profile
 01 P-REC.
    05 P-USERNAME      PIC X(20).
    05 P-FIRST-NAME    PIC X(30).
@@ -156,19 +178,21 @@ WORKING-STORAGE SECTION.
 01 MAX-YEAR   PIC 9(4) VALUE 2060.
 01 P-I        PIC 9 VALUE 0.
 
+*> Program logic starts here
 PROCEDURE DIVISION.
+*> Entry point: init files, then menu
 MAIN.
     OPEN INPUT  INPUT-FILE
 
-    *> Static output path; no env override
+    *> Output path is fixed here
 
-    *> Open APPLOG fresh (truncate/create)
+    *> Start with a fresh output file
     OPEN OUTPUT APPLOG
     EVALUATE APPLOG-FILE-STATUS
         WHEN "00"
             CONTINUE
         WHEN "61"
-            *> File exists and cannot be opened with OUTPUT; remove and retry
+            *> If OUTPUT refuses to open, remove the file and retry
             CALL "SYSTEM" USING BY CONTENT "rm -f src/InCollege-Output.txt"
             OPEN OUTPUT APPLOG
             IF APPLOG-FILE-STATUS NOT = "00"
@@ -179,7 +203,7 @@ MAIN.
     END-EVALUATE
 
 
-    *> Ensure profiles file exists
+    *> Make sure profiles file exists
     OPEN INPUT PROFILES
     IF PROFILES-FILE-STATUS = "00"
         CLOSE PROFILES
@@ -206,17 +230,19 @@ MAIN.
 
     PERFORM SHOW-MAIN-MENU
 
-    *> Done after the chosen flow returns
+    *> All done — wrap up
     MOVE "--- END_OF_PROGRAM_EXECUTION ---" TO SAVE-TEXT PERFORM SHOW
     CLOSE INPUT-FILE
     CLOSE APPLOG
     STOP RUN.
 
 SHOW-MAIN-MENU.
-    *> Welcome + first choice (reusable)
+    *> Show the main menu and route to actions
     MOVE "Welcome to InCollege!" TO SAVE-TEXT PERFORM SHOW
-    MOVE "1. Log In"            TO SAVE-TEXT PERFORM SHOW
-    MOVE "2. Create New Account" TO SAVE-TEXT PERFORM SHOW
+    MOVE "--------------------------" TO SAVE-TEXT PERFORM SHOW
+    MOVE "  1. Log In"            TO SAVE-TEXT PERFORM SHOW
+    MOVE "  2. Create New Account" TO SAVE-TEXT PERFORM SHOW
+    MOVE "--------------------------" TO SAVE-TEXT PERFORM SHOW
     MOVE "Enter your choice:"   TO SAVE-TEXT PERFORM SHOW
 
     READ INPUT-FILE INTO INPUT-TEXT
@@ -240,6 +266,7 @@ SHOW-MAIN-MENU.
     END-READ.
 
 LOGIN-PROCESS.
+    *> Handle user login prompts and auth
     IF WS-LOGGEDIN = 'Y'
         MOVE "You are already logged in." TO SAVE-TEXT PERFORM SHOW
     ELSE
@@ -258,6 +285,7 @@ LOGIN-PROCESS.
     END-IF.
 
 CREATE-ACCOUNT-PROCESS.
+    *> Create a new account with basic validation
     IF WS-LOGGEDIN = 'Y'
         MOVE "You are already logged in." TO SAVE-TEXT PERFORM SHOW
         EXIT PARAGRAPH
@@ -268,7 +296,7 @@ CREATE-ACCOUNT-PROCESS.
 
     MOVE 'N' TO WS-UNIQUEUSERSTATUS
     MOVE 'N' TO WS-ABORT-CREATE
-    *> Ask until username is unique
+    *> Keep asking until the username is unique
     PERFORM UNTIL WS-UNIQUEUSERSTATUS = 'Y'
         MOVE "Enter new username:" TO SAVE-TEXT PERFORM SHOW
         READ INPUT-FILE INTO INPUT-TEXT
@@ -305,7 +333,7 @@ CREATE-ACCOUNT-PROCESS.
         END-IF
     END-PERFORM
 
-    *> Ask for password until valid
+    *> Ask for a valid password
     PERFORM UNTIL WS-LOGGEDIN = 'Y'
         MOVE "Enter password (8-12 chars, 1 capital, 1 digit, 1 special):" TO SAVE-TEXT PERFORM SHOW
         READ INPUT-FILE INTO INPUT-TEXT
@@ -316,10 +344,11 @@ CREATE-ACCOUNT-PROCESS.
 
         MOVE WS-NEWUSERNAME TO IN-USERNAME
         PERFORM CHECKPASSWORD
-        *> On success, CHECKPASSWORD sets WS-LOGGEDIN='Y', writes USERINFO, and jumps to NAV-MENU.
+        *> On success: log in, save user, and go to the menu
     END-PERFORM.
 
 SHOW.
+    *> Print to screen and append to the output file
     DISPLAY SAVE-TEXT
     MOVE SAVE-TEXT TO SAVE-RECORD
     WRITE SAVE-RECORD
@@ -329,13 +358,13 @@ SHOW.
 
 
 CHECKPASSWORD.
-    *> Reset flags/counters
+    *> Reset rule flags and counters
     MOVE 0  TO WS-CHARCOUNT
     MOVE 'N' TO WS-HASDIGIT
     MOVE 'N' TO WS-HASCAPITAL
     MOVE 'N' TO WS-HASSPECIAL
 
-    *> Normalize: trim spaces, remove Windows CR (\r) and tabs if any
+    *> Clean up: trim and strip CR/TAB if present
     MOVE FUNCTION TRIM(IN-PASSWORD) TO WS-BUF
     INSPECT WS-BUF REPLACING ALL X"0D" BY SPACE
     INSPECT WS-BUF REPLACING ALL X"09" BY SPACE
@@ -383,7 +412,7 @@ CHECKPASSWORD.
 
             MOVE IN-USERNAME TO WS-NAME
 
-            *> Ensure file exists before appending
+            *> Make sure USERINFO exists before appending
             OPEN INPUT USERINFO
             IF UINFO-FILE-STATUS = "35"
                 OPEN OUTPUT USERINFO
@@ -409,6 +438,7 @@ CHECKPASSWORD.
 
 
 AUTH-USER.
+    *> Verify username/password against USERINFO
     MOVE 'N' TO WS-LOGGEDIN
     OPEN INPUT USERINFO
     IF UINFO-FILE-STATUS = "00"
@@ -435,17 +465,18 @@ AUTH-USER.
                INTO SAVE-TEXT
         END-STRING
         PERFORM SHOW
-        MOVE SPACES TO SAVE-TEXT PERFORM SHOW
     ELSE
         MOVE "Wrong credentials. Try again." TO SAVE-TEXT PERFORM SHOW
     END-IF.
 
 EDIT-PROFILE.
-    MOVE "--- Create/Edit Profile ---" TO SAVE-TEXT PERFORM SHOW
+    *> Collect and validate profile fields
+    MOVE "     Create/Edit Profile     " TO SAVE-TEXT PERFORM SHOW
+    MOVE "--------------------------" TO SAVE-TEXT PERFORM SHOW
 
     *> First Name (required)
     PERFORM UNTIL FUNCTION LENGTH(FUNCTION TRIM(P-FIRST-NAME)) > 0
-        MOVE "Enter First Name:" TO SAVE-TEXT PERFORM SHOW
+        MOVE "  Enter First Name:" TO SAVE-TEXT PERFORM SHOW
         READ INPUT-FILE INTO INPUT-TEXT
             AT END
                 MOVE "No more input while editing profile." TO SAVE-TEXT PERFORM SHOW
@@ -459,7 +490,7 @@ EDIT-PROFILE.
 
     *> Last Name (required)
     PERFORM UNTIL FUNCTION LENGTH(FUNCTION TRIM(P-LAST-NAME)) > 0
-        MOVE "Enter Last Name:" TO SAVE-TEXT PERFORM SHOW
+        MOVE "  Enter Last Name:" TO SAVE-TEXT PERFORM SHOW
         READ INPUT-FILE INTO INPUT-TEXT
             AT END
                 MOVE "No more input while editing profile." TO SAVE-TEXT PERFORM SHOW
@@ -472,12 +503,12 @@ EDIT-PROFILE.
     END-PERFORM
 
     *> University (required)
-    MOVE "Enter University/College Attended:" TO SAVE-TEXT PERFORM SHOW
+    MOVE "  Enter University/College Attended:" TO SAVE-TEXT PERFORM SHOW
     READ INPUT-FILE INTO INPUT-TEXT
     MOVE FUNCTION TRIM(INPUT-TEXT) TO P-UNIVERSITY
 
     *> Major (required)
-    MOVE "Enter Major:" TO SAVE-TEXT PERFORM SHOW
+    MOVE "  Enter Major:" TO SAVE-TEXT PERFORM SHOW
     READ INPUT-FILE INTO INPUT-TEXT
     MOVE FUNCTION TRIM(INPUT-TEXT) TO P-MAJOR
 
@@ -488,7 +519,7 @@ EDIT-PROFILE.
         MOVE MIN-YEAR TO WS-MIN-YEAR-TXT
         MOVE MAX-YEAR TO WS-MAX-YEAR-TXT
         MOVE SPACES TO SAVE-TEXT
-        STRING "Enter Graduation Year (" DELIMITED BY SIZE
+        STRING "  Enter Graduation Year (" DELIMITED BY SIZE
                WS-MIN-YEAR-TXT           DELIMITED BY SIZE
                "-"                       DELIMITED BY SIZE
                WS-MAX-YEAR-TXT           DELIMITED BY SIZE
@@ -507,7 +538,7 @@ EDIT-PROFILE.
             MOVE "Cancelled editing profile. Returning to menu." TO SAVE-TEXT PERFORM SHOW
             EXIT PARAGRAPH
         END-IF
-        *> Normalize CR/TAB like password path
+        *> Clean up CR/TAB just in case
         INSPECT WS-BUF REPLACING ALL X"0D" BY SPACE
         INSPECT WS-BUF REPLACING ALL X"09" BY SPACE
         MOVE FUNCTION TRIM(WS-BUF) TO WS-BUF
@@ -542,7 +573,7 @@ EDIT-PROFILE.
     END-PERFORM
 
     *> About (optional)
-    MOVE "Enter About Me (optional, max 200 chars, enter blank line to skip):" TO SAVE-TEXT PERFORM SHOW
+    MOVE "  Enter About Me (optional, max 200 chars, enter blank line to skip):" TO SAVE-TEXT PERFORM SHOW
     READ INPUT-FILE INTO INPUT-TEXT
     IF FUNCTION LENGTH(FUNCTION TRIM(INPUT-TEXT)) = 0
         MOVE SPACES TO P-ABOUT
@@ -552,7 +583,6 @@ EDIT-PROFILE.
 
     *> Experience entries (prompt order adjusted to include Title prompt)
     MOVE 0 TO P-EXP-COUNT
-    MOVE "Add Experience (optional, max 3 entries. Enter 'DONE' to finish):" TO SAVE-TEXT PERFORM SHOW
 
     PERFORM UNTIL P-EXP-COUNT >= 3
         COMPUTE P-I = P-EXP-COUNT + 1
@@ -562,7 +592,14 @@ EDIT-PROFILE.
             MOVE SPACE TO WS-IDX-TXT(2:1)
         END-IF
         MOVE SPACES TO SAVE-TEXT
-        STRING "Experience #" DELIMITED BY SIZE
+        STRING "  Add Experience #" DELIMITED BY SIZE
+               FUNCTION TRIM(WS-IDX-TXT) DELIMITED BY SIZE
+               " (optional, max 3 entries. Enter 'DONE' to finish):" DELIMITED BY SIZE
+               INTO SAVE-TEXT
+        END-STRING
+        PERFORM SHOW
+        MOVE SPACES TO SAVE-TEXT
+        STRING "    Experience #" DELIMITED BY SIZE
                FUNCTION TRIM(WS-IDX-TXT) DELIMITED BY SIZE
                " - Title:" DELIMITED BY SIZE
                INTO SAVE-TEXT
@@ -582,7 +619,7 @@ EDIT-PROFILE.
         MOVE FUNCTION TRIM(INPUT-TEXT) TO P-EXP-TITLE(P-EXP-COUNT)
 
         MOVE SPACES TO SAVE-TEXT
-        STRING "Experience #" DELIMITED BY SIZE
+        STRING "    Experience #" DELIMITED BY SIZE
                FUNCTION TRIM(WS-IDX-TXT) DELIMITED BY SIZE
                " - Company/Organization:" DELIMITED BY SIZE
                INTO SAVE-TEXT
@@ -592,7 +629,7 @@ EDIT-PROFILE.
         MOVE FUNCTION TRIM(INPUT-TEXT) TO P-EXP-COMPANY(P-EXP-COUNT)
 
         MOVE SPACES TO SAVE-TEXT
-        STRING "Experience #" DELIMITED BY SIZE
+        STRING "    Experience #" DELIMITED BY SIZE
                FUNCTION TRIM(WS-IDX-TXT) DELIMITED BY SIZE
                " - Dates (e.g., Summer 2024):" DELIMITED BY SIZE
                INTO SAVE-TEXT
@@ -602,7 +639,7 @@ EDIT-PROFILE.
         MOVE FUNCTION TRIM(INPUT-TEXT) TO P-EXP-DATES(P-EXP-COUNT)
 
         MOVE SPACES TO SAVE-TEXT
-        STRING "Experience #" DELIMITED BY SIZE
+        STRING "    Experience #" DELIMITED BY SIZE
                FUNCTION TRIM(WS-IDX-TXT) DELIMITED BY SIZE
                " - Description (optional, max 100 chars, blank to skip):" DELIMITED BY SIZE
                INTO SAVE-TEXT
@@ -615,14 +652,11 @@ EDIT-PROFILE.
             MOVE SPACES TO P-EXP-DESC(P-EXP-COUNT)
         END-IF
 
-        IF P-EXP-COUNT < 3
-            MOVE "Add Experience (optional, max 3 entries. Enter 'DONE' to finish):" TO SAVE-TEXT PERFORM SHOW
-        END-IF
-    END-PERFORM
+        *> Do not print the next header here to avoid duplicates
+        END-PERFORM
 
     *> Education entries (prompt order adjusted to include Degree prompt)
     MOVE 0 TO P-EDU-COUNT
-    MOVE "Add Education (optional, max 3 entries. Enter 'DONE' to finish):" TO SAVE-TEXT PERFORM SHOW
 
     PERFORM UNTIL P-EDU-COUNT >= 3
         COMPUTE P-I = P-EDU-COUNT + 1
@@ -632,7 +666,14 @@ EDIT-PROFILE.
             MOVE SPACE TO WS-IDX-TXT(2:1)
         END-IF
         MOVE SPACES TO SAVE-TEXT
-        STRING "Education #" DELIMITED BY SIZE
+        STRING "  Add Education #" DELIMITED BY SIZE
+               FUNCTION TRIM(WS-IDX-TXT) DELIMITED BY SIZE
+               " (optional, max 3 entries. Enter 'DONE' to finish):" DELIMITED BY SIZE
+               INTO SAVE-TEXT
+        END-STRING
+        PERFORM SHOW
+        MOVE SPACES TO SAVE-TEXT
+        STRING "    Education #" DELIMITED BY SIZE
                FUNCTION TRIM(WS-IDX-TXT) DELIMITED BY SIZE
                " - Degree:" DELIMITED BY SIZE
                INTO SAVE-TEXT
@@ -652,7 +693,7 @@ EDIT-PROFILE.
         MOVE FUNCTION TRIM(INPUT-TEXT) TO P-EDU-DEGREE(P-EDU-COUNT)
 
         MOVE SPACES TO SAVE-TEXT
-        STRING "Education #" DELIMITED BY SIZE
+        STRING "    Education #" DELIMITED BY SIZE
                FUNCTION TRIM(WS-IDX-TXT) DELIMITED BY SIZE
                " - University/College:" DELIMITED BY SIZE
                INTO SAVE-TEXT
@@ -662,7 +703,7 @@ EDIT-PROFILE.
         MOVE FUNCTION TRIM(INPUT-TEXT) TO P-EDU-SCHOOL(P-EDU-COUNT)
 
         MOVE SPACES TO SAVE-TEXT
-        STRING "Education #" DELIMITED BY SIZE
+        STRING "    Education #" DELIMITED BY SIZE
                FUNCTION TRIM(WS-IDX-TXT) DELIMITED BY SIZE
                " - Years Attended (e.g., 2023-2025):" DELIMITED BY SIZE
                INTO SAVE-TEXT
@@ -671,26 +712,34 @@ EDIT-PROFILE.
         READ INPUT-FILE INTO INPUT-TEXT
         MOVE FUNCTION TRIM(INPUT-TEXT) TO P-EDU-YEARS(P-EDU-COUNT)
 
-        IF P-EDU-COUNT < 3
-            MOVE "Add Education (optional, max 3 entries. Enter 'DONE' to finish):" TO SAVE-TEXT PERFORM SHOW
-        END-IF
-    END-PERFORM
+        *> Do not print the next header here to avoid duplicates
+        END-PERFORM
 
     *> Save profile
     MOVE WS-NAME TO P-USERNAME
     PERFORM SAVE-PROFILE
 
-    MOVE "Profile saved successfully!" TO SAVE-TEXT PERFORM SHOW.
+    MOVE "Profile saved successfully!" TO SAVE-TEXT PERFORM SHOW
+
+    *> Show the freshly saved profile using the reusable printer
+    MOVE "--- Your Profile ---" TO WS-HEADER
+    PERFORM PRINT-PROFILE-FRIENDLY.
 NAV-MENU.
+    *> Main navigation after login
     MOVE 0 TO CHOICE
     PERFORM UNTIL CHOICE = 9
-        MOVE "1. Create/Edit My Profile" TO SAVE-TEXT PERFORM SHOW
-        MOVE "2. View My Profile"        TO SAVE-TEXT PERFORM SHOW
-        MOVE "3. Search for a job"       TO SAVE-TEXT PERFORM SHOW
-        MOVE "4. Find someone you know"  TO SAVE-TEXT PERFORM SHOW
-        MOVE "5. Learn a New Skill"      TO SAVE-TEXT PERFORM SHOW
-        MOVE "9. Log Out / Exit"         TO SAVE-TEXT PERFORM SHOW
-        MOVE "Enter your choice:"        TO SAVE-TEXT PERFORM SHOW
+        MOVE "--------------------------" TO SAVE-TEXT PERFORM SHOW
+        MOVE "        Menu        " TO SAVE-TEXT PERFORM SHOW
+        MOVE "--------------------------" TO SAVE-TEXT PERFORM SHOW
+
+        MOVE "  1. Create/Edit My Profile" TO SAVE-TEXT PERFORM SHOW
+        MOVE "  2. View My Profile"        TO SAVE-TEXT PERFORM SHOW
+        MOVE "  3. Search for a job"       TO SAVE-TEXT PERFORM SHOW
+        MOVE "  4. Find someone you know"  TO SAVE-TEXT PERFORM SHOW
+        MOVE "  5. Learn a New Skill"      TO SAVE-TEXT PERFORM SHOW
+        MOVE "  9. Log Out / Exit"         TO SAVE-TEXT PERFORM SHOW
+        MOVE "  Enter your choice:"        TO SAVE-TEXT PERFORM SHOW
+        MOVE "--------------------------"  TO SAVE-TEXT PERFORM SHOW
 
         READ INPUT-FILE INTO INPUT-TEXT
             AT END
@@ -709,7 +758,7 @@ NAV-MENU.
             WHEN CHOICE = 3
                 MOVE "Search for a job is under construction." TO SAVE-TEXT PERFORM SHOW
             WHEN CHOICE = 4
-                MOVE "Find someone you know is under construction." TO SAVE-TEXT PERFORM SHOW
+                PERFORM FIND-SOMEONE-YOU-KNOW
             WHEN CHOICE = 5
                 PERFORM SKILL-MENU
             WHEN CHOICE = 9
@@ -722,6 +771,7 @@ NAV-MENU.
 
 
 WRITE-PROFILE-BLOCK.
+    *> Persist the in-memory profile (P-REC) as text
     MOVE SPACES TO TEMP-LINE
     STRING "USER: "  P-USERNAME   INTO TEMP-LINE END-STRING
     WRITE TEMP-LINE
@@ -747,7 +797,7 @@ WRITE-PROFILE-BLOCK.
     STRING "GRAD: "  WS-GRAD-YEAR-DISPLAY INTO TEMP-LINE END-STRING
     WRITE TEMP-LINE
 
-    *> Only persist About when non-empty
+    *> Only write About if it’s not empty
     IF FUNCTION LENGTH(FUNCTION TRIM(P-ABOUT)) > 0
         MOVE SPACES TO TEMP-LINE
         STRING "ABOUT: " P-ABOUT      INTO TEMP-LINE END-STRING
@@ -794,15 +844,19 @@ WRITE-PROFILE-BLOCK.
             STRING "Years: " P-EDU-YEARS(P-I) INTO TEMP-LINE END-STRING
             WRITE TEMP-LINE
         END-PERFORM
+    ELSE
+        MOVE "Experience: None" TO SAVE-TEXT PERFORM SHOW
     END-IF
+
 
     MOVE "-----END-----" TO TEMP-LINE
     WRITE TEMP-LINE.
 
 SAVE-PROFILE.
+    *> Save current P-REC into profiles.txt (replace or add)
     MOVE "N" TO PROFILE-FOUND
 
-    *> Ensure profiles exists
+    *> Make sure the profiles file exists
     OPEN INPUT PROFILES
     IF PROFILES-FILE-STATUS NOT = "00"
         OPEN OUTPUT PROFILES
@@ -810,7 +864,7 @@ SAVE-PROFILE.
         OPEN INPUT PROFILES
     END-IF
 
-    *> Truncate temp and start copying
+    *> Rewrite via temp: copy everything, replacing just this user’s block
     OPEN OUTPUT TEMP-FILE
 
     PERFORM UNTIL PROFILES-FILE-STATUS = "10"
@@ -821,17 +875,17 @@ SAVE-PROFILE.
         IF PROFILES-LINE(1:6) = "USER: "
             MOVE PROFILES-LINE(7:) TO WS-BUF
             IF FUNCTION TRIM(WS-BUF) = FUNCTION TRIM(P-USERNAME)
-                *> Skip this block
+                *> Skip the old block for this user
                 PERFORM UNTIL PROFILES-LINE = "END" OR PROFILES-LINE = "-----END-----"
                     READ PROFILES INTO PROFILES-LINE
                         AT END EXIT PERFORM
                     END-READ
                 END-PERFORM
-                *> Write new block
+                *> Write the updated block
                 PERFORM WRITE-PROFILE-BLOCK
                 MOVE "Y" TO PROFILE-FOUND
             ELSE
-                *> Copy other user's block
+                *> Copy other users as-is
                 MOVE PROFILES-LINE TO TEMP-LINE
                 WRITE TEMP-LINE
                 PERFORM UNTIL PROFILES-LINE = "END" OR PROFILES-LINE = "-----END-----"
@@ -860,7 +914,7 @@ SAVE-PROFILE.
 
     CLOSE TEMP-FILE
 
-    *> Atomic replace
+    *> Swap in the new file (atomic replace)
     OPEN INPUT  TEMP-FILE
     OPEN OUTPUT NEW-FILE
     PERFORM UNTIL TEMP-FILE-STATUS = "10"
@@ -876,8 +930,8 @@ SAVE-PROFILE.
     CALL "SYSTEM" USING BY CONTENT "mv -f src/profiles.new src/profiles.txt".
 
 VIEW-PROFILE.
-    MOVE "--- Your Profile ---" TO SAVE-TEXT PERFORM SHOW
-
+    *> Load and show the current user's profile
+    *> Load and show the current user's profile
     MOVE 'N' TO PROFILE-FOUND
     OPEN INPUT PROFILES
     MOVE SPACES TO PROFILES-LINE
@@ -964,82 +1018,9 @@ VIEW-PROFILE.
                     END-IF
                 END-PERFORM
 
-                *> Friendly view
-                MOVE SPACES TO SAVE-TEXT
-                STRING "Name: " DELIMITED BY SIZE
-                       FUNCTION TRIM(P-FIRST-NAME) DELIMITED BY SIZE
-                       " " DELIMITED BY SIZE
-                       FUNCTION TRIM(P-LAST-NAME) DELIMITED BY SIZE
-                       INTO SAVE-TEXT
-                END-STRING
-                PERFORM SHOW
-
-                MOVE SPACES TO SAVE-TEXT
-                STRING "University: " DELIMITED BY SIZE
-                       FUNCTION TRIM(P-UNIVERSITY) DELIMITED BY SIZE
-                       INTO SAVE-TEXT
-                END-STRING
-                PERFORM SHOW
-
-                MOVE SPACES TO SAVE-TEXT
-                STRING "Major: " DELIMITED BY SIZE
-                       FUNCTION TRIM(P-MAJOR) DELIMITED BY SIZE
-                       INTO SAVE-TEXT
-                END-STRING
-                PERFORM SHOW
-
-                MOVE P-GRAD-YEAR TO WS-GRAD-YEAR-DISPLAY
-                MOVE SPACES TO SAVE-TEXT
-                STRING "Graduation Year: " DELIMITED BY SIZE
-                       WS-GRAD-YEAR-DISPLAY DELIMITED BY SIZE
-                       INTO SAVE-TEXT
-                END-STRING
-                PERFORM SHOW
-
-                *> Only display About when non-empty
-                IF FUNCTION LENGTH(FUNCTION TRIM(P-ABOUT)) > 0
-                    MOVE SPACES TO SAVE-TEXT
-                    STRING "About Me: " DELIMITED BY SIZE
-                           FUNCTION TRIM(P-ABOUT) DELIMITED BY SIZE
-                           INTO SAVE-TEXT
-                    END-STRING
-                    PERFORM SHOW
-                END-IF
-
-                IF P-EXP-COUNT > 0
-                    MOVE "Experience:" TO SAVE-TEXT PERFORM SHOW
-                    PERFORM VARYING P-I FROM 1 BY 1 UNTIL P-I > P-EXP-COUNT
-                        MOVE SPACES TO SAVE-TEXT
-                        STRING "Title: " P-EXP-TITLE(P-I) INTO SAVE-TEXT END-STRING
-                        PERFORM SHOW
-                        MOVE SPACES TO SAVE-TEXT
-                        STRING "Company: " P-EXP-COMPANY(P-I) INTO SAVE-TEXT END-STRING
-                        PERFORM SHOW
-                        MOVE SPACES TO SAVE-TEXT
-                        STRING "Dates: " P-EXP-DATES(P-I) INTO SAVE-TEXT END-STRING
-                        PERFORM SHOW
-                        IF FUNCTION LENGTH(FUNCTION TRIM(P-EXP-DESC(P-I))) > 0
-                            MOVE SPACES TO SAVE-TEXT
-                            STRING "Description: " P-EXP-DESC(P-I) INTO SAVE-TEXT END-STRING
-                            PERFORM SHOW
-                        END-IF
-                    END-PERFORM
-                END-IF
-
-                IF P-EDU-COUNT > 0
-                    MOVE "Education:" TO SAVE-TEXT PERFORM SHOW
-                    PERFORM VARYING P-I FROM 1 BY 1 UNTIL P-I > P-EDU-COUNT
-                        MOVE SPACES TO SAVE-TEXT
-                        STRING "Degree: " P-EDU-DEGREE(P-I) INTO SAVE-TEXT END-STRING
-                        PERFORM SHOW
-                        MOVE SPACES TO SAVE-TEXT
-                        STRING "University: " P-EDU-SCHOOL(P-I) INTO SAVE-TEXT END-STRING
-                        PERFORM SHOW
-                        MOVE SPACES TO SAVE-TEXT
-                        STRING "Years: " P-EDU-YEARS(P-I) INTO SAVE-TEXT END-STRING
-                        PERFORM SHOW
-                    END-PERFORM
-                END-IF
+                *> Print a friendly view
+                MOVE "--- Your Profile ---" TO WS-HEADER
+                PERFORM PRINT-PROFILE-FRIENDLY
 
                 EXIT PERFORM
             END-IF
@@ -1049,12 +1030,18 @@ VIEW-PROFILE.
     CLOSE PROFILES
 
     IF PROFILE-FOUND = 'Y'
-        MOVE "--------------------" TO SAVE-TEXT PERFORM SHOW
+        CONTINUE
     ELSE
-        MOVE "No profile found." TO SAVE-TEXT PERFORM SHOW
+        MOVE SPACES TO SAVE-TEXT
+        STRING WS-IND1 DELIMITED BY SIZE
+               "No profile found." DELIMITED BY SIZE
+               INTO SAVE-TEXT
+        END-STRING
+        PERFORM SHOW
     END-IF.
 
 SKILL-MENU.
+    *> Stub skills menu (under construction)
     MOVE 0 TO SKILLCHOICE
     PERFORM UNTIL SKILLCHOICE = 9
         MOVE "Learn a New Skill:" TO SAVE-TEXT PERFORM SHOW
@@ -1093,4 +1080,283 @@ SKILL-MENU.
                 MOVE 0 TO SKILLCHOICE
         END-EVALUATE
     END-PERFORM.
+PRINT-PROFILE-FRIENDLY.
+    *> readable printer for the profile in P-REC
+    MOVE WS-HEADER TO SAVE-TEXT PERFORM SHOW
+    MOVE "--------------------------" TO SAVE-TEXT PERFORM SHOW
+
+    MOVE SPACES TO SAVE-TEXT
+    STRING "Name: " DELIMITED BY SIZE
+           FUNCTION TRIM(P-FIRST-NAME) DELIMITED BY SIZE
+           " " DELIMITED BY SIZE
+           FUNCTION TRIM(P-LAST-NAME)  DELIMITED BY SIZE
+           INTO SAVE-TEXT
+    END-STRING
+    PERFORM SHOW
+
+    MOVE SPACES TO SAVE-TEXT
+    STRING "University: " DELIMITED BY SIZE
+           FUNCTION TRIM(P-UNIVERSITY) DELIMITED BY SIZE
+           INTO SAVE-TEXT
+    END-STRING
+    PERFORM SHOW
+
+    MOVE SPACES TO SAVE-TEXT
+    STRING "Major: " DELIMITED BY SIZE
+           FUNCTION TRIM(P-MAJOR) DELIMITED BY SIZE
+           INTO SAVE-TEXT
+    END-STRING
+    PERFORM SHOW
+
+    MOVE P-GRAD-YEAR TO WS-GRAD-YEAR-DISPLAY
+    MOVE SPACES TO SAVE-TEXT
+    STRING "Graduation Year: " DELIMITED BY SIZE
+           WS-GRAD-YEAR-DISPLAY DELIMITED BY SIZE
+           INTO SAVE-TEXT
+    END-STRING
+    PERFORM SHOW
+
+    *> About (print value or "None")
+    IF FUNCTION LENGTH(FUNCTION TRIM(P-ABOUT)) > 0
+        MOVE SPACES TO SAVE-TEXT
+        STRING "About Me: " DELIMITED BY SIZE
+               FUNCTION TRIM(P-ABOUT) DELIMITED BY SIZE
+               INTO SAVE-TEXT
+        END-STRING
+        PERFORM SHOW
+    ELSE
+        MOVE "About Me: None" TO SAVE-TEXT PERFORM SHOW
+    END-IF
+
+    *> Experience (print items or "None")
+    IF P-EXP-COUNT > 0
+        MOVE "Experience:" TO SAVE-TEXT PERFORM SHOW
+        PERFORM VARYING P-I FROM 1 BY 1 UNTIL P-I > P-EXP-COUNT
+            MOVE SPACES TO SAVE-TEXT
+            STRING WS-IND1 DELIMITED BY SIZE
+                   "Title: " DELIMITED BY SIZE
+                   P-EXP-TITLE(P-I) DELIMITED BY SIZE
+                   INTO SAVE-TEXT
+            END-STRING
+            PERFORM SHOW
+
+            MOVE SPACES TO SAVE-TEXT
+            STRING WS-IND2 DELIMITED BY SIZE
+                   "Company: " DELIMITED BY SIZE
+                   P-EXP-COMPANY(P-I) DELIMITED BY SIZE
+                   INTO SAVE-TEXT
+            END-STRING
+            PERFORM SHOW
+
+            MOVE SPACES TO SAVE-TEXT
+            STRING WS-IND2 DELIMITED BY SIZE
+                   "Dates: " DELIMITED BY SIZE
+                   P-EXP-DATES(P-I) DELIMITED BY SIZE
+                   INTO SAVE-TEXT
+            END-STRING
+            PERFORM SHOW
+
+            IF FUNCTION LENGTH(FUNCTION TRIM(P-EXP-DESC(P-I))) > 0
+                MOVE SPACES TO SAVE-TEXT
+                STRING WS-IND2 DELIMITED BY SIZE
+                       "Description: " DELIMITED BY SIZE
+                       P-EXP-DESC(P-I) DELIMITED BY SIZE
+                       INTO SAVE-TEXT
+                END-STRING
+                PERFORM SHOW
+            END-IF
+        END-PERFORM
+    ELSE
+        MOVE "Experience: None" TO SAVE-TEXT PERFORM SHOW
+    END-IF
+
+    *> Education (print items or "None")
+    IF P-EDU-COUNT > 0
+        MOVE "Education:" TO SAVE-TEXT PERFORM SHOW
+        PERFORM VARYING P-I FROM 1 BY 1 UNTIL P-I > P-EDU-COUNT
+            MOVE SPACES TO SAVE-TEXT
+            STRING WS-IND1 DELIMITED BY SIZE
+                   "Degree: " DELIMITED BY SIZE
+                   P-EDU-DEGREE(P-I) DELIMITED BY SIZE
+                   INTO SAVE-TEXT
+            END-STRING
+            PERFORM SHOW
+
+            MOVE SPACES TO SAVE-TEXT
+            STRING WS-IND2 DELIMITED BY SIZE
+                   "University: " DELIMITED BY SIZE
+                   P-EDU-SCHOOL(P-I) DELIMITED BY SIZE
+                   INTO SAVE-TEXT
+            END-STRING
+            PERFORM SHOW
+
+            MOVE SPACES TO SAVE-TEXT
+            STRING WS-IND2 DELIMITED BY SIZE
+                   "Years: " DELIMITED BY SIZE
+                   P-EDU-YEARS(P-I) DELIMITED BY SIZE
+                   INTO SAVE-TEXT
+            END-STRING
+            PERFORM SHOW
+        END-PERFORM
+    ELSE
+        MOVE "Education: None" TO SAVE-TEXT PERFORM SHOW
+    END-IF
+
+    *> No trailing separator
+    CONTINUE.
+
+FIND-SOMEONE-YOU-KNOW.
+    *> Search profiles by full name (case-insensitive)
+    MOVE "Enter the full name of the person you are looking for:" TO SAVE-TEXT
+    PERFORM SHOW
+
+    READ INPUT-FILE INTO INPUT-TEXT
+        AT END
+            MOVE "Missing search input." TO SAVE-TEXT PERFORM SHOW
+            EXIT PARAGRAPH
+    END-READ
+
+    *> Clean up the search string
+    MOVE FUNCTION TRIM(INPUT-TEXT) TO WS-BUF
+    INSPECT WS-BUF REPLACING ALL X"0D" BY SPACE
+    INSPECT WS-BUF REPLACING ALL X"09" BY SPACE
+    MOVE FUNCTION TRIM(WS-BUF) TO WS-BUF
+    IF FUNCTION LENGTH(WS-BUF) = 0
+        MOVE "Name cannot be empty." TO SAVE-TEXT PERFORM SHOW
+        EXIT PARAGRAPH
+    END-IF
+
+    OPEN INPUT PROFILES
+    IF PROFILES-FILE-STATUS NOT = "00"
+        MOVE "No profiles on file." TO SAVE-TEXT PERFORM SHOW
+        EXIT PARAGRAPH
+    END-IF
+
+    MOVE 'N' TO WS-DONE
+    PERFORM UNTIL WS-DONE = 'Y'
+        READ PROFILES INTO PROFILES-LINE
+            AT END MOVE 'Y' TO WS-DONE
+            NOT AT END
+                INSPECT PROFILES-LINE REPLACING ALL X"0D" BY SPACE
+                INSPECT PROFILES-LINE REPLACING ALL X"09" BY SPACE
+
+                IF PROFILES-LINE(1:6) = "USER: "
+                    *> Reset record state
+                    MOVE 0 TO WS-BLOCK-LINES
+                    MOVE SPACE TO WS-SECTION
+                    MOVE 0 TO P-EXP-COUNT P-EDU-COUNT
+                    MOVE SPACES TO P-FIRST-NAME P-LAST-NAME P-UNIVERSITY P-MAJOR P-ABOUT
+                    MOVE 0 TO P-GRAD-YEAR
+
+                    *> Parse this profile block into P-REC
+                    PERFORM UNTIL PROFILES-LINE = "-----END-----"
+                        READ PROFILES INTO PROFILES-LINE
+                            AT END EXIT PERFORM
+                        END-READ
+                        ADD 1 TO WS-BLOCK-LINES
+                        IF WS-BLOCK-LINES > 500
+                            EXIT PERFORM
+                        END-IF
+
+                        INSPECT PROFILES-LINE REPLACING ALL X"0D" BY SPACE
+                        INSPECT PROFILES-LINE REPLACING ALL X"09" BY SPACE
+
+                        IF PROFILES-LINE = "-----END-----"
+                            EXIT PERFORM
+                        ELSE IF PROFILES-LINE = "Experience:"
+                            MOVE 'X' TO WS-SECTION
+                        ELSE IF PROFILES-LINE = "Education:"
+                            MOVE 'U' TO WS-SECTION
+                        ELSE IF PROFILES-LINE(1:4) = "FN: "
+                            MOVE PROFILES-LINE(5:) TO WS-BUF
+                            MOVE FUNCTION TRIM(WS-BUF) TO P-FIRST-NAME
+                        ELSE IF PROFILES-LINE(1:4) = "LN: "
+                            MOVE PROFILES-LINE(5:) TO WS-BUF
+                            MOVE FUNCTION TRIM(WS-BUF) TO P-LAST-NAME
+                        ELSE IF PROFILES-LINE(1:6) = "UNIV: "
+                            MOVE PROFILES-LINE(7:) TO WS-BUF
+                            MOVE FUNCTION TRIM(WS-BUF) TO P-UNIVERSITY
+                        ELSE IF PROFILES-LINE(1:7) = "MAJOR: "
+                            MOVE PROFILES-LINE(8:) TO WS-BUF
+                            MOVE FUNCTION TRIM(WS-BUF) TO P-MAJOR
+                        ELSE IF PROFILES-LINE(1:6) = "GRAD: "
+                            MOVE PROFILES-LINE(7:) TO WS-BUF
+                            MOVE FUNCTION NUMVAL(FUNCTION TRIM(WS-BUF)) TO P-GRAD-YEAR
+                        ELSE IF PROFILES-LINE(1:7) = "ABOUT: "
+                            MOVE PROFILES-LINE(8:) TO WS-BUF
+                            MOVE FUNCTION TRIM(WS-BUF) TO P-ABOUT
+                        ELSE
+                            EVALUATE WS-SECTION
+                                WHEN 'X'
+                                    IF PROFILES-LINE(1:7) = "Title: "
+                                        IF P-EXP-COUNT < 3
+                                            ADD 1 TO P-EXP-COUNT
+                                            MOVE PROFILES-LINE(8:) TO WS-BUF
+                                            MOVE FUNCTION TRIM(WS-BUF) TO P-EXP-TITLE(P-EXP-COUNT)
+                                        END-IF
+                                    ELSE IF PROFILES-LINE(1:9) = "Company: "
+                                        IF P-EXP-COUNT > 0
+                                            MOVE PROFILES-LINE(10:) TO WS-BUF
+                                            MOVE FUNCTION TRIM(WS-BUF) TO P-EXP-COMPANY(P-EXP-COUNT)
+                                        END-IF
+                                    ELSE IF PROFILES-LINE(1:7) = "Dates: "
+                                        IF P-EXP-COUNT > 0
+                                            MOVE PROFILES-LINE(8:) TO WS-BUF
+                                            MOVE FUNCTION TRIM(WS-BUF) TO P-EXP-DATES(P-EXP-COUNT)
+                                        END-IF
+                                    ELSE IF PROFILES-LINE(1:13) = "Description: "
+                                        IF P-EXP-COUNT > 0
+                                            MOVE PROFILES-LINE(14:) TO WS-BUF
+                                            MOVE FUNCTION TRIM(WS-BUF) TO P-EXP-DESC(P-EXP-COUNT)
+                                        END-IF
+                                    END-IF
+                                WHEN 'U'
+                                    IF PROFILES-LINE(1:8) = "Degree: "
+                                        IF P-EDU-COUNT < 3
+                                            ADD 1 TO P-EDU-COUNT
+                                            MOVE PROFILES-LINE(9:) TO WS-BUF
+                                            MOVE FUNCTION TRIM(WS-BUF) TO P-EDU-DEGREE(P-EDU-COUNT)
+                                        END-IF
+                                    ELSE IF PROFILES-LINE(1:12) = "University: "
+                                        IF P-EDU-COUNT > 0
+                                            MOVE PROFILES-LINE(13:) TO WS-BUF
+                                            MOVE FUNCTION TRIM(WS-BUF) TO P-EDU-SCHOOL(P-EDU-COUNT)
+                                        END-IF
+                                    ELSE IF PROFILES-LINE(1:7) = "Years: "
+                                        IF P-EDU-COUNT > 0
+                                            MOVE PROFILES-LINE(8:) TO WS-BUF
+                                            MOVE FUNCTION TRIM(WS-BUF) TO P-EDU-YEARS(P-EDU-COUNT)
+                                        END-IF
+                                    END-IF
+                                WHEN OTHER
+                                    CONTINUE
+                            END-EVALUATE
+                        END-IF
+                    END-PERFORM
+
+                    *> Compare full name if we have both parts
+                    IF FUNCTION LENGTH(FUNCTION TRIM(P-FIRST-NAME)) > 0
+                       AND FUNCTION LENGTH(FUNCTION TRIM(P-LAST-NAME))  > 0
+                        MOVE SPACES TO WS-CANDIDATE-NAME
+                        STRING FUNCTION TRIM(P-FIRST-NAME) DELIMITED BY SIZE
+                               " " DELIMITED BY SIZE
+                               FUNCTION TRIM(P-LAST-NAME)  DELIMITED BY SIZE
+                               INTO WS-CANDIDATE-NAME
+                        END-STRING
+
+                        IF FUNCTION TRIM(WS-CANDIDATE-NAME)
+                           = FUNCTION TRIM(WS-BUF)
+                            CLOSE PROFILES
+                            MOVE "--- Found User Profile ---" TO WS-HEADER
+                            PERFORM PRINT-PROFILE-FRIENDLY
+                            EXIT PARAGRAPH
+                        END-IF
+                    END-IF
+                END-IF
+        END-READ
+    END-PERFORM
+    CLOSE PROFILES
+
+    MOVE "No one by that name could be found." TO SAVE-TEXT PERFORM SHOW.
+
 
