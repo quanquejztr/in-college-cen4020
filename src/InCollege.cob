@@ -145,6 +145,7 @@ WORKING-STORAGE SECTION.
 01 WS-DONE            PIC A(1)  VALUE 'N'.
 01 WS-BLOCK-LINES     PIC 9(4)  VALUE 0.
 01 WS-CANDIDATE-NAME  PIC X(128).
+01 WS-SEARCH-NAME     PIC X(128).
 
 *> Menus
 77 CHOICE      PIC 9 VALUE 0.
@@ -1205,6 +1206,9 @@ PRINT-PROFILE-FRIENDLY.
     *> No trailing separator
     CONTINUE.
 
+*> rejects blank/whitespace, opens src/profiles.txt and reads line-by-line until end of file
+*> Detects the start of a block by USER: , then parses that block into P-REC fields. If match, collects all fields(experience, education, etc)
+*> if it can’t open prints “No profiles on file", ,
 FIND-SOMEONE-YOU-KNOW.
     *> Search profiles by full name (case-insensitive)
     MOVE "Enter the full name of the person you are looking for:" TO SAVE-TEXT
@@ -1217,11 +1221,12 @@ FIND-SOMEONE-YOU-KNOW.
     END-READ
 
     *> Clean up the search string
-    MOVE FUNCTION TRIM(INPUT-TEXT) TO WS-BUF
-    INSPECT WS-BUF REPLACING ALL X"0D" BY SPACE
-    INSPECT WS-BUF REPLACING ALL X"09" BY SPACE
-    MOVE FUNCTION TRIM(WS-BUF) TO WS-BUF
-    IF FUNCTION LENGTH(WS-BUF) = 0
+    MOVE FUNCTION TRIM(INPUT-TEXT) TO WS-SEARCH-NAME
+    INSPECT WS-SEARCH-NAME REPLACING ALL X"0D" BY SPACE
+    INSPECT WS-SEARCH-NAME REPLACING ALL X"09" BY SPACE
+    MOVE FUNCTION TRIM(WS-SEARCH-NAME) TO WS-SEARCH-NAME
+    *> validation for if user enters ' ' for name
+    IF FUNCTION LENGTH(FUNCTION TRIM(WS-SEARCH-NAME)) = 0
         MOVE "Name cannot be empty." TO SAVE-TEXT PERFORM SHOW
         EXIT PARAGRAPH
     END-IF
@@ -1344,8 +1349,8 @@ FIND-SOMEONE-YOU-KNOW.
                                INTO WS-CANDIDATE-NAME
                         END-STRING
 
-                        IF FUNCTION TRIM(WS-CANDIDATE-NAME)
-                           = FUNCTION TRIM(WS-BUF)
+                        IF FUNCTION UPPER-CASE(FUNCTION TRIM(WS-CANDIDATE-NAME))
+                           = FUNCTION UPPER-CASE(FUNCTION TRIM(WS-SEARCH-NAME))
                             CLOSE PROFILES
                             MOVE "--- Found User Profile ---" TO WS-HEADER
                             PERFORM PRINT-PROFILE-FRIENDLY

@@ -19,7 +19,46 @@ Welcome, Paige12!
   9. Log Out / Exit
   Enter your choice:
 --------------------------
---- Your Profile ---
+Enter the full name of the person you are looking for:
+--- Found User Profile ---
+--------------------------
+Name: Alex Johnson
+University: Florida State University
+Major: Software Engineering
+Graduation Year: 2027
+About Me: Passionate software engineer eager to apply problem-solving skills and creativity to meaningful projects. Dedicated to teamwork, continuous learning, and making a difference with technology.
+Experience:
+    Title: Software Engineer Intern
+        Company: Google
+        Dates: May 2025 - Aug 2025
+        Description: Developed backend services and optimized algorithms to improve system performance.
+Education: None
+--------------------------
+        Menu
+--------------------------
+  1. Create/Edit My Profile
+  2. View My Profile
+  3. Search for a job
+  4. Find someone you know
+  5. Learn a New Skill
+  9. Log Out / Exit
+  Enter your choice:
+--------------------------
+Enter the full name of the person you are looking for:
+Name cannot be empty.
+--------------------------
+        Menu
+--------------------------
+  1. Create/Edit My Profile
+  2. View My Profile
+  3. Search for a job
+  4. Find someone you know
+  5. Learn a New Skill
+  9. Log Out / Exit
+  Enter your choice:
+--------------------------
+Enter the full name of the person you are looking for:
+--- Found User Profile ---
 --------------------------
 Name: Brooklyn Luna
 University: University of South Florida
@@ -49,32 +88,6 @@ Education:
     Degree: High School
         University: Fort Walton Beach High School
         Years: 2018-2022
---------------------------
-        Menu
---------------------------
-  1. Create/Edit My Profile
-  2. View My Profile
-  3. Search for a job
-  4. Find someone you know
-  5. Learn a New Skill
-  9. Log Out / Exit
-  Enter your choice:
---------------------------
-Enter the full name of the person you are looking for:
-No one by that name could be found.
---------------------------
-        Menu
---------------------------
-  1. Create/Edit My Profile
-  2. View My Profile
-  3. Search for a job
-  4. Find someone you know
-  5. Learn a New Skill
-  9. Log Out / Exit
-  Enter your choice:
---------------------------
-Enter the full name of the person you are looking for:
-No one by that name could be found.
 --------------------------
         Menu
 --------------------------
