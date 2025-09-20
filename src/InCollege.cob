@@ -846,7 +846,7 @@ WRITE-PROFILE-BLOCK.
             WRITE TEMP-LINE
         END-PERFORM
     ELSE
-        MOVE "Experience: None" TO SAVE-TEXT PERFORM SHOW
+        MOVE "Education: None" TO SAVE-TEXT PERFORM SHOW
     END-IF
 
 
