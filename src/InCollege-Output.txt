@@ -4,11 +4,10 @@ Welcome to InCollege!
   2. Create New Account
 --------------------------
 Enter your choice:
-Enter new username:
-Enter password (8-12 chars, 1 capital, 1 digit, 1 special):
-Account created successfully.
-Welcome, Joshua!
-
+Please enter your username:
+Please enter your password:
+You have successfully logged in.
+Welcome, Stephen!
 --------------------------
         Menu
 --------------------------
@@ -20,29 +19,8 @@ Welcome, Joshua!
   9. Log Out / Exit
   Enter your choice:
 --------------------------
-     Create/Edit Profile
---------------------------
-  Enter First Name:
-  Enter Last Name:
-  Enter University/College Attended:
-  Enter Major:
-  Enter Graduation Year (1950-2060):
-  Enter About Me (optional, max 200 chars, enter blank line to skip):
-  Add Experience #1 (optional, max 3 entries. Enter 'DONE' to finish):
-    Experience #1 - Title:
-  Add Education #1 (optional, max 3 entries. Enter 'DONE' to finish):
-    Education #1 - Degree:
-Education: None
-Profile saved successfully!
---- Your Profile ---
---------------------------
-Name: Joshua Maharaj
-University: USF
-Major: Biology
-Graduation Year: 2025
-About Me: I am a senior at USF studying Biology. I love hiking and reading.
-Experience: None
-Education: None
+Enter the full name of the person you are looking for:
+No one by that name could be found.
 --------------------------
         Menu
 --------------------------
@@ -54,7 +32,47 @@ Education: None
   9. Log Out / Exit
   Enter your choice:
 --------------------------
---- Your Profile ---
+Enter the full name of the person you are looking for:
+No one by that name could be found.
+--------------------------
+        Menu
+--------------------------
+  1. Create/Edit My Profile
+  2. View My Profile
+  3. Search for a job
+  4. Find someone you know
+  5. Learn a New Skill
+  9. Log Out / Exit
+  Enter your choice:
+--------------------------
+Enter the full name of the person you are looking for:
+No one by that name could be found.
+--------------------------
+        Menu
+--------------------------
+  1. Create/Edit My Profile
+  2. View My Profile
+  3. Search for a job
+  4. Find someone you know
+  5. Learn a New Skill
+  9. Log Out / Exit
+  Enter your choice:
+--------------------------
+Enter the full name of the person you are looking for:
+Name cannot be empty.
+--------------------------
+        Menu
+--------------------------
+  1. Create/Edit My Profile
+  2. View My Profile
+  3. Search for a job
+  4. Find someone you know
+  5. Learn a New Skill
+  9. Log Out / Exit
+  Enter your choice:
+--------------------------
+Enter the full name of the person you are looking for:
+--- Found User Profile ---
 --------------------------
 Name: Joshua Maharaj
 University: USF

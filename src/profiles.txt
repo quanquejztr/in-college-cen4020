@@ -6,3 +6,11 @@ MAJOR: Biology
 GRAD: 2025
 ABOUT: I am a senior at USF studying Biology. I love hiking and reading.
 -----END-----
+USER: Stephen
+FN: Tri Cuong
+LN: Luong
+UNIV: University of South Florida
+MAJOR: Computer Science
+GRAD: 2025
+ABOUT: I am currently looking for internship for Summer 2026, please hire me!!
+-----END-----
