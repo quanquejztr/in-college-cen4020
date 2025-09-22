@@ -1,0 +1,8 @@
+USER: Joshua
+FN: Joshua
+LN: Maharaj
+UNIV: USF
+MAJOR: Biology
+GRAD: 2025
+ABOUT: I am a senior at USF studying Biology. I love hiking and reading.
+-----END-----
