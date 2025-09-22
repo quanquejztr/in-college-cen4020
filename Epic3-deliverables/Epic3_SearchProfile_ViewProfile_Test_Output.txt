@@ -1,0 +1,254 @@
+Welcome to InCollege!
+--------------------------
+  1. Log In
+  2. Create New Account
+--------------------------
+Enter your choice:
+Please enter your username:
+Please enter your password:
+You have successfully logged in.
+Welcome, Stephen!
+--------------------------
+        Menu
+--------------------------
+  1. Create/Edit My Profile
+  2. View My Profile
+  3. Search for a job
+  4. Find someone you know
+  5. Learn a New Skill
+  9. Log Out / Exit
+  Enter your choice:
+--------------------------
+Enter the full name of the person you are looking for:
+No one by that name could be found.
+--------------------------
+        Menu
+--------------------------
+  1. Create/Edit My Profile
+  2. View My Profile
+  3. Search for a job
+  4. Find someone you know
+  5. Learn a New Skill
+  9. Log Out / Exit
+  Enter your choice:
+--------------------------
+Enter the full name of the person you are looking for:
+No one by that name could be found.
+--------------------------
+        Menu
+--------------------------
+  1. Create/Edit My Profile
+  2. View My Profile
+  3. Search for a job
+  4. Find someone you know
+  5. Learn a New Skill
+  9. Log Out / Exit
+  Enter your choice:
+--------------------------
+Enter the full name of the person you are looking for:
+No one by that name could be found.
+--------------------------
+        Menu
+--------------------------
+  1. Create/Edit My Profile
+  2. View My Profile
+  3. Search for a job
+  4. Find someone you know
+  5. Learn a New Skill
+  9. Log Out / Exit
+  Enter your choice:
+--------------------------
+Enter the full name of the person you are looking for:
+--- Found User Profile ---
+--------------------------
+Name: Joshua Maharaj
+University: USF
+Major: Biology
+Graduation Year: 2025
+About Me: I am a senior at USF studying Biology. I love hiking and reading.
+Experience: None
+Education: None
+--------------------------
+        Menu
+--------------------------
+  1. Create/Edit My Profile
+  2. View My Profile
+  3. Search for a job
+  4. Find someone you know
+  5. Learn a New Skill
+  9. Log Out / Exit
+  Enter your choice:
+--------------------------
+Enter the full name of the person you are looking for:
+No one by that name could be found.
+--------------------------
+        Menu
+--------------------------
+  1. Create/Edit My Profile
+  2. View My Profile
+  3. Search for a job
+  4. Find someone you know
+  5. Learn a New Skill
+  9. Log Out / Exit
+  Enter your choice:
+--------------------------
+Enter the full name of the person you are looking for:
+No one by that name could be found.
+--------------------------
+        Menu
+--------------------------
+  1. Create/Edit My Profile
+  2. View My Profile
+  3. Search for a job
+  4. Find someone you know
+  5. Learn a New Skill
+  9. Log Out / Exit
+  Enter your choice:
+--------------------------
+Enter the full name of the person you are looking for:
+--- Found User Profile ---
+--------------------------
+Name: Joshua Maharaj
+University: USF
+Major: Biology
+Graduation Year: 2025
+About Me: I am a senior at USF studying Biology. I love hiking and reading.
+Experience: None
+Education: None
+--------------------------
+        Menu
+--------------------------
+  1. Create/Edit My Profile
+  2. View My Profile
+  3. Search for a job
+  4. Find someone you know
+  5. Learn a New Skill
+  9. Log Out / Exit
+  Enter your choice:
+--------------------------
+Enter the full name of the person you are looking for:
+--- Found User Profile ---
+--------------------------
+Name: Tri Cuong Luong
+University: University of South Florida
+Major: Computer Science
+Graduation Year: 2025
+About Me: I am currently looking for internship for Summer 2026, please hire me!!
+Experience: None
+Education: None
+--------------------------
+        Menu
+--------------------------
+  1. Create/Edit My Profile
+  2. View My Profile
+  3. Search for a job
+  4. Find someone you know
+  5. Learn a New Skill
+  9. Log Out / Exit
+  Enter your choice:
+--------------------------
+Enter the full name of the person you are looking for:
+--- Found User Profile ---
+--------------------------
+Name: Tri Cu0ng Luong
+University: USF
+Major: Compsci
+Graduation Year: 2026
+About Me: Hehe
+Experience: None
+Education: None
+--------------------------
+        Menu
+--------------------------
+  1. Create/Edit My Profile
+  2. View My Profile
+  3. Search for a job
+  4. Find someone you know
+  5. Learn a New Skill
+  9. Log Out / Exit
+  Enter your choice:
+--------------------------
+Enter the full name of the person you are looking for:
+--- Found User Profile ---
+--------------------------
+Name: Tri Cuong Luong
+University: University of South Florida
+Major: Computer Science
+Graduation Year: 2025
+About Me: I am currently looking for internship for Summer 2026, please hire me!!
+Experience: None
+Education: None
+--------------------------
+        Menu
+--------------------------
+  1. Create/Edit My Profile
+  2. View My Profile
+  3. Search for a job
+  4. Find someone you know
+  5. Learn a New Skill
+  9. Log Out / Exit
+  Enter your choice:
+--------------------------
+Enter the full name of the person you are looking for:
+--- Found User Profile ---
+--------------------------
+Name: Tri Cu0ng Luong
+University: USF
+Major: Compsci
+Graduation Year: 2026
+About Me: Hehe
+Experience: None
+Education: None
+--------------------------
+        Menu
+--------------------------
+  1. Create/Edit My Profile
+  2. View My Profile
+  3. Search for a job
+  4. Find someone you know
+  5. Learn a New Skill
+  9. Log Out / Exit
+  Enter your choice:
+--------------------------
+Enter the full name of the person you are looking for:
+--- Found User Profile ---
+--------------------------
+Name: Tri Cu0ng Luong
+University: USF
+Major: Compsci
+Graduation Year: 2026
+About Me: Hehe
+Experience: None
+Education: None
+--------------------------
+        Menu
+--------------------------
+  1. Create/Edit My Profile
+  2. View My Profile
+  3. Search for a job
+  4. Find someone you know
+  5. Learn a New Skill
+  9. Log Out / Exit
+  Enter your choice:
+--------------------------
+--- Your Profile ---
+--------------------------
+Name: Tri Cuong Luong
+University: University of South Florida
+Major: Computer Science
+Graduation Year: 2025
+About Me: I am currently looking for internship for Summer 2026, please hire me!!
+Experience: None
+Education: None
+--------------------------
+        Menu
+--------------------------
+  1. Create/Edit My Profile
+  2. View My Profile
+  3. Search for a job
+  4. Find someone you know
+  5. Learn a New Skill
+  9. Log Out / Exit
+  Enter your choice:
+--------------------------
+--- END_OF_PROGRAM_EXECUTION ---

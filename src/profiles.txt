@@ -14,3 +14,11 @@ MAJOR: Computer Science
 GRAD: 2025
 ABOUT: I am currently looking for internship for Summer 2026, please hire me!!
 -----END-----
+USER: Stephen2
+FN: Tri Cu0ng
+LN: Luong
+UNIV: USF
+MAJOR: Compsci
+GRAD: 2026
+ABOUT: Hehe
+-----END-----

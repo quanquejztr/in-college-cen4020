@@ -19,68 +19,41 @@ Welcome, Stephen!
   9. Log Out / Exit
   Enter your choice:
 --------------------------
-Enter the full name of the person you are looking for:
-No one by that name could be found.
+--- Your Profile ---
 --------------------------
-        Menu
---------------------------
-  1. Create/Edit My Profile
-  2. View My Profile
-  3. Search for a job
-  4. Find someone you know
-  5. Learn a New Skill
-  9. Log Out / Exit
-  Enter your choice:
---------------------------
-Enter the full name of the person you are looking for:
-No one by that name could be found.
---------------------------
-        Menu
---------------------------
-  1. Create/Edit My Profile
-  2. View My Profile
-  3. Search for a job
-  4. Find someone you know
-  5. Learn a New Skill
-  9. Log Out / Exit
-  Enter your choice:
---------------------------
-Enter the full name of the person you are looking for:
-No one by that name could be found.
---------------------------
-        Menu
---------------------------
-  1. Create/Edit My Profile
-  2. View My Profile
-  3. Search for a job
-  4. Find someone you know
-  5. Learn a New Skill
-  9. Log Out / Exit
-  Enter your choice:
---------------------------
-Enter the full name of the person you are looking for:
-Name cannot be empty.
---------------------------
-        Menu
---------------------------
-  1. Create/Edit My Profile
-  2. View My Profile
-  3. Search for a job
-  4. Find someone you know
-  5. Learn a New Skill
-  9. Log Out / Exit
-  Enter your choice:
---------------------------
-Enter the full name of the person you are looking for:
---- Found User Profile ---
---------------------------
-Name: Joshua Maharaj
-University: USF
-Major: Biology
+Name: Tri Cuong Luong
+University: University of South Florida
+Major: Computer Science
 Graduation Year: 2025
-About Me: I am a senior at USF studying Biology. I love hiking and reading.
+About Me: I am currently looking for internship for Summer 2026, please hire me!!
 Experience: None
 Education: None
+--------------------------
+        Menu
+--------------------------
+  1. Create/Edit My Profile
+  2. View My Profile
+  3. Search for a job
+  4. Find someone you know
+  5. Learn a New Skill
+  9. Log Out / Exit
+  Enter your choice:
+--------------------------
+Enter the full name of the person you are looking for:
+No one by that name could be found.
+--------------------------
+        Menu
+--------------------------
+  1. Create/Edit My Profile
+  2. View My Profile
+  3. Search for a job
+  4. Find someone you know
+  5. Learn a New Skill
+  9. Log Out / Exit
+  Enter your choice:
+--------------------------
+Enter the full name of the person you are looking for:
+No one by that name could be found.
 --------------------------
         Menu
 --------------------------
