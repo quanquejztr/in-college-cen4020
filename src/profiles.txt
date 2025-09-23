@@ -7,12 +7,16 @@ GRAD: 2025
 ABOUT: I am a senior at USF studying Biology. I love hiking and reading.
 -----END-----
 USER: Stephen
-FN: Tri Cuong
-LN: Luong
-UNIV: University of South Florida
+FN: Jayson
+LN: Lopez
+UNIV: University of Kalamazoo
 MAJOR: Computer Science
-GRAD: 2025
-ABOUT: I am currently looking for internship for Summer 2026, please hire me!!
+GRAD: 2003
+ABOUT: I am a and am a a and this is a and I'm CS.
+Education:
+Degree: bachelor's of CS
+University: USF
+Years: 2021-2024
 -----END-----
 USER: Stephen2
 FN: Tri Cu0ng
