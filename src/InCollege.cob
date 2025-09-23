@@ -89,6 +89,7 @@ WORKING-STORAGE SECTION.
 
 *> EOF flags
 01 INFOEOF   PIC A(1) VALUE 'N'.
+01 WS-INPUT-EOF PIC A(1) VALUE 'N'.
 
 *> Menu choices
 01 CURRENT-ACTION PIC X(20).
@@ -480,7 +481,9 @@ EDIT-PROFILE.
         MOVE "  Enter First Name:" TO SAVE-TEXT PERFORM SHOW
         READ INPUT-FILE INTO INPUT-TEXT
             AT END
-                MOVE "No more input while editing profile." TO SAVE-TEXT PERFORM SHOW
+                MOVE 'Y' TO WS-INPUT-EOF
+                MOVE 9 TO CHOICE
+                MOVE "Ran out of input during profile setup." TO SAVE-TEXT PERFORM SHOW
                 EXIT PARAGRAPH
         END-READ
         MOVE FUNCTION TRIM(INPUT-TEXT) TO P-FIRST-NAME
@@ -494,7 +497,9 @@ EDIT-PROFILE.
         MOVE "  Enter Last Name:" TO SAVE-TEXT PERFORM SHOW
         READ INPUT-FILE INTO INPUT-TEXT
             AT END
-                MOVE "No more input while editing profile." TO SAVE-TEXT PERFORM SHOW
+                MOVE 'Y' TO WS-INPUT-EOF
+                MOVE 9 TO CHOICE
+                MOVE "Ran out of input while setting up the profile." TO SAVE-TEXT PERFORM SHOW
                 EXIT PARAGRAPH
         END-READ
         MOVE FUNCTION TRIM(INPUT-TEXT) TO P-LAST-NAME
@@ -506,11 +511,23 @@ EDIT-PROFILE.
     *> University (required)
     MOVE "  Enter University/College Attended:" TO SAVE-TEXT PERFORM SHOW
     READ INPUT-FILE INTO INPUT-TEXT
+        AT END
+            MOVE 'Y' TO WS-INPUT-EOF
+            MOVE 9 TO CHOICE
+            MOVE "Ran out of input while setting up the profile." TO SAVE-TEXT PERFORM SHOW
+            EXIT PARAGRAPH
+    END-READ
     MOVE FUNCTION TRIM(INPUT-TEXT) TO P-UNIVERSITY
 
     *> Major (required)
     MOVE "  Enter Major:" TO SAVE-TEXT PERFORM SHOW
     READ INPUT-FILE INTO INPUT-TEXT
+        AT END
+            MOVE 'Y' TO WS-INPUT-EOF
+            MOVE 9 TO CHOICE
+            MOVE "Ran out of input while setting up the profile." TO SAVE-TEXT PERFORM SHOW
+            EXIT PARAGRAPH
+    END-READ
     MOVE FUNCTION TRIM(INPUT-TEXT) TO P-MAJOR
 
     *> Graduation Year (required, exactly 4 digits)
@@ -530,7 +547,9 @@ EDIT-PROFILE.
         PERFORM SHOW
         READ INPUT-FILE INTO INPUT-TEXT
             AT END
-                MOVE "No more input while editing profile." TO SAVE-TEXT PERFORM SHOW
+                MOVE 'Y' TO WS-INPUT-EOF
+                MOVE 9 TO CHOICE
+                MOVE "Ran out of input while setting up the profile." TO SAVE-TEXT PERFORM SHOW
                 EXIT PARAGRAPH
         END-READ
 
@@ -576,6 +595,12 @@ EDIT-PROFILE.
     *> About (optional)
     MOVE "  Enter About Me (optional, max 200 chars, enter blank line to skip):" TO SAVE-TEXT PERFORM SHOW
     READ INPUT-FILE INTO INPUT-TEXT
+    IF INPUT-FILE-STATUS NOT = "00"
+        MOVE 'Y' TO WS-INPUT-EOF
+        MOVE 9 TO CHOICE
+        MOVE "Ran out of input while setting up the profile." TO SAVE-TEXT PERFORM SHOW
+        EXIT PARAGRAPH
+    END-IF
     IF FUNCTION LENGTH(FUNCTION TRIM(INPUT-TEXT)) = 0
         MOVE SPACES TO P-ABOUT
     ELSE
@@ -607,6 +632,12 @@ EDIT-PROFILE.
         END-STRING
         PERFORM SHOW
         READ INPUT-FILE INTO INPUT-TEXT
+        IF INPUT-FILE-STATUS NOT = "00"
+            MOVE 'Y' TO WS-INPUT-EOF
+            MOVE 9 TO CHOICE
+            MOVE "No more input while editing profile." TO SAVE-TEXT PERFORM SHOW
+            EXIT PARAGRAPH
+        END-IF
         IF FUNCTION UPPER-CASE(FUNCTION TRIM(INPUT-TEXT)) = "DONE"
             EXIT PERFORM
         END-IF
@@ -627,6 +658,12 @@ EDIT-PROFILE.
         END-STRING
         PERFORM SHOW
         READ INPUT-FILE INTO INPUT-TEXT
+        IF INPUT-FILE-STATUS NOT = "00"
+            MOVE 'Y' TO WS-INPUT-EOF
+            MOVE 9 TO CHOICE
+            MOVE "No more input while editing profile." TO SAVE-TEXT PERFORM SHOW
+            EXIT PARAGRAPH
+        END-IF
         MOVE FUNCTION TRIM(INPUT-TEXT) TO P-EXP-COMPANY(P-EXP-COUNT)
 
         MOVE SPACES TO SAVE-TEXT
@@ -637,6 +674,12 @@ EDIT-PROFILE.
         END-STRING
         PERFORM SHOW
         READ INPUT-FILE INTO INPUT-TEXT
+        IF INPUT-FILE-STATUS NOT = "00"
+            MOVE 'Y' TO WS-INPUT-EOF
+            MOVE 9 TO CHOICE
+            MOVE "No more input while editing profile." TO SAVE-TEXT PERFORM SHOW
+            EXIT PARAGRAPH
+        END-IF
         MOVE FUNCTION TRIM(INPUT-TEXT) TO P-EXP-DATES(P-EXP-COUNT)
 
         MOVE SPACES TO SAVE-TEXT
@@ -647,6 +690,12 @@ EDIT-PROFILE.
         END-STRING
         PERFORM SHOW
         READ INPUT-FILE INTO INPUT-TEXT
+        IF INPUT-FILE-STATUS NOT = "00"
+            MOVE 'Y' TO WS-INPUT-EOF
+            MOVE 9 TO CHOICE
+            MOVE "No more input while editing profile." TO SAVE-TEXT PERFORM SHOW
+            EXIT PARAGRAPH
+        END-IF
         IF FUNCTION LENGTH(FUNCTION TRIM(INPUT-TEXT)) > 0
             MOVE FUNCTION TRIM(INPUT-TEXT) TO P-EXP-DESC(P-EXP-COUNT)
         ELSE
@@ -681,6 +730,12 @@ EDIT-PROFILE.
         END-STRING
         PERFORM SHOW
         READ INPUT-FILE INTO INPUT-TEXT
+        IF INPUT-FILE-STATUS NOT = "00"
+            MOVE 'Y' TO WS-INPUT-EOF
+            MOVE 9 TO CHOICE
+            MOVE "No more input while editing profile." TO SAVE-TEXT PERFORM SHOW
+            EXIT PARAGRAPH
+        END-IF
         IF FUNCTION UPPER-CASE(FUNCTION TRIM(INPUT-TEXT)) = "DONE"
             EXIT PERFORM
         END-IF
@@ -701,6 +756,12 @@ EDIT-PROFILE.
         END-STRING
         PERFORM SHOW
         READ INPUT-FILE INTO INPUT-TEXT
+        IF INPUT-FILE-STATUS NOT = "00"
+            MOVE 'Y' TO WS-INPUT-EOF
+            MOVE 9 TO CHOICE
+            MOVE "No more input while editing profile." TO SAVE-TEXT PERFORM SHOW
+            EXIT PARAGRAPH
+        END-IF
         MOVE FUNCTION TRIM(INPUT-TEXT) TO P-EDU-SCHOOL(P-EDU-COUNT)
 
         MOVE SPACES TO SAVE-TEXT
@@ -711,6 +772,12 @@ EDIT-PROFILE.
         END-STRING
         PERFORM SHOW
         READ INPUT-FILE INTO INPUT-TEXT
+        IF INPUT-FILE-STATUS NOT = "00"
+            MOVE 'Y' TO WS-INPUT-EOF
+            MOVE 9 TO CHOICE
+            MOVE "No more input while editing profile." TO SAVE-TEXT PERFORM SHOW
+            EXIT PARAGRAPH
+        END-IF
         MOVE FUNCTION TRIM(INPUT-TEXT) TO P-EDU-YEARS(P-EDU-COUNT)
 
         *> Do not print the next header here to avoid duplicates
@@ -729,6 +796,10 @@ NAV-MENU.
     *> Main navigation after login
     MOVE 0 TO CHOICE
     PERFORM UNTIL CHOICE = 9
+        IF WS-INPUT-EOF = 'Y'
+            MOVE 9 TO CHOICE
+            EXIT PERFORM
+        END-IF
         MOVE "--------------------------" TO SAVE-TEXT PERFORM SHOW
         MOVE "        Menu        " TO SAVE-TEXT PERFORM SHOW
         MOVE "--------------------------" TO SAVE-TEXT PERFORM SHOW
@@ -1363,5 +1434,3 @@ FIND-SOMEONE-YOU-KNOW.
     CLOSE PROFILES
 
     MOVE "No one by that name could be found." TO SAVE-TEXT PERFORM SHOW.
-
-

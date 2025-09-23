@@ -19,28 +19,19 @@ Welcome, Stephen!
   9. Log Out / Exit
   Enter your choice:
 --------------------------
---- Your Profile ---
+     Create/Edit Profile
 --------------------------
-Name: Tri Cuong Luong
-University: University of South Florida
-Major: Computer Science
-Graduation Year: 2025
-About Me: I am currently looking for internship for Summer 2026, please hire me!!
-Experience: None
-Education: None
---------------------------
-        Menu
---------------------------
-  1. Create/Edit My Profile
-  2. View My Profile
-  3. Search for a job
-  4. Find someone you know
-  5. Learn a New Skill
-  9. Log Out / Exit
-  Enter your choice:
---------------------------
-Enter the full name of the person you are looking for:
-No one by that name could be found.
+  Enter First Name:
+  Enter Last Name:
+  Enter University/College Attended:
+  Enter Major:
+  Enter Graduation Year (1950-2060):
+Invalid year. Please enter 4 digits (YYYY).
+  Enter Graduation Year (1950-2060):
+Invalid year. Please enter 4 digits (YYYY).
+  Enter Graduation Year (1950-2060):
+Invalid year. Please enter 4 digits (YYYY).
+Too many invalid attempts. Returning to main menu.
 --------------------------
         Menu
 --------------------------
@@ -52,8 +43,7 @@ No one by that name could be found.
   9. Log Out / Exit
   Enter your choice:
 --------------------------
-Enter the full name of the person you are looking for:
-No one by that name could be found.
+Invalid choice, please try again.
 --------------------------
         Menu
 --------------------------
@@ -65,4 +55,9 @@ No one by that name could be found.
   9. Log Out / Exit
   Enter your choice:
 --------------------------
+     Create/Edit Profile
+--------------------------
+  Enter University/College Attended:
+  Enter Major:
+Ran out of input while setting up the profile.
 --- END_OF_PROGRAM_EXECUTION ---
