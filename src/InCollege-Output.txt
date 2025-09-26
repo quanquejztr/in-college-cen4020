@@ -16,69 +16,7 @@ Welcome, Stephen!
   3. Search for a job
   4. Find someone you know
   5. Learn a New Skill
-  9. Log Out / Exit
-  Enter your choice:
---------------------------
-     Create/Edit Profile
---------------------------
-  Enter First Name:
-  Enter Last Name:
-  Enter University/College Attended:
-  Enter Major:
-  Enter Graduation Year (1950-2060):
-  Enter About Me (optional, max 200 chars, enter blank line to skip):
-  Add Experience #1 (optional, max 3 entries. Enter 'DONE' to finish):
-    Experience #1 - Title:
-  Add Education #1 (optional, max 3 entries. Enter 'DONE' to finish):
-    Education #1 - Degree:
-    Education #1 - University/College:
-    Education #1 - Years Attended (e.g., 2023-2025):
-  Add Education #2 (optional, max 3 entries. Enter 'DONE' to finish):
-    Education #2 - Degree:
-Profile saved successfully!
---- Your Profile ---
---------------------------
-Name: Jayson Lopez
-University: University of Kalamazoo
-Major: Computer Science
-Graduation Year: 2003
-About Me: I am a and am a a and this is a and I'm CS.
-Experience: None
-Education:
-    Degree: bachelor's of CS
-        University: USF
-        Years: 2021-2024
---------------------------
-        Menu
---------------------------
-  1. Create/Edit My Profile
-  2. View My Profile
-  3. Search for a job
-  4. Find someone you know
-  5. Learn a New Skill
-  9. Log Out / Exit
-  Enter your choice:
---------------------------
---- Your Profile ---
---------------------------
-Name: Jayson Lopez
-University: University of Kalamazoo
-Major: Computer Science
-Graduation Year: 2003
-About Me: I am a and am a a and this is a and I'm CS.
-Experience: None
-Education:
-    Degree: bachelor's of CS
-        University: USF
-        Years: 2021-2024
---------------------------
-        Menu
---------------------------
-  1. Create/Edit My Profile
-  2. View My Profile
-  3. Search for a job
-  4. Find someone you know
-  5. Learn a New Skill
+  6. View My Pending Connection Requests
   9. Log Out / Exit
   Enter your choice:
 --------------------------
@@ -92,6 +30,11 @@ Graduation Year: 2025
 About Me: I am a senior at USF studying Biology. I love hiking and reading.
 Experience: None
 Education: None
+-------------------------
+  1. Send Connection Request
+  2. Back to Main Menu
+Enter your choice:
+Connection request sent to Joshua.
 --------------------------
         Menu
 --------------------------
@@ -100,11 +43,13 @@ Education: None
   3. Search for a job
   4. Find someone you know
   5. Learn a New Skill
+  6. View My Pending Connection Requests
   9. Log Out / Exit
   Enter your choice:
 --------------------------
-Enter the full name of the person you are looking for:
-No one by that name could be found.
+--- Pending Connection Requests ---
+You have no pending connection requests at this time.
+-----------------------------------
 --------------------------
         Menu
 --------------------------
@@ -113,30 +58,7 @@ No one by that name could be found.
   3. Search for a job
   4. Find someone you know
   5. Learn a New Skill
-  9. Log Out / Exit
-  Enter your choice:
---------------------------
-Enter the full name of the person you are looking for:
---- Found User Profile ---
---------------------------
-Name: Jayson Lopez
-University: University of Kalamazoo
-Major: Computer Science
-Graduation Year: 2003
-About Me: I am a and am a a and this is a and I'm CS.
-Experience: None
-Education:
-    Degree: bachelor's of CS
-        University: USF
-        Years: 2021-2024
---------------------------
-        Menu
---------------------------
-  1. Create/Edit My Profile
-  2. View My Profile
-  3. Search for a job
-  4. Find someone you know
-  5. Learn a New Skill
+  6. View My Pending Connection Requests
   9. Log Out / Exit
   Enter your choice:
 --------------------------

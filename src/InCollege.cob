@@ -44,6 +44,12 @@ FILE-CONTROL.
         ACCESS MODE IS SEQUENTIAL
         FILE STATUS IS NEW-FILE-STATUS.
 
+    *> Connections file (pending requests)
+    SELECT CONNECTIONS ASSIGN TO "src/connections.txt"
+        ORGANIZATION IS LINE SEQUENTIAL
+        ACCESS MODE IS SEQUENTIAL
+        FILE STATUS IS CONNECTIONS-FILE-STATUS.
+
 *> Data descriptions
 DATA DIVISION.
 *> File record layouts
@@ -76,6 +82,13 @@ FD TEMP-FILE.
 FD NEW-FILE.
 01 NEW-LINE PIC X(256).
 
+*> Connections (pending requests)
+FD CONNECTIONS.
+01 CONNECTION-REC.
+    05 CONN-SENDER    PIC X(20).
+    05 CONN-RECIPIENT PIC X(20).
+
+
 *> Variables, flags, and helpers
 WORKING-STORAGE SECTION.
    77 WS-OUTFILE PIC X(256) VALUE "src/InCollege-Output.txt".
@@ -86,6 +99,13 @@ WORKING-STORAGE SECTION.
 01 PROFILES-FILE-STATUS PIC XX.
 01 TEMP-FILE-STATUS     PIC XX.
 01 NEW-FILE-STATUS      PIC XX.
+
+01 CONNECTIONS-FILE-STATUS PIC XX.
+
+01 WS-CONN-SENDER    PIC X(20).
+01 WS-CONN-RECIPIENT PIC X(20).
+01 WS-CONN-FOUND     PIC A(1) VALUE 'N'.
+
 
 *> EOF flags
 01 INFOEOF   PIC A(1) VALUE 'N'.
@@ -215,6 +235,18 @@ MAIN.
             CLOSE PROFILES
         END-IF
     END-IF
+
+    *> Make sure connections file exists
+    OPEN INPUT CONNECTIONS
+    IF CONNECTIONS-FILE-STATUS = "00"
+        CLOSE CONNECTIONS
+    ELSE
+        IF CONNECTIONS-FILE-STATUS = "35"
+            OPEN OUTPUT CONNECTIONS
+            CLOSE CONNECTIONS
+        END-IF
+    END-IF
+
 
     *> Count existing accounts
     MOVE 0 TO WS-NUMACCOUNTS
@@ -809,6 +841,7 @@ NAV-MENU.
         MOVE "  3. Search for a job"       TO SAVE-TEXT PERFORM SHOW
         MOVE "  4. Find someone you know"  TO SAVE-TEXT PERFORM SHOW
         MOVE "  5. Learn a New Skill"      TO SAVE-TEXT PERFORM SHOW
+        MOVE "  6. View My Pending Connection Requests" TO SAVE-TEXT PERFORM SHOW
         MOVE "  9. Log Out / Exit"         TO SAVE-TEXT PERFORM SHOW
         MOVE "  Enter your choice:"        TO SAVE-TEXT PERFORM SHOW
         MOVE "--------------------------"  TO SAVE-TEXT PERFORM SHOW
@@ -833,6 +866,8 @@ NAV-MENU.
                 PERFORM FIND-SOMEONE-YOU-KNOW
             WHEN CHOICE = 5
                 PERFORM SKILL-MENU
+            WHEN CHOICE = 6
+                PERFORM VIEW-PENDING-REQUESTS
             WHEN CHOICE = 9
                 CONTINUE
             WHEN OTHER
@@ -1317,6 +1352,8 @@ FIND-SOMEONE-YOU-KNOW.
                 INSPECT PROFILES-LINE REPLACING ALL X"09" BY SPACE
 
                 IF PROFILES-LINE(1:6) = "USER: "
+                    MOVE PROFILES-LINE(7:) TO WS-BUF
+                    MOVE FUNCTION TRIM(WS-BUF) TO P-USERNAME
                     *> Reset record state
                     MOVE 0 TO WS-BLOCK-LINES
                     MOVE SPACE TO WS-SECTION
@@ -1425,7 +1462,31 @@ FIND-SOMEONE-YOU-KNOW.
                             CLOSE PROFILES
                             MOVE "--- Found User Profile ---" TO WS-HEADER
                             PERFORM PRINT-PROFILE-FRIENDLY
+
+                            *> Offer to send a connection request
+                            MOVE "-------------------------" TO SAVE-TEXT PERFORM SHOW
+                            MOVE "  1. Send Connection Request" TO SAVE-TEXT PERFORM SHOW
+                            MOVE "  2. Back to Main Menu" TO SAVE-TEXT PERFORM SHOW
+                            MOVE "Enter your choice:" TO SAVE-TEXT PERFORM SHOW
+
+                            READ INPUT-FILE INTO INPUT-TEXT
+                                AT END
+                                    MOVE "No input. Returning to main menu." TO SAVE-TEXT PERFORM SHOW
+                                    EXIT PARAGRAPH
+                                NOT AT END
+                                    EVALUATE FUNCTION TRIM(INPUT-TEXT)
+                                        WHEN "1"
+                                            *> logged-in user is WS-NAME, recipient is P-USERNAME
+                                            MOVE FUNCTION TRIM(WS-NAME) TO WS-CONN-SENDER
+                                            MOVE FUNCTION TRIM(P-USERNAME) TO WS-CONN-RECIPIENT
+                                            PERFORM SEND-CONNECTION-REQUEST
+                                        WHEN OTHER
+                                            CONTINUE
+                                    END-EVALUATE
+                            END-READ
+
                             EXIT PARAGRAPH
+
                         END-IF
                     END-IF
                 END-IF
@@ -1434,3 +1495,83 @@ FIND-SOMEONE-YOU-KNOW.
     CLOSE PROFILES
 
     MOVE "No one by that name could be found." TO SAVE-TEXT PERFORM SHOW.
+
+SEND-CONNECTION-REQUEST.
+    *> Validate that there is no duplicate or reverse pending request
+    MOVE 'N' TO WS-CONN-FOUND
+
+    OPEN INPUT CONNECTIONS
+    IF CONNECTIONS-FILE-STATUS = "00"
+        PERFORM UNTIL CONNECTIONS-FILE-STATUS = "10"
+            READ CONNECTIONS INTO CONNECTION-REC
+                AT END EXIT PERFORM
+            END-READ
+            IF FUNCTION TRIM(CONN-SENDER) = FUNCTION TRIM(WS-CONN-SENDER)
+               AND FUNCTION TRIM(CONN-RECIPIENT) = FUNCTION TRIM(WS-CONN-RECIPIENT)
+                MOVE 'Y' TO WS-CONN-FOUND
+            ELSE IF FUNCTION TRIM(CONN-SENDER) = FUNCTION TRIM(WS-CONN-RECIPIENT)
+               AND FUNCTION TRIM(CONN-RECIPIENT) = FUNCTION TRIM(WS-CONN-SENDER)
+                *> recipient already sent you a request (reverse pending)
+                MOVE 'Y' TO WS-CONN-FOUND
+            END-IF
+        END-PERFORM
+        CLOSE CONNECTIONS
+    END-IF
+
+    IF WS-CONN-FOUND = 'Y'
+        MOVE "You are already connected with this user or a connection request is pending." TO SAVE-TEXT PERFORM SHOW
+        EXIT PARAGRAPH
+    END-IF
+
+    *> Append the new pending request (create file if necessary)
+    OPEN EXTEND CONNECTIONS
+    IF CONNECTIONS-FILE-STATUS = "35"
+        OPEN OUTPUT CONNECTIONS
+        CLOSE CONNECTIONS
+        OPEN EXTEND CONNECTIONS
+    END-IF
+
+    MOVE WS-CONN-SENDER    TO CONN-SENDER
+    MOVE WS-CONN-RECIPIENT TO CONN-RECIPIENT
+    WRITE CONNECTION-REC
+    CLOSE CONNECTIONS
+
+    MOVE SPACES TO SAVE-TEXT
+    STRING "Connection request sent to " DELIMITED BY SIZE
+           FUNCTION TRIM(WS-CONN-RECIPIENT) DELIMITED BY SIZE
+           "." DELIMITED BY SIZE
+           INTO SAVE-TEXT
+    END-STRING
+    PERFORM SHOW.
+
+VIEW-PENDING-REQUESTS.
+    MOVE "--- Pending Connection Requests ---" TO SAVE-TEXT PERFORM SHOW
+    MOVE 'N' TO WS-CONN-FOUND
+
+    OPEN INPUT CONNECTIONS
+    IF CONNECTIONS-FILE-STATUS = "00"
+        PERFORM UNTIL CONNECTIONS-FILE-STATUS = "10"
+            READ CONNECTIONS INTO CONNECTION-REC
+                AT END EXIT PERFORM
+            END-READ
+            IF FUNCTION TRIM(CONN-RECIPIENT) = FUNCTION TRIM(WS-NAME)
+                MOVE 'Y' TO WS-CONN-FOUND
+                MOVE SPACES TO SAVE-TEXT
+                STRING "Request from: " DELIMITED BY SIZE
+                       FUNCTION TRIM(CONN-SENDER) DELIMITED BY SIZE
+                       INTO SAVE-TEXT
+                END-STRING
+                PERFORM SHOW
+            END-IF
+        END-PERFORM
+        CLOSE CONNECTIONS
+    ELSE
+        *> No connections file -> no pending requests
+        MOVE "You have no pending connection requests at this time." TO SAVE-TEXT PERFORM SHOW
+    END-IF
+
+    IF WS-CONN-FOUND = 'N'
+        MOVE "You have no pending connection requests at this time." TO SAVE-TEXT PERFORM SHOW
+    END-IF
+
+    MOVE "-----------------------------------" TO SAVE-TEXT PERFORM SHOW.
