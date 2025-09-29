@@ -7,7 +7,7 @@ Enter your choice:
 Please enter your username:
 Please enter your password:
 You have successfully logged in.
-Welcome, alice!
+Welcome, charlie!
 --------------------------
         Menu
 --------------------------
@@ -20,21 +20,10 @@ Welcome, alice!
   9. Log Out / Exit
   Enter your choice:
 --------------------------
-Enter the full name of the person you are looking for:
---- Found User Profile ---
---------------------------
-Name: Bob Builder
-University: West Coast Uni
-Major: Business
-Graduation Year: 2027
-About Me: None
-Experience: None
-Education: None
--------------------------
-  1. Send Connection Request
-  2. Back to Main Menu
-Enter your choice:
-Connection request sent to bob.
+--- Pending Connection Requests ---
+Request from: bob
+Request from: alice
+-----------------------------------
 --------------------------
         Menu
 --------------------------

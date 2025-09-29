@@ -1,7 +1,5 @@
 1
 alice
 AlicePwd1!
-4
-Bob Builder
-1
+6
 9

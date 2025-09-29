@@ -27,14 +27,14 @@ Name: Bob Builder
 University: West Coast Uni
 Major: Business
 Graduation Year: 2027
-About Me: None
+About Me: Can we fix it? Yes we can.
 Experience: None
 Education: None
 -------------------------
   1. Send Connection Request
   2. Back to Main Menu
 Enter your choice:
-Connection request sent to bob.
+You are already connected with this user or a connection request is pending.
 --------------------------
         Menu
 --------------------------

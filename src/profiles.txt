@@ -1,36 +1,7 @@
-USER: Joshua
-FN: Joshua
-LN: Maharaj
-UNIV: USF
-MAJOR: Biology
-GRAD: 2025
-ABOUT: I am a senior at USF studying Biology. I love hiking and reading.
------END-----
-USER: Stephen
-FN: Jayson
-LN: Lopez
-UNIV: University of Kalamazoo
-MAJOR: Computer Science
-GRAD: 2003
-ABOUT: I am a and am a a and this is a and I'm CS.
-Education:
-Degree: bachelor's of CS
-University: USF
-Years: 2021-2024
------END-----
-USER: Stephen2
-FN: Tri Cu0ng
-LN: Luong
-UNIV: USF
-MAJOR: Compsci
-GRAD: 2026
-ABOUT: Hehe
------END-----
-USER: PaigeLec
-FN: Paige
-LN: Leclair
-UNIV: USF
-MAJOR: Computer Science
-GRAD: 2026
-ABOUT: About
+USER: bob
+FN: Bob
+LN: Builder
+UNIV: West Coast Uni
+MAJOR: Business
+GRAD: 2027
 -----END-----

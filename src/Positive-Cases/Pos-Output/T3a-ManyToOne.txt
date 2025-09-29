@@ -7,7 +7,7 @@ Enter your choice:
 Please enter your username:
 Please enter your password:
 You have successfully logged in.
-Welcome, alice!
+Welcome, bob!
 --------------------------
         Menu
 --------------------------
@@ -23,10 +23,10 @@ Welcome, alice!
 Enter the full name of the person you are looking for:
 --- Found User Profile ---
 --------------------------
-Name: Bob Builder
-University: West Coast Uni
-Major: Business
-Graduation Year: 2027
+Name: Charlie Cruz
+University: North State
+Major: Information Systems
+Graduation Year: 2025
 About Me: None
 Experience: None
 Education: None
@@ -34,7 +34,7 @@ Education: None
   1. Send Connection Request
   2. Back to Main Menu
 Enter your choice:
-Connection request sent to bob.
+Connection request sent to charlie.
 --------------------------
         Menu
 --------------------------

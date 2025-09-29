@@ -27,7 +27,7 @@ Name: Bob Builder
 University: West Coast Uni
 Major: Business
 Graduation Year: 2027
-About Me: None
+About Me: Can we fix it? Yes we can.
 Experience: None
 Education: None
 -------------------------
@@ -35,6 +35,33 @@ Education: None
   2. Back to Main Menu
 Enter your choice:
 Connection request sent to bob.
+--------------------------
+        Menu
+--------------------------
+  1. Create/Edit My Profile
+  2. View My Profile
+  3. Search for a job
+  4. Find someone you know
+  5. Learn a New Skill
+  6. View My Pending Connection Requests
+  9. Log Out / Exit
+  Enter your choice:
+--------------------------
+Enter the full name of the person you are looking for:
+--- Found User Profile ---
+--------------------------
+Name: Bob Builder
+University: West Coast Uni
+Major: Business
+Graduation Year: 2027
+About Me: Can we fix it? Yes we can.
+Experience: None
+Education: None
+-------------------------
+  1. Send Connection Request
+  2. Back to Main Menu
+Enter your choice:
+You are already connected with this user or a connection request is pending.
 --------------------------
         Menu
 --------------------------

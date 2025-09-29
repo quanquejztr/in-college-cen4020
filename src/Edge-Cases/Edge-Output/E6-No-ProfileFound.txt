@@ -21,20 +21,7 @@ Welcome, alice!
   Enter your choice:
 --------------------------
 Enter the full name of the person you are looking for:
---- Found User Profile ---
---------------------------
-Name: Bob Builder
-University: West Coast Uni
-Major: Business
-Graduation Year: 2027
-About Me: None
-Experience: None
-Education: None
--------------------------
-  1. Send Connection Request
-  2. Back to Main Menu
-Enter your choice:
-Connection request sent to bob.
+No one by that name could be found.
 --------------------------
         Menu
 --------------------------
