@@ -7,7 +7,42 @@ Enter your choice:
 Please enter your username:
 Please enter your password:
 You have successfully logged in.
-Welcome, alice!
+Welcome, Alice!
+--------------------------
+        Menu
+--------------------------
+  1. Create/Edit My Profile
+  2. View My Profile
+  3. Search for a job
+  4. Find someone you know
+  5. Learn a New Skill
+  6. View My Pending Connection Requests
+  9. Log Out / Exit
+  Enter your choice:
+--------------------------
+     Create/Edit Profile
+--------------------------
+  Enter First Name:
+  Enter Last Name:
+  Enter University/College Attended:
+  Enter Major:
+  Enter Graduation Year (1950-2060):
+  Enter About Me (optional, max 200 chars, enter blank line to skip):
+  Add Experience #1 (optional, max 3 entries. Enter 'DONE' to finish):
+    Experience #1 - Title:
+  Add Education #1 (optional, max 3 entries. Enter 'DONE' to finish):
+    Education #1 - Degree:
+Education: None
+Profile saved successfully!
+--- Your Profile ---
+--------------------------
+Name: Alice Smith
+University: University of Florida
+Major: Computer Science
+Graduation Year: 2025
+About Me: I love programming!
+Experience: None
+Education: None
 --------------------------
         Menu
 --------------------------
@@ -23,18 +58,33 @@ Welcome, alice!
 Enter the full name of the person you are looking for:
 --- Found User Profile ---
 --------------------------
-Name: Bob Builder
-University: West Coast Uni
-Major: Business
-Graduation Year: 2027
-About Me: None
+Name: Alice Smith
+University: University of Florida
+Major: Computer Science
+Graduation Year: 2025
+About Me: I love programming!
 Experience: None
 Education: None
 -------------------------
   1. Send Connection Request
   2. Back to Main Menu
 Enter your choice:
-Connection request sent to bob.
+You cannot send a connection request to yourself.
+--------------------------
+        Menu
+--------------------------
+  1. Create/Edit My Profile
+  2. View My Profile
+  3. Search for a job
+  4. Find someone you know
+  5. Learn a New Skill
+  6. View My Pending Connection Requests
+  9. Log Out / Exit
+  Enter your choice:
+--------------------------
+--- Pending Connection Requests ---
+You have no pending connection requests at this time.
+-----------------------------------
 --------------------------
         Menu
 --------------------------

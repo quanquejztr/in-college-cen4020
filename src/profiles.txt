@@ -5,3 +5,11 @@ UNIV: West Coast Uni
 MAJOR: Business
 GRAD: 2027
 -----END-----
+USER: Alice
+FN: Alice
+LN: Smith
+UNIV: University of Florida
+MAJOR: Computer Science
+GRAD: 2025
+ABOUT: I love programming!
+-----END-----

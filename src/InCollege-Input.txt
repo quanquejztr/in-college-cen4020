@@ -1,7 +1,17 @@
 1
-alice
-AlicePwd1!
-4
-Bob Builder
+Alice
+Password123!
 1
+Alice
+Smith
+University of Florida
+Computer Science
+2025
+I love programming!
+DONE
+DONE
+4
+Alice Smith
+1
+6
 9
