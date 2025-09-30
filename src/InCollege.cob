@@ -1497,6 +1497,12 @@ FIND-SOMEONE-YOU-KNOW.
     MOVE "No one by that name could be found." TO SAVE-TEXT PERFORM SHOW.
 
 SEND-CONNECTION-REQUEST.
+    *> First check: prevent self-connection requests
+    IF FUNCTION TRIM(WS-CONN-SENDER) = FUNCTION TRIM(WS-CONN-RECIPIENT)
+        MOVE "You cannot send a connection request to yourself." TO SAVE-TEXT PERFORM SHOW
+        EXIT PARAGRAPH
+    END-IF
+
     *> Validate that there is no duplicate or reverse pending request
     MOVE 'N' TO WS-CONN-FOUND
 
