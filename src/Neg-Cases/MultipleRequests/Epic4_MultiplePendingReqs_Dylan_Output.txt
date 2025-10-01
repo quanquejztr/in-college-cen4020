@@ -64,18 +64,18 @@ Education:
 Enter the full name of the person you are looking for:
 --- Found User Profile ---
 --------------------------
-Name: Alice Smith
-University: University of Florida
-Major: Computer Science
-Graduation Year: 2025
-About Me: I love programming!
+Name: Bob Builder
+University: West Coast Uni
+Major: Business
+Graduation Year: 2027
+About Me: None
 Experience: None
 Education: None
 -------------------------
   1. Send Connection Request
   2. Back to Main Menu
 Enter your choice:
-Connection request sent to Alice.
+You are already connected with this user or a connection request is pending.
 --------------------------
         Menu
 --------------------------

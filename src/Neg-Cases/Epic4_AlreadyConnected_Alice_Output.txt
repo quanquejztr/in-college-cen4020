@@ -42,34 +42,6 @@ Education: None
   Enter your choice:
 --------------------------
 Enter the full name of the person you are looking for:
-No one by that name could be found.
---------------------------
-        Menu
---------------------------
-  1. Create/Edit My Profile
-  2. View My Profile
-  3. Search for a job
-  4. Find someone you know
-  5. Learn a New Skill
-  6. View My Pending Connection Requests
-  9. Log Out / Exit
-  Enter your choice:
---------------------------
-Enter the full name of the person you are looking for:
-No one by that name could be found.
---------------------------
-        Menu
---------------------------
-  1. Create/Edit My Profile
-  2. View My Profile
-  3. Search for a job
-  4. Find someone you know
-  5. Learn a New Skill
-  6. View My Pending Connection Requests
-  9. Log Out / Exit
-  Enter your choice:
---------------------------
-Enter the full name of the person you are looking for:
 --- Found User Profile ---
 --------------------------
 Name: Bob Builder
@@ -83,21 +55,7 @@ Education: None
   1. Send Connection Request
   2. Back to Main Menu
 Enter your choice:
-Connection request sent to bob.
---------------------------
-        Menu
---------------------------
-  1. Create/Edit My Profile
-  2. View My Profile
-  3. Search for a job
-  4. Find someone you know
-  5. Learn a New Skill
-  6. View My Pending Connection Requests
-  9. Log Out / Exit
-  Enter your choice:
---------------------------
-Enter the full name of the person you are looking for:
-No one by that name could be found.
+You are already connected with this user or a connection request is pending.
 --------------------------
         Menu
 --------------------------
