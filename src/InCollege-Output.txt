@@ -7,7 +7,7 @@ Enter your choice:
 Please enter your username:
 Please enter your password:
 You have successfully logged in.
-Welcome, Alice!
+Welcome, bob!
 --------------------------
         Menu
 --------------------------
@@ -21,6 +21,7 @@ Welcome, Alice!
   Enter your choice:
 --------------------------
 --- Pending Connection Requests ---
+Request from: Alice
 Request from: averyveryverylooo
 -----------------------------------
 --------------------------
@@ -35,4 +36,5 @@ Request from: averyveryverylooo
   9. Log Out / Exit
   Enter your choice:
 --------------------------
+No more input. Exiting.
 --- END_OF_PROGRAM_EXECUTION ---
