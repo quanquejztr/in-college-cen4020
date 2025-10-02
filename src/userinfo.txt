@@ -1,0 +1,4 @@
+alice                AlicePwd1!
+averyveryverylooo    LongPwd1!@
+bob                  BobPwd2!@
+Alice               Password123!

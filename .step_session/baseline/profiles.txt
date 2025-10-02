@@ -1,0 +1,16 @@
+USER: persistuser
+FN: Paige
+LN: Leclair
+UNIV: Uni A
+MAJOR: Software Engineering
+GRAD: 2026
+ABOUT: About A3
+END
+USER: luna
+FN: Brooklyn
+LN: Luna
+UNIV: University of South Florida
+MAJOR: Computer Science
+GRAD: 2026
+ABOUT:
+END

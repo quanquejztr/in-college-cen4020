@@ -1,0 +1,27 @@
+USER: bob
+FN: Bob
+LN: Builder
+UNIV: West Coast Uni
+MAJOR: Business
+GRAD: 2027
+-----END-----
+USER: Alice
+FN: Alice
+LN: Smith
+UNIV: University of Florida
+MAJOR: Computer Science
+GRAD: 2025
+ABOUT: I love programming!
+-----END-----
+USER: averyveryverylooo
+FN: Dylan
+LN: Johnson
+UNIV: University of Kalamazoo
+MAJOR: Computer Science
+GRAD: 2003
+ABOUT: I am a and am a a and this is a and I'm CS.
+Education:
+Degree: bachelor's of CS
+University: USF
+Years: 2021-2024
+-----END-----
