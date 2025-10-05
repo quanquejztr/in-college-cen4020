@@ -50,6 +50,22 @@ FILE-CONTROL.
         ACCESS MODE IS SEQUENTIAL
         FILE STATUS IS CONNECTIONS-FILE-STATUS.
 
+    *> Accepted connections (friends) file
+    SELECT FRIENDS ASSIGN TO "src/friends.txt"
+        ORGANIZATION IS LINE SEQUENTIAL
+        ACCESS MODE IS SEQUENTIAL
+        FILE STATUS IS FRIENDS-FILE-STATUS.
+
+    *> Temp files for rewriting connections on accept
+    SELECT CONN-TEMP-FILE ASSIGN TO "src/connections.tmp"
+        ORGANIZATION IS LINE SEQUENTIAL
+        ACCESS MODE IS SEQUENTIAL
+        FILE STATUS IS CONN-TEMP-FILE-STATUS.
+    SELECT CONN-NEW-FILE ASSIGN TO "src/connections.new"
+        ORGANIZATION IS LINE SEQUENTIAL
+        ACCESS MODE IS SEQUENTIAL
+        FILE STATUS IS CONN-NEW-FILE-STATUS.
+
 *> Data descriptions
 DATA DIVISION.
 *> File record layouts
@@ -88,6 +104,21 @@ FD CONNECTIONS.
     05 CONN-SENDER    PIC X(20).
     05 CONN-RECIPIENT PIC X(20).
 
+FD FRIENDS.
+01 FRIEND-REC.
+    05 FR-USER    PIC X(20).
+    05 FR-FRIEND  PIC X(20).
+
+FD CONN-TEMP-FILE.
+01 CONN-TEMP-REC.
+    05 CONN-TEMP-SENDER    PIC X(20).
+    05 CONN-TEMP-RECIPIENT PIC X(20).
+
+FD CONN-NEW-FILE.
+01 CONN-NEW-REC.
+    05 CONN-NEW-SENDER    PIC X(20).
+    05 CONN-NEW-RECIPIENT PIC X(20).
+
 
 *> Variables, flags, and helpers
 WORKING-STORAGE SECTION.
@@ -102,9 +133,23 @@ WORKING-STORAGE SECTION.
 
 01 CONNECTIONS-FILE-STATUS PIC XX.
 
+01 FRIENDS-FILE-STATUS     PIC XX.
+01 CONN-TEMP-FILE-STATUS   PIC XX.
+01 CONN-NEW-FILE-STATUS    PIC XX.
+
 01 WS-CONN-SENDER    PIC X(20).
 01 WS-CONN-RECIPIENT PIC X(20).
 01 WS-CONN-FOUND     PIC A(1) VALUE 'N'.
+
+01 WS-ACCEPT-NAME    PIC X(20).
+01 WS-PENDING-MATCH  PIC A(1) VALUE 'N'.
+01 WS-NEED-A-TO-B    PIC A(1) VALUE 'Y'.
+01 WS-NEED-B-TO-A    PIC A(1) VALUE 'Y'.
+
+01 WS-PENDING-COUNT   PIC 99   VALUE 0.
+01 WS-PENDING-SENDERS OCCURS 20 PIC X(20).
+01 WS-PEND-I          PIC 99   VALUE 0.
+01 WS-REQ-CHOICE      PIC 9    VALUE 0.
 
 
 *> EOF flags
@@ -244,6 +289,17 @@ MAIN.
         IF CONNECTIONS-FILE-STATUS = "35"
             OPEN OUTPUT CONNECTIONS
             CLOSE CONNECTIONS
+        END-IF
+    END-IF
+
+    *> Make sure friends file exists
+    OPEN INPUT FRIENDS
+    IF FRIENDS-FILE-STATUS = "00"
+        CLOSE FRIENDS
+    ELSE
+        IF FRIENDS-FILE-STATUS = "35"
+            OPEN OUTPUT FRIENDS
+            CLOSE FRIENDS
         END-IF
     END-IF
 
@@ -842,6 +898,7 @@ NAV-MENU.
         MOVE "  4. Find someone you know"  TO SAVE-TEXT PERFORM SHOW
         MOVE "  5. Learn a New Skill"      TO SAVE-TEXT PERFORM SHOW
         MOVE "  6. View My Pending Connection Requests" TO SAVE-TEXT PERFORM SHOW
+        MOVE "  7. View My Network"        TO SAVE-TEXT PERFORM SHOW
         MOVE "  9. Log Out / Exit"         TO SAVE-TEXT PERFORM SHOW
         MOVE "  Enter your choice:"        TO SAVE-TEXT PERFORM SHOW
         MOVE "--------------------------"  TO SAVE-TEXT PERFORM SHOW
@@ -868,6 +925,8 @@ NAV-MENU.
                 PERFORM SKILL-MENU
             WHEN CHOICE = 6
                 PERFORM VIEW-PENDING-REQUESTS
+            WHEN CHOICE = 7
+                PERFORM VIEW-MY-NETWORK
             WHEN CHOICE = 9
                 CONTINUE
             WHEN OTHER
@@ -1554,6 +1613,7 @@ SEND-CONNECTION-REQUEST.
 VIEW-PENDING-REQUESTS.
     MOVE "--- Pending Connection Requests ---" TO SAVE-TEXT PERFORM SHOW
     MOVE 'N' TO WS-CONN-FOUND
+    MOVE 0 TO WS-PENDING-COUNT
 
     OPEN INPUT CONNECTIONS
     IF CONNECTIONS-FILE-STATUS = "00"
@@ -1563,22 +1623,335 @@ VIEW-PENDING-REQUESTS.
             END-READ
             IF FUNCTION TRIM(CONN-RECIPIENT) = FUNCTION TRIM(WS-NAME)
                 MOVE 'Y' TO WS-CONN-FOUND
-                MOVE SPACES TO SAVE-TEXT
-                STRING "Request from: " DELIMITED BY SIZE
-                       FUNCTION TRIM(CONN-SENDER) DELIMITED BY SIZE
-                       INTO SAVE-TEXT
-                END-STRING
-                PERFORM SHOW
+                IF WS-PENDING-COUNT < 20
+                    ADD 1 TO WS-PENDING-COUNT
+                    MOVE CONN-SENDER TO WS-PENDING-SENDERS(WS-PENDING-COUNT)
+                END-IF
             END-IF
         END-PERFORM
         CLOSE CONNECTIONS
     ELSE
-        *> No connections file -> no pending requests
         MOVE "You have no pending connection requests at this time." TO SAVE-TEXT PERFORM SHOW
     END-IF
 
-    IF WS-CONN-FOUND = 'N'
+    IF WS-CONN-FOUND = 'N' OR WS-PENDING-COUNT = 0
         MOVE "You have no pending connection requests at this time." TO SAVE-TEXT PERFORM SHOW
+    ELSE
+        PERFORM VARYING WS-PEND-I FROM 1 BY 1 UNTIL WS-PEND-I > WS-PENDING-COUNT
+            MOVE SPACES TO SAVE-TEXT
+            STRING "[" DELIMITED BY SIZE
+                   FUNCTION TRIM(WS-PEND-I) DELIMITED BY SIZE
+                   "] Request from: " DELIMITED BY SIZE
+                   FUNCTION TRIM(WS-PENDING-SENDERS(WS-PEND-I)) DELIMITED BY SIZE
+                   INTO SAVE-TEXT
+            END-STRING
+            PERFORM SHOW
+        END-PERFORM
+
+        PERFORM VARYING WS-PEND-I FROM 1 BY 1 UNTIL WS-PEND-I > WS-PENDING-COUNT
+            MOVE SPACES TO SAVE-TEXT
+            STRING "For request #" DELIMITED BY SIZE
+                   FUNCTION TRIM(WS-PEND-I) DELIMITED BY SIZE
+                   ": (1) Accept  (2) Reject" DELIMITED BY SIZE
+                   INTO SAVE-TEXT
+            END-STRING
+            PERFORM SHOW
+
+            MOVE 0 TO WS-REQ-CHOICE
+            READ INPUT-FILE INTO INPUT-TEXT
+                AT END MOVE 2 TO WS-REQ-CHOICE
+                NOT AT END
+                    MOVE FUNCTION NUMVAL(FUNCTION TRIM(INPUT-TEXT)) TO WS-REQ-CHOICE
+            END-READ
+
+            EVALUATE WS-REQ-CHOICE
+                WHEN 1
+                    MOVE WS-PENDING-SENDERS(WS-PEND-I) TO WS-ACCEPT-NAME
+                    PERFORM ACCEPT-CONNECTION-BY-USERNAME
+                WHEN 2
+                    MOVE WS-PENDING-SENDERS(WS-PEND-I) TO WS-ACCEPT-NAME
+                    PERFORM REJECT-PENDING-BY-USERNAME
+                WHEN OTHER
+                    MOVE WS-PENDING-SENDERS(WS-PEND-I) TO WS-ACCEPT-NAME
+                    PERFORM REJECT-PENDING-BY-USERNAME
+            END-EVALUATE
+        END-PERFORM
     END-IF
 
     MOVE "-----------------------------------" TO SAVE-TEXT PERFORM SHOW.
+
+ACCEPT-CONNECTION-BY-USERNAME.
+    *> Verify that a pending request exists for WS-ACCEPT-NAME -> WS-NAME
+    MOVE 'N' TO WS-PENDING-MATCH
+    OPEN INPUT CONNECTIONS
+    IF CONNECTIONS-FILE-STATUS = "00"
+        PERFORM UNTIL CONNECTIONS-FILE-STATUS = "10"
+            READ CONNECTIONS INTO CONNECTION-REC
+                AT END EXIT PERFORM
+            END-READ
+            IF FUNCTION TRIM(CONN-SENDER) = FUNCTION TRIM(WS-ACCEPT-NAME)
+               AND FUNCTION TRIM(CONN-RECIPIENT) = FUNCTION TRIM(WS-NAME)
+                MOVE 'Y' TO WS-PENDING-MATCH
+                EXIT PERFORM
+            END-IF
+        END-PERFORM
+        CLOSE CONNECTIONS
+    END-IF
+
+    IF WS-PENDING-MATCH = 'Y'
+        PERFORM ADD-FRIEND-BIDIRECTIONAL
+        PERFORM REMOVE-PENDING-PAIR
+        MOVE SPACES TO SAVE-TEXT
+        STRING "You are now connected with " DELIMITED BY SIZE
+               FUNCTION TRIM(WS-ACCEPT-NAME) DELIMITED BY SIZE
+               "." DELIMITED BY SIZE
+               INTO SAVE-TEXT
+        END-STRING
+        PERFORM SHOW
+    ELSE
+        MOVE "No pending request from that user." TO SAVE-TEXT PERFORM SHOW
+    END-IF.
+
+ADD-FRIEND-BIDIRECTIONAL.
+    *> Add both directions to FRIENDS if not already present
+    MOVE 'Y' TO WS-NEED-A-TO-B
+    MOVE 'Y' TO WS-NEED-B-TO-A
+
+    OPEN INPUT FRIENDS
+    IF FRIENDS-FILE-STATUS = "00"
+        PERFORM UNTIL FRIENDS-FILE-STATUS = "10"
+            READ FRIENDS INTO FRIEND-REC
+                AT END EXIT PERFORM
+            END-READ
+            IF FUNCTION TRIM(FR-USER) = FUNCTION TRIM(WS-NAME)
+               AND FUNCTION TRIM(FR-FRIEND) = FUNCTION TRIM(WS-ACCEPT-NAME)
+                MOVE 'N' TO WS-NEED-A-TO-B
+            ELSE IF FUNCTION TRIM(FR-USER) = FUNCTION TRIM(WS-ACCEPT-NAME)
+               AND FUNCTION TRIM(FR-FRIEND) = FUNCTION TRIM(WS-NAME)
+                MOVE 'N' TO WS-NEED-B-TO-A
+            END-IF
+        END-PERFORM
+        CLOSE FRIENDS
+    END-IF
+
+    OPEN EXTEND FRIENDS
+    IF FRIENDS-FILE-STATUS = "35"
+        OPEN OUTPUT FRIENDS
+        CLOSE FRIENDS
+        OPEN EXTEND FRIENDS
+    END-IF
+
+    IF WS-NEED-A-TO-B = 'Y'
+        MOVE WS-NAME        TO FR-USER
+        MOVE WS-ACCEPT-NAME TO FR-FRIEND
+        WRITE FRIEND-REC
+    END-IF
+    IF WS-NEED-B-TO-A = 'Y'
+        MOVE WS-ACCEPT-NAME TO FR-USER
+        MOVE WS-NAME        TO FR-FRIEND
+        WRITE FRIEND-REC
+    END-IF
+    CLOSE FRIENDS.
+
+REMOVE-PENDING-PAIR.
+    *> Remove the accepted pending request from CONNECTIONS
+    OPEN INPUT CONNECTIONS
+    IF CONNECTIONS-FILE-STATUS NOT = "00"
+        EXIT PARAGRAPH
+    END-IF
+
+    OPEN OUTPUT CONN-TEMP-FILE
+
+    PERFORM UNTIL CONNECTIONS-FILE-STATUS = "10"
+        READ CONNECTIONS INTO CONNECTION-REC
+            AT END EXIT PERFORM
+        END-READ
+        IF FUNCTION TRIM(CONN-SENDER) = FUNCTION TRIM(WS-ACCEPT-NAME)
+           AND FUNCTION TRIM(CONN-RECIPIENT) = FUNCTION TRIM(WS-NAME)
+            CONTINUE
+        ELSE
+            MOVE CONN-SENDER    TO CONN-TEMP-SENDER
+            MOVE CONN-RECIPIENT TO CONN-TEMP-RECIPIENT
+            WRITE CONN-TEMP-REC
+        END-IF
+    END-PERFORM
+
+    CLOSE CONNECTIONS
+    CLOSE CONN-TEMP-FILE
+
+    *> Copy temp to new file, then replace original
+    OPEN INPUT CONN-TEMP-FILE
+    OPEN OUTPUT CONN-NEW-FILE
+    PERFORM UNTIL CONN-TEMP-FILE-STATUS = "10"
+        READ CONN-TEMP-FILE INTO CONN-TEMP-REC
+            AT END EXIT PERFORM
+        END-READ
+        MOVE CONN-TEMP-SENDER    TO CONN-NEW-SENDER
+        MOVE CONN-TEMP-RECIPIENT TO CONN-NEW-RECIPIENT
+        WRITE CONN-NEW-REC
+    END-PERFORM
+    CLOSE CONN-TEMP-FILE
+    CLOSE CONN-NEW-FILE
+
+    CALL "SYSTEM" USING BY CONTENT "mv -f src/connections.new src/connections.txt".
+
+VIEW-MY-NETWORK.
+    *> List all users connected to WS-NAME using friends.txt, with full names
+    MOVE "--- My Network ---" TO SAVE-TEXT PERFORM SHOW
+
+    MOVE 0 TO WS-PENDING-COUNT
+
+    OPEN INPUT FRIENDS
+    IF FRIENDS-FILE-STATUS = "00"
+        PERFORM UNTIL FRIENDS-FILE-STATUS = "10"
+            READ FRIENDS INTO FRIEND-REC
+                AT END EXIT PERFORM
+            END-READ
+            IF FUNCTION TRIM(FR-USER) = FUNCTION TRIM(WS-NAME)
+                IF WS-PENDING-COUNT < 20
+                    ADD 1 TO WS-PENDING-COUNT
+                    MOVE FR-FRIEND TO WS-PENDING-SENDERS(WS-PENDING-COUNT)
+                END-IF
+            END-IF
+        END-PERFORM
+        CLOSE FRIENDS
+    END-IF
+
+    IF WS-PENDING-COUNT = 0
+        MOVE "You are not connected with anyone yet." TO SAVE-TEXT PERFORM SHOW
+        EXIT PARAGRAPH
+    END-IF
+
+    *> For each friend username, look up full name (and optionally school/major)
+    PERFORM VARYING WS-PEND-I FROM 1 BY 1 UNTIL WS-PEND-I > WS-PENDING-COUNT
+        PERFORM LOOKUP-USER-DETAILS
+    END-PERFORM.
+
+LOOKUP-USER-DETAILS.
+    *> Loads name/university/major from profiles.txt for WS-PENDING-SENDERS(WS-PEND-I)
+    MOVE SPACES TO P-FIRST-NAME P-LAST-NAME P-UNIVERSITY P-MAJOR
+
+    OPEN INPUT PROFILES
+    IF PROFILES-FILE-STATUS = "00"
+        PERFORM UNTIL PROFILES-FILE-STATUS = "10"
+            READ PROFILES INTO PROFILES-LINE
+                AT END EXIT PERFORM
+            END-READ
+            IF PROFILES-LINE(1:6) = "USER: "
+                MOVE PROFILES-LINE(7:) TO WS-BUF
+                IF FUNCTION TRIM(WS-BUF) = FUNCTION TRIM(WS-PENDING-SENDERS(WS-PEND-I))
+                    *> Within this block, gather fields then print
+                    PERFORM UNTIL PROFILES-LINE = "-----END-----"
+                        READ PROFILES INTO PROFILES-LINE
+                            AT END EXIT PERFORM
+                        END-READ
+                        IF PROFILES-LINE = "-----END-----"
+                            EXIT PERFORM
+                        ELSE IF PROFILES-LINE(1:4) = "FN: "
+                            MOVE PROFILES-LINE(5:) TO WS-BUF
+                            MOVE FUNCTION TRIM(WS-BUF) TO P-FIRST-NAME
+                        ELSE IF PROFILES-LINE(1:4) = "LN: "
+                            MOVE PROFILES-LINE(5:) TO WS-BUF
+                            MOVE FUNCTION TRIM(WS-BUF) TO P-LAST-NAME
+                        ELSE IF PROFILES-LINE(1:6) = "UNIV: "
+                            MOVE PROFILES-LINE(7:) TO WS-BUF
+                            MOVE FUNCTION TRIM(WS-BUF) TO P-UNIVERSITY
+                        ELSE IF PROFILES-LINE(1:7) = "MAJOR: "
+                            MOVE PROFILES-LINE(8:) TO WS-BUF
+                            MOVE FUNCTION TRIM(WS-BUF) TO P-MAJOR
+                        END-IF
+                    END-PERFORM
+
+                    MOVE SPACES TO SAVE-TEXT
+                    STRING " - " DELIMITED BY SIZE
+                           FUNCTION TRIM(P-FIRST-NAME) DELIMITED BY SIZE
+                           " " DELIMITED BY SIZE
+                           FUNCTION TRIM(P-LAST-NAME)  DELIMITED BY SIZE
+                           INTO SAVE-TEXT
+                    END-STRING
+                    PERFORM SHOW
+
+                    IF FUNCTION LENGTH(FUNCTION TRIM(P-UNIVERSITY)) > 0
+                        MOVE SPACES TO SAVE-TEXT
+                        STRING WS-IND2 DELIMITED BY SIZE
+                               "University: " DELIMITED BY SIZE
+                               FUNCTION TRIM(P-UNIVERSITY) DELIMITED BY SIZE
+                               INTO SAVE-TEXT
+                        END-STRING
+                        PERFORM SHOW
+                    END-IF
+
+                    IF FUNCTION LENGTH(FUNCTION TRIM(P-MAJOR)) > 0
+                        MOVE SPACES TO SAVE-TEXT
+                        STRING WS-IND2 DELIMITED BY SIZE
+                               "Major: " DELIMITED BY SIZE
+                               FUNCTION TRIM(P-MAJOR) DELIMITED BY SIZE
+                               INTO SAVE-TEXT
+                        END-STRING
+                        PERFORM SHOW
+                    END-IF
+
+                    EXIT PARAGRAPH
+                END-IF
+            END-IF
+        END-PERFORM
+        CLOSE PROFILES
+    END-IF
+
+    *> Fallback if profile not found: print username
+    MOVE SPACES TO SAVE-TEXT
+    STRING " - " DELIMITED BY SIZE
+           FUNCTION TRIM(WS-PENDING-SENDERS(WS-PEND-I)) DELIMITED BY SIZE
+           INTO SAVE-TEXT
+    END-STRING
+    PERFORM SHOW.
+
+REJECT-PENDING-BY-USERNAME.
+    *> Remove a pending request from WS-ACCEPT-NAME -> WS-NAME (no friends added)
+    OPEN INPUT CONNECTIONS
+    IF CONNECTIONS-FILE-STATUS NOT = "00"
+        MOVE "You have no pending connection requests at this time." TO SAVE-TEXT PERFORM SHOW
+        EXIT PARAGRAPH
+    END-IF
+
+    OPEN OUTPUT CONN-TEMP-FILE
+
+    PERFORM UNTIL CONNECTIONS-FILE-STATUS = "10"
+        READ CONNECTIONS INTO CONNECTION-REC
+            AT END EXIT PERFORM
+        END-READ
+        IF FUNCTION TRIM(CONN-SENDER) = FUNCTION TRIM(WS-ACCEPT-NAME)
+           AND FUNCTION TRIM(CONN-RECIPIENT) = FUNCTION TRIM(WS-NAME)
+            CONTINUE
+        ELSE
+            MOVE CONN-SENDER    TO CONN-TEMP-SENDER
+            MOVE CONN-RECIPIENT TO CONN-TEMP-RECIPIENT
+            WRITE CONN-TEMP-REC
+        END-IF
+    END-PERFORM
+
+    CLOSE CONNECTIONS
+    CLOSE CONN-TEMP-FILE
+
+    *> Copy temp to new file, then replace original
+    OPEN INPUT CONN-TEMP-FILE
+    OPEN OUTPUT CONN-NEW-FILE
+    PERFORM UNTIL CONN-TEMP-FILE-STATUS = "10"
+        READ CONN-TEMP-FILE INTO CONN-TEMP-REC
+            AT END EXIT PERFORM
+        END-READ
+        MOVE CONN-TEMP-SENDER    TO CONN-NEW-SENDER
+        MOVE CONN-TEMP-RECIPIENT TO CONN-NEW-RECIPIENT
+        WRITE CONN-NEW-REC
+    END-PERFORM
+    CLOSE CONN-TEMP-FILE
+    CLOSE CONN-NEW-FILE
+
+    CALL "SYSTEM" USING BY CONTENT "mv -f src/connections.new src/connections.txt"
+    MOVE SPACES TO SAVE-TEXT
+    STRING "Request from " DELIMITED BY SIZE
+           FUNCTION TRIM(WS-ACCEPT-NAME) DELIMITED BY SIZE
+           " rejected." DELIMITED BY SIZE
+           INTO SAVE-TEXT
+    END-STRING
+    PERFORM SHOW.
