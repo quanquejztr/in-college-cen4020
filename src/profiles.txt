@@ -32,3 +32,11 @@ UNIV: University of Central Florida
 MAJOR: Computer Science
 GRAD: 2026
 -----END-----
+USER: alice
+FN: Alice
+LN: User
+UNIV: Test University
+MAJOR: Computer Science
+GRAD: 2025
+-----END-----
+

@@ -1,0 +1,4 @@
+alice               bob
+bob                 alice
+alice               cuong
+cuong               alice
