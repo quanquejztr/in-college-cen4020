@@ -37,34 +37,9 @@ You have no pending connection requests at this time.
   9. Log Out / Exit
   Enter your choice:
 --------------------------
-Search for a job is under construction.
+     Create/Edit Profile
 --------------------------
-        Menu
---------------------------
-  1. Create/Edit My Profile
-  2. View My Profile
-  3. Search for a job
-  4. Find someone you know
-  5. Learn a New Skill
-  6. View My Pending Connection Requests
-  7. View My Network
-  9. Log Out / Exit
-  Enter your choice:
---------------------------
---- Pending Connection Requests ---
-You have no pending connection requests at this time.
------------------------------------
---------------------------
-        Menu
---------------------------
-  1. Create/Edit My Profile
-  2. View My Profile
-  3. Search for a job
-  4. Find someone you know
-  5. Learn a New Skill
-  6. View My Pending Connection Requests
-  7. View My Network
-  9. Log Out / Exit
-  Enter your choice:
---------------------------
+  Enter First Name:
+  Enter Last Name:
+Ran out of input while setting up the profile.
 --- END_OF_PROGRAM_EXECUTION ---
