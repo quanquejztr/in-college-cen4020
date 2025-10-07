@@ -1574,7 +1574,7 @@ SEND-CONNECTION-REQUEST.
             IF FUNCTION TRIM(CONN-SENDER) = FUNCTION TRIM(WS-CONN-SENDER)
                AND FUNCTION TRIM(CONN-RECIPIENT) = FUNCTION TRIM(WS-CONN-RECIPIENT)
                 MOVE 'Y' TO WS-CONN-FOUND
-           
+
             ELSE IF FUNCTION TRIM(CONN-SENDER) = FUNCTION TRIM(WS-CONN-RECIPIENT)
                AND FUNCTION TRIM(CONN-RECIPIENT) = FUNCTION TRIM(WS-CONN-SENDER)
                 *> recipient already sent you a request (reverse pending)
@@ -1890,6 +1890,7 @@ LOOKUP-USER-DETAILS.
                         END-STRING
                         PERFORM SHOW
                     END-IF
+                    CLOSE PROFILES
 
                     EXIT PARAGRAPH
                 END-IF
