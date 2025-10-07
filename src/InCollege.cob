@@ -1663,6 +1663,11 @@ VIEW-PENDING-REQUESTS.
                 NOT AT END
                     MOVE FUNCTION NUMVAL(FUNCTION TRIM(INPUT-TEXT)) TO WS-REQ-CHOICE
             END-READ
+           *> If the choice is neither 1 nor 2, display the error and loop again
+           IF WS-REQ-CHOICE NOT = 1 AND WS-REQ-CHOICE NOT = 2
+                    MOVE "Invalid choice. Please enter 1 or 2 to proceed." TO SAVE-TEXT PERFORM SHOW
+                END-IF
+           
 
             EVALUATE WS-REQ-CHOICE
                 WHEN 1
