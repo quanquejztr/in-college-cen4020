@@ -26,7 +26,7 @@ Welcome, bob!
 [02] Request from: cuong
 [03] Request from: averyveryverylooo
 For request #01: (1) Accept  (2) Reject
-Request from alice rejected.
+You are now connected with alice.
 For request #02: (1) Accept  (2) Reject
 You are now connected with cuong.
 For request #03: (1) Accept  (2) Reject
@@ -46,9 +46,10 @@ Request from averyveryverylooo rejected.
   Enter your choice:
 --------------------------
 --- My Network ---
- - Stephen Hawking
-        University: University of Central Florida
+ - Alice User
+        University: Test University
         Major: Computer Science
+ - cuong
 --------------------------
         Menu
 --------------------------

@@ -7,7 +7,7 @@ Enter your choice:
 Please enter your username:
 Please enter your password:
 You have successfully logged in.
-Welcome, bob!
+Welcome, cuong!
 --------------------------
         Menu
 --------------------------
@@ -22,15 +22,12 @@ Welcome, bob!
   Enter your choice:
 --------------------------
 --- Pending Connection Requests ---
-[01] Request from: alice
-[02] Request from: cuong
-[03] Request from: averyveryverylooo
+[01] Request from: bob
+[02] Request from: alice
 For request #01: (1) Accept  (2) Reject
-Request from alice rejected.
+Request from bob rejected.
 For request #02: (1) Accept  (2) Reject
-You are now connected with cuong.
-For request #03: (1) Accept  (2) Reject
-Request from averyveryverylooo rejected.
+Request from alice rejected.
 -----------------------------------
 --------------------------
         Menu
@@ -46,9 +43,7 @@ Request from averyveryverylooo rejected.
   Enter your choice:
 --------------------------
 --- My Network ---
- - Stephen Hawking
-        University: University of Central Florida
-        Major: Computer Science
+You are not connected with anyone yet.
 --------------------------
         Menu
 --------------------------
