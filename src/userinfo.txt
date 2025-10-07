@@ -1,4 +1,3 @@
 alice               Password!1
 bob                 BobPwd2!@
 cuong               CCCPwd2!@
-averyveryverylooo   LongPwd1!@
