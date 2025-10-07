@@ -21,13 +21,12 @@ Welcome, alice!
   9. Log Out / Exit
   Enter your choice:
 --------------------------
---- My Network ---
- - Stephen Hawking
-        University: University of Central Florida
-        Major: Computer Science
- - Bob Builder
-        University: West Coast Uni
-        Major: Business
+--- Pending Connection Requests ---
+[01] Request from: bob
+For request #01: (1) Accept  (2) Reject
+Invalid choice. Please enter 1 or 2 to proceed.
+Request from bob rejected.
+-----------------------------------
 --------------------------
         Menu
 --------------------------
