@@ -1658,17 +1658,18 @@ VIEW-PENDING-REQUESTS.
             PERFORM SHOW
 
             MOVE 0 TO WS-REQ-CHOICE
-            READ INPUT-FILE INTO INPUT-TEXT
-                AT END MOVE 2 TO WS-REQ-CHOICE
-                NOT AT END
-                    MOVE FUNCTION NUMVAL(FUNCTION TRIM(INPUT-TEXT)) TO WS-REQ-CHOICE
-            END-READ
-           *> If the choice is neither 1 nor 2, display the error and loop again
-           IF WS-REQ-CHOICE NOT = 1 AND WS-REQ-CHOICE NOT = 2
+            PERFORM UNTIL WS-REQ-CHOICE = 1 OR WS-REQ-CHOICE = 2
+                READ INPUT-FILE INTO INPUT-TEXT
+                    AT END
+                        MOVE 2 TO WS-REQ-CHOICE
+                    NOT AT END
+                        MOVE FUNCTION NUMVAL(FUNCTION TRIM(INPUT-TEXT)) TO WS-REQ-CHOICE
+                END-READ
+                IF WS-REQ-CHOICE NOT = 1 AND WS-REQ-CHOICE NOT = 2
                     MOVE "Invalid choice. Please enter 1 or 2 to proceed." TO SAVE-TEXT PERFORM SHOW
                 END-IF
-           
-
+            END-PERFORM
+            
             EVALUATE WS-REQ-CHOICE
                 WHEN 1
                     MOVE WS-PENDING-SENDERS(WS-PEND-I) TO WS-ACCEPT-NAME
@@ -1677,8 +1678,7 @@ VIEW-PENDING-REQUESTS.
                     MOVE WS-PENDING-SENDERS(WS-PEND-I) TO WS-ACCEPT-NAME
                     PERFORM REJECT-PENDING-BY-USERNAME
                 WHEN OTHER
-                    MOVE WS-PENDING-SENDERS(WS-PEND-I) TO WS-ACCEPT-NAME
-                    PERFORM REJECT-PENDING-BY-USERNAME
+                    CONTINUE
             END-EVALUATE
         END-PERFORM
     END-IF
