@@ -22,38 +22,8 @@ Welcome, alice!
   Enter your choice:
 --------------------------
 --- Pending Connection Requests ---
-<<<<<<< HEAD
-[01] Request from: alice
-[02] Request from: cuong
-[03] Request from: averyveryverylooo
-For request #01: (1) Accept  (2) Reject
-Request from alice rejected.
-For request #02: (1) Accept  (2) Reject
-You are now connected with cuong.
-For request #03: (1) Accept  (2) Reject
-Request from averyveryverylooo rejected.
------------------------------------
---------------------------
-        Menu
---------------------------
-  1. Create/Edit My Profile
-  2. View My Profile
-  3. Search for a job
-  4. Find someone you know
-  5. Learn a New Skill
-  6. View My Pending Connection Requests
-  7. View My Network
-  9. Log Out / Exit
-  Enter your choice:
---------------------------
---- My Network ---
- - Stephen Hawking
-        University: University of Central Florida
-        Major: Computer Science
-=======
 You have no pending connection requests at this time.
 -----------------------------------
->>>>>>> 0ce366eca81a862c9b654a74398841f0b078ca5a
 --------------------------
         Menu
 --------------------------
@@ -67,10 +37,4 @@ You have no pending connection requests at this time.
   9. Log Out / Exit
   Enter your choice:
 --------------------------
-     Create/Edit Profile
---------------------------
-  Enter First Name:
-  Enter Last Name:
-  Enter University/College Attended:
-Ran out of input while setting up the profile.
 --- END_OF_PROGRAM_EXECUTION ---

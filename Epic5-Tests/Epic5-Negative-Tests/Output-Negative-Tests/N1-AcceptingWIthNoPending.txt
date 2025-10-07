@@ -21,9 +21,8 @@ Welcome, alice!
   9. Log Out / Exit
   Enter your choice:
 --------------------------
---- Pending Connection Requests ---
-You have no pending connection requests at this time.
------------------------------------
+Enter the full name of the person you are looking for:
+No one by that name could be found.
 --------------------------
         Menu
 --------------------------
@@ -37,9 +36,5 @@ You have no pending connection requests at this time.
   9. Log Out / Exit
   Enter your choice:
 --------------------------
-     Create/Edit Profile
---------------------------
-  Enter First Name:
-  Enter Last Name:
-Ran out of input while setting up the profile.
+No more input. Exiting.
 --- END_OF_PROGRAM_EXECUTION ---

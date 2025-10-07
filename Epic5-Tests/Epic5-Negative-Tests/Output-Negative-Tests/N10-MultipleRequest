@@ -7,7 +7,7 @@ Enter your choice:
 Please enter your username:
 Please enter your password:
 You have successfully logged in.
-Welcome, alice!
+Welcome, bob!
 --------------------------
         Menu
 --------------------------
@@ -21,9 +21,21 @@ Welcome, alice!
   9. Log Out / Exit
   Enter your choice:
 --------------------------
---- Pending Connection Requests ---
-You have no pending connection requests at this time.
------------------------------------
+Enter the full name of the person you are looking for:
+--- Found User Profile ---
+--------------------------
+Name: Alice User
+University: Test University
+Major: Computer Science
+Graduation Year: 2025
+About Me: None
+Experience: None
+Education: None
+-------------------------
+  1. Send Connection Request
+  2. Back to Main Menu
+Enter your choice:
+You are already connected with this user or a connection request is pending.
 --------------------------
         Menu
 --------------------------
@@ -37,9 +49,4 @@ You have no pending connection requests at this time.
   9. Log Out / Exit
   Enter your choice:
 --------------------------
-     Create/Edit Profile
---------------------------
-  Enter First Name:
-  Enter Last Name:
-Ran out of input while setting up the profile.
 --- END_OF_PROGRAM_EXECUTION ---
