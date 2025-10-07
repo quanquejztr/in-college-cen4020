@@ -25,7 +25,8 @@ Welcome, alice!
 [01] Request from: bob
 For request #01: (1) Accept  (2) Reject
 Invalid choice. Please enter 1 or 2 to proceed.
-Request from bob rejected.
+Invalid choice. Please enter 1 or 2 to proceed.
+Too many invalid attempts. Returning to menu.
 -----------------------------------
 --------------------------
         Menu
