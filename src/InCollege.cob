@@ -150,6 +150,7 @@ WORKING-STORAGE SECTION.
 01 WS-PENDING-SENDERS OCCURS 20 PIC X(20).
 01 WS-PEND-I          PIC 99   VALUE 0.
 01 WS-REQ-CHOICE      PIC 9    VALUE 0.
+01 WS-REQ-INVALID-COUNT PIC 9  VALUE 0.
 
 
 *> EOF flags
@@ -1658,7 +1659,9 @@ VIEW-PENDING-REQUESTS.
             PERFORM SHOW
 
             MOVE 0 TO WS-REQ-CHOICE
+            MOVE 0 TO WS-REQ-INVALID-COUNT
             PERFORM UNTIL WS-REQ-CHOICE = 1 OR WS-REQ-CHOICE = 2
+                     OR WS-REQ-INVALID-COUNT >= 3
                 READ INPUT-FILE INTO INPUT-TEXT
                     AT END
                         MOVE 2 TO WS-REQ-CHOICE
@@ -1666,10 +1669,21 @@ VIEW-PENDING-REQUESTS.
                         MOVE FUNCTION NUMVAL(FUNCTION TRIM(INPUT-TEXT)) TO WS-REQ-CHOICE
                 END-READ
                 IF WS-REQ-CHOICE NOT = 1 AND WS-REQ-CHOICE NOT = 2
-                    MOVE "Invalid choice. Please enter 1 or 2 to proceed." TO SAVE-TEXT PERFORM SHOW
+                    ADD 1 TO WS-REQ-INVALID-COUNT
+                    IF WS-REQ-INVALID-COUNT >= 3
+                        MOVE "Too many invalid attempts. Returning to menu." TO SAVE-TEXT
+                        PERFORM SHOW
+                    ELSE
+                        MOVE "Invalid choice. Please enter 1 or 2 to proceed." TO SAVE-TEXT
+                        PERFORM SHOW
+                    END-IF
                 END-IF
             END-PERFORM
-            
+
+            IF WS-REQ-INVALID-COUNT >= 3
+                EXIT PERFORM
+            END-IF
+
             EVALUATE WS-REQ-CHOICE
                 WHEN 1
                     MOVE WS-PENDING-SENDERS(WS-PEND-I) TO WS-ACCEPT-NAME
