@@ -21,26 +21,16 @@ Welcome, alice!
   9. Log Out / Exit
   Enter your choice:
 --------------------------
---- Pending Connection Requests ---
-[01] Request from: bob
-For request #01: (1) Accept  (2) Reject
-Invalid choice. Please enter 1 or 2 to proceed.
-Request from bob rejected.
------------------------------------
+  1. Post a Job/Internships
+  2. Browse Jobs/Internships
+  3. Back to Main Menu
+     Post a Job/Internship
 --------------------------
-        Menu
---------------------------
-  1. Create/Edit My Profile
-  2. View My Profile
-  3. Search for a job
-  4. Find someone you know
-  5. Learn a New Skill
-  6. View My Pending Connection Requests
-  7. View My Network
-  9. Log Out / Exit
-  Enter your choice:
---------------------------
-Invalid choice, please try again.
+  Enter Job Title:
+  Enter Job Description:
+  Enter Employer:
+  Enter Job Location:
+  Enter Salary (optional, max 16 chars, enter blank line to skip):
 --------------------------
         Menu
 --------------------------
