@@ -1,26 +1,7 @@
 ID: 00000
-Title:
-Description: Software Engineer Internship focusing on COBOL development
-Employer: IBM
-Location: Tampa, FL
-Salary: $45000/year
------END-----
-ID: 00000
-Title: Chef
-Description:
-Employer:
-Location: Naples, FL
------END-----
-ID: 00000
-Title: Software Engineer II
-Description: Works in fast-pace environemnt, competitve salary
-Employer: University of South
-Location: Tampa, FL
-Salary: $11000000/yr
------END-----
-ID: 00000
-Title: Software Engineer III
-Description: Works in fast-pace environemnt, competitve salary
-Employer: University of South
-Location: South Dakota, FL
+Title: Works in fast-pace environemnt
+Description: University of South Florida
+Employer: Tampa, FL
+Location: $11000000/yr
+Salary: 9
 -----END-----
