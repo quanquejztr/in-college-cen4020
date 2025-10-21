@@ -31,6 +31,7 @@ Welcome, alice!
   Enter Employer:
   Enter Job Location:
   Enter Salary (optional, max 16 chars, enter blank line to skip):
+Job posted successfully!
 --------------------------
         Menu
 --------------------------
