@@ -1294,49 +1294,67 @@ POST-JOBS.
     MOVE "--------------------------" TO SAVE-TEXT PERFORM SHOW
 
     *> Job Title (required)
-    MOVE "  Enter Job Title:" TO SAVE-TEXT PERFORM SHOW
-    READ INPUT-FILE INTO INPUT-TEXT
-        AT END
-            MOVE 'Y' TO WS-INPUT-EOF
-            MOVE 9 TO CHOICE
-            MOVE "Ran out of input while detailing job." TO SAVE-TEXT PERFORM SHOW
-            EXIT PARAGRAPH
-    END-READ
-    MOVE FUNCTION TRIM(INPUT-TEXT) TO JOB-TITLE
+    PERFORM UNTIL FUNCTION LENGTH(FUNCTION TRIM(JOB-TITLE)) > 0
+       MOVE "  Enter Job Title:" TO SAVE-TEXT PERFORM SHOW
+       READ INPUT-FILE INTO INPUT-TEXT
+           AT END
+               MOVE 'Y' TO WS-INPUT-EOF
+               MOVE 9 TO CHOICE
+               MOVE "Ran out of input while detailing job." TO SAVE-TEXT PERFORM SHOW
+               EXIT PARAGRAPH
+       END-READ
+       MOVE FUNCTION TRIM(INPUT-TEXT) TO JOB-TITLE
+       IF FUNCTION LENGTH(FUNCTION TRIM(JOB-TITLE)) = 0
+            MOVE "Job Title cannot be empty. Please enter a value." TO SAVE-TEXT PERFORM SHOW
+       END-IF
+    END-PERFORM
 
     *> Job Description (required)
-    MOVE "  Enter Job Description:" TO SAVE-TEXT PERFORM SHOW
-    READ INPUT-FILE INTO INPUT-TEXT
-        AT END
-            MOVE 'Y' TO WS-INPUT-EOF
-            MOVE 9 TO CHOICE
-            MOVE "Ran out of input while detailing job." TO SAVE-TEXT PERFORM SHOW
-            EXIT PARAGRAPH
-    END-READ
-    MOVE FUNCTION TRIM(INPUT-TEXT) TO JOB-DESCRIPTION
+    PERFORM UNTIL FUNCTION LENGTH(FUNCTION TRIM(JOB-DESCRIPTION)) > 0
+       MOVE "  Enter Job Description:" TO SAVE-TEXT PERFORM SHOW
+       READ INPUT-FILE INTO INPUT-TEXT
+           AT END
+               MOVE 'Y' TO WS-INPUT-EOF
+               MOVE 9 TO CHOICE
+               MOVE "Ran out of input while detailing job." TO SAVE-TEXT PERFORM SHOW
+               EXIT PARAGRAPH
+       END-READ
+       MOVE FUNCTION TRIM(INPUT-TEXT) TO JOB-DESCRIPTION
+       IF FUNCTION LENGTH(FUNCTION TRIM(JOB-DESCRIPTION)) = 0
+            MOVE "Job Description cannot be empty. Please enter a value." TO SAVE-TEXT PERFORM SHOW
+       END-IF
+    END-PERFORM
 
     *> Employer (required)
-    MOVE "  Enter Employer:" TO SAVE-TEXT PERFORM SHOW
-    READ INPUT-FILE INTO INPUT-TEXT
-        AT END
-            MOVE 'Y' TO WS-INPUT-EOF
-            MOVE 9 TO CHOICE
-            MOVE "Ran out of input while detailing job." TO SAVE-TEXT PERFORM SHOW
-            EXIT PARAGRAPH
-    END-READ
-    MOVE FUNCTION TRIM(INPUT-TEXT) TO JOB-EMPLOYER
+    PERFORM UNTIL FUNCTION LENGTH(FUNCTION TRIM(JOB-EMPLOYER)) > 0
+       MOVE "  Enter Employer:" TO SAVE-TEXT PERFORM SHOW
+       READ INPUT-FILE INTO INPUT-TEXT
+           AT END
+               MOVE 'Y' TO WS-INPUT-EOF
+               MOVE 9 TO CHOICE
+               MOVE "Ran out of input while detailing job." TO SAVE-TEXT PERFORM SHOW
+               EXIT PARAGRAPH
+       END-READ
+       MOVE FUNCTION TRIM(INPUT-TEXT) TO JOB-EMPLOYER
+       IF FUNCTION LENGTH(FUNCTION TRIM(JOB-DESCRIPTION)) = 0
+            MOVE "Job Description cannot be empty. Please enter a value." TO SAVE-TEXT PERFORM SHOW
+       END-IF
+    END-PERFORM
 
     *> Location (required)
-    MOVE "  Enter Job Location:" TO SAVE-TEXT PERFORM SHOW
-    READ INPUT-FILE INTO INPUT-TEXT
-        AT END
-            MOVE 'Y' TO WS-INPUT-EOF
-            MOVE 9 TO CHOICE
-            MOVE "Ran out of input while detailing job." TO SAVE-TEXT PERFORM SHOW
-            EXIT PARAGRAPH
-    END-READ
-    MOVE FUNCTION TRIM(INPUT-TEXT) TO JOB-LOCATION
-
+    PERFORM UNTIL FUNCTION LENGTH(FUNCTION TRIM(JOB-LOCATION)) > 0
+       READ INPUT-FILE INTO INPUT-TEXT
+           AT END
+               MOVE 'Y' TO WS-INPUT-EOF
+               MOVE 9 TO CHOICE
+               MOVE "Ran out of input while detailing job." TO SAVE-TEXT PERFORM SHOW
+               EXIT PARAGRAPH
+       END-READ
+       MOVE FUNCTION TRIM(INPUT-TEXT) TO JOB-LOCATION
+       IF FUNCTION LENGTH(FUNCTION TRIM(JOB-LOCATION)) = 0
+            MOVE "Job Location cannot be empty. Please enter a value." TO SAVE-TEXT PERFORM SHOW
+       END-IF
+    END-PERFORM
     *> Salary (optional)
     MOVE "  Enter Salary (optional, max 16 chars, enter blank line to skip):" TO SAVE-TEXT PERFORM SHOW
     READ INPUT-FILE INTO INPUT-TEXT
