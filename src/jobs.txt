@@ -1,7 +1,13 @@
 ID: 00000
-Title: Job Title
-Description: Job Desc
-Employer: Job Employer
-Location: Job Loc
-Salary: $12/hr
+Title:
+Description: Software Engineer Internship focusing on COBOL development
+Employer: IBM
+Location: Tampa, FL
+Salary: $45000/year
+-----END-----
+ID: 00000
+Title: Chef
+Description:
+Employer:
+Location: Naples, FL
 -----END-----
