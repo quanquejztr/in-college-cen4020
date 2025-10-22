@@ -1312,7 +1312,7 @@ POST-JOBS.
        END-READ
        MOVE FUNCTION TRIM(INPUT-TEXT) TO JOB-TITLE
        IF FUNCTION LENGTH(FUNCTION TRIM(JOB-TITLE)) = 0
-            MOVE "Job Title cannot be empty. Please enter a value." TO SAVE-TEXT PERFORM SHOW
+            MOVE "Job Title cannot be empty. Job Posting Failed, returning to Main Menu" TO SAVE-TEXT PERFORM SHOW
             EXIT PARAGRAPH
        END-IF
     END-PERFORM
@@ -1329,7 +1329,7 @@ POST-JOBS.
        END-READ
        MOVE FUNCTION TRIM(INPUT-TEXT) TO JOB-DESCRIPTION
        IF FUNCTION LENGTH(FUNCTION TRIM(JOB-DESCRIPTION)) = 0
-            MOVE "Job Description cannot be empty. Please enter a value." TO SAVE-TEXT PERFORM SHOW
+            MOVE "Job Description cannot be empty. Job Posting Failed, returning to Main Menu" TO SAVE-TEXT PERFORM SHOW
             EXIT PARAGRAPH
        END-IF
     END-PERFORM
@@ -1346,7 +1346,7 @@ POST-JOBS.
        END-READ
        MOVE FUNCTION TRIM(INPUT-TEXT) TO JOB-EMPLOYER
        IF FUNCTION LENGTH(FUNCTION TRIM(JOB-DESCRIPTION)) = 0
-            MOVE "Job Description cannot be empty. Please enter a value." TO SAVE-TEXT PERFORM SHOW
+            MOVE "Employer cannot be empty. Job Posting Failed, returning to Main Menu" TO SAVE-TEXT PERFORM SHOW
             EXIT PARAGRAPH
        END-IF
     END-PERFORM
@@ -1362,7 +1362,7 @@ POST-JOBS.
        END-READ
        MOVE FUNCTION TRIM(INPUT-TEXT) TO JOB-LOCATION
        IF FUNCTION LENGTH(FUNCTION TRIM(JOB-LOCATION)) = 0
-            MOVE "Job Location cannot be empty. Please enter a value." TO SAVE-TEXT PERFORM SHOW
+            MOVE "Job Location cannot be empty. Job Posting Failed, returning to Main Menu." TO SAVE-TEXT PERFORM SHOW
             EXIT PARAGRAPH
        END-IF
     END-PERFORM
