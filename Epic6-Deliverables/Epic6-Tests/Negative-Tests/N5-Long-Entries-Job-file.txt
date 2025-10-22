@@ -1,0 +1,7 @@
+ID: 00000
+Title: Junior Database Security Manag
+Description: Software Engineer role - Entry level open to recent graduates
+Employer: American Broadcastin
+Location: New York City, New Y
+Salary: 15-20 USD per ho
+-----END-----
