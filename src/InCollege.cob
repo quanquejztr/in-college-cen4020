@@ -1293,6 +1293,13 @@ POST-JOBS.
     MOVE "     Post a Job/Internship     " TO SAVE-TEXT PERFORM SHOW
     MOVE "--------------------------" TO SAVE-TEXT PERFORM SHOW
 
+    MOVE SPACES TO JOB-TITLE
+    MOVE SPACES TO JOB-DESCRIPTION
+    MOVE SPACES TO JOB-EMPLOYER
+    MOVE SPACES TO JOB-LOCATION
+    MOVE SPACES TO JOB-SALARY    *> Safely clearing adjacent field
+    MOVE SPACES TO INPUT-TEXT
+
     *> Job Title (required)
     PERFORM UNTIL FUNCTION LENGTH(FUNCTION TRIM(JOB-TITLE)) > 0
        MOVE "  Enter Job Title:" TO SAVE-TEXT PERFORM SHOW
@@ -1306,6 +1313,7 @@ POST-JOBS.
        MOVE FUNCTION TRIM(INPUT-TEXT) TO JOB-TITLE
        IF FUNCTION LENGTH(FUNCTION TRIM(JOB-TITLE)) = 0
             MOVE "Job Title cannot be empty. Please enter a value." TO SAVE-TEXT PERFORM SHOW
+            EXIT PARAGRAPH
        END-IF
     END-PERFORM
 
@@ -1322,6 +1330,7 @@ POST-JOBS.
        MOVE FUNCTION TRIM(INPUT-TEXT) TO JOB-DESCRIPTION
        IF FUNCTION LENGTH(FUNCTION TRIM(JOB-DESCRIPTION)) = 0
             MOVE "Job Description cannot be empty. Please enter a value." TO SAVE-TEXT PERFORM SHOW
+            EXIT PARAGRAPH
        END-IF
     END-PERFORM
 
@@ -1338,6 +1347,7 @@ POST-JOBS.
        MOVE FUNCTION TRIM(INPUT-TEXT) TO JOB-EMPLOYER
        IF FUNCTION LENGTH(FUNCTION TRIM(JOB-DESCRIPTION)) = 0
             MOVE "Job Description cannot be empty. Please enter a value." TO SAVE-TEXT PERFORM SHOW
+            EXIT PARAGRAPH
        END-IF
     END-PERFORM
 
@@ -1353,6 +1363,7 @@ POST-JOBS.
        MOVE FUNCTION TRIM(INPUT-TEXT) TO JOB-LOCATION
        IF FUNCTION LENGTH(FUNCTION TRIM(JOB-LOCATION)) = 0
             MOVE "Job Location cannot be empty. Please enter a value." TO SAVE-TEXT PERFORM SHOW
+            EXIT PARAGRAPH
        END-IF
     END-PERFORM
     *> Salary (optional)

@@ -28,11 +28,62 @@ Welcome, alice!
 --------------------------
   Enter Job Title:
 Job Title cannot be empty. Please enter a value.
-  Enter Job Title:
-  Enter Job Description:
-  Enter Employer:
-  Enter Salary (optional, max 16 chars, enter blank line to skip):
-Job posted successfully!
+--------------------------
+        Menu
+--------------------------
+  1. Create/Edit My Profile
+  2. View My Profile
+  3. Search for a job
+  4. Find someone you know
+  5. Learn a New Skill
+  6. View My Pending Connection Requests
+  7. View My Network
+  9. Log Out / Exit
+  Enter your choice:
+--------------------------
+Invalid choice, please try again.
+--------------------------
+        Menu
+--------------------------
+  1. Create/Edit My Profile
+  2. View My Profile
+  3. Search for a job
+  4. Find someone you know
+  5. Learn a New Skill
+  6. View My Pending Connection Requests
+  7. View My Network
+  9. Log Out / Exit
+  Enter your choice:
+--------------------------
+Invalid choice, please try again.
+--------------------------
+        Menu
+--------------------------
+  1. Create/Edit My Profile
+  2. View My Profile
+  3. Search for a job
+  4. Find someone you know
+  5. Learn a New Skill
+  6. View My Pending Connection Requests
+  7. View My Network
+  9. Log Out / Exit
+  Enter your choice:
+--------------------------
+Invalid choice, please try again.
+--------------------------
+        Menu
+--------------------------
+  1. Create/Edit My Profile
+  2. View My Profile
+  3. Search for a job
+  4. Find someone you know
+  5. Learn a New Skill
+  6. View My Pending Connection Requests
+  7. View My Network
+  9. Log Out / Exit
+  Enter your choice:
+--------------------------
+Invalid choice, please try again.
 --------------------------
         Menu
 --------------------------
