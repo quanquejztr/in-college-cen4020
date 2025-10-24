@@ -1,0 +1,75 @@
+Welcome to InCollege!
+1. Log In
+2. Create New Account
+Enter your choice:
+Please enter your username:
+Please enter your password:
+You have successfully logged in.
+Welcome, TestUser!
+
+1. Create/Edit My Profile
+2. View My Profile
+3. Search for a job
+4. Find someone you know
+5. Learn a New Skill
+9. Log Out / Exit
+Enter your choice:
+--- Create/Edit Profile ---
+Enter First Name:
+Enter Last Name:
+Enter University/College Attended:
+Enter Major:
+Enter Graduation Year (1950-2060):
+Invalid year. Please enter 1950-2060.
+Enter Graduation Year (1950-2060):
+Invalid year. Please enter 4 digits (YYYY).
+Enter Graduation Year (1950-2060):
+Invalid year. Please enter 4 digits (YYYY).
+Enter Graduation Year (1950-2060):
+Invalid year. Please enter 4 digits (YYYY).
+Too many invalid attempts. Returning to main menu.
+1. Create/Edit My Profile
+2. View My Profile
+3. Search for a job
+4. Find someone you know
+5. Learn a New Skill
+9. Log Out / Exit
+Enter your choice:
+--- Your Profile ---
+Name: John Doe
+University: USF
+Major: Computer Science
+Graduation Year: 2026
+About Me: fnebh fjernfref f r r gre frw. djrwfnejrgnerfgnrefnrefnrefjrenfjrefnerffjuernferfnreijrwf ref tg tr hy h h th r e fcw cds cds c dsc sc sdc ds cds c dsc ds cds cds c f ef erf erf re fre f ref
+Experience:
+Title: 5
+Company: DONE
+Dates: 2
+Description: 9
+Title: 9
+Company: 9
+Dates: 9
+Description: 9
+Title: 9
+Company: 9
+Dates: 9
+Description: 9
+Education:
+Degree: 9
+University: 9
+Years: 9
+Degree: 9
+University: 9
+Years: 9
+Degree: 9
+University: 9
+Years: 9
+--------------------
+1. Create/Edit My Profile
+2. View My Profile
+3. Search for a job
+4. Find someone you know
+5. Learn a New Skill
+9. Log Out / Exit
+Enter your choice:
+--- END_OF_PROGRAM_EXECUTION ---

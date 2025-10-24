@@ -1,7 +1,0 @@
-Epic #6 Roles : Washington
---------------------------------
-Scrum Master: Paige LeClair
-Coder #1:  Jayson Lopez
-Coder #2: Brooklyn Luna
-Tester #1: Tri Cuong Luong
-Tester #2: Joshua Maharaj

@@ -72,6 +72,12 @@ FILE-CONTROL.
         ACCESS MODE IS SEQUENTIAL
         FILE STATUS IS JOBS-NEW-FILE-STATUS.
 
+    *> Job applications file
+    SELECT APPLICATIONS-FILE ASSIGN TO "src/applications.txt"
+        ORGANIZATION IS LINE SEQUENTIAL
+        ACCESS MODE IS SEQUENTIAL
+        FILE STATUS IS APPLICATIONS-FILE-STATUS.
+
     *> Temp files for rewriting connections on accept
     SELECT CONN-PROFILES-TEMP-FILE ASSIGN TO "src/connections.tmp"
         ORGANIZATION IS LINE SEQUENTIAL
@@ -141,8 +147,11 @@ FD JOBS-FILE.
  FD JOBS-TEMP-FILE.
  01 JOBS-TEMP-LINE PIC X(256).
 
- FD JOBS-NEW-FILE.
- 01 JOBS-NEW-LINE PIC X(256).
+FD JOBS-NEW-FILE.
+01 JOBS-NEW-LINE PIC X(256).
+
+FD APPLICATIONS-FILE.
+01 APPLICATIONS-LINE PIC X(400).
 
 
 *> Variables, flags, and helpers
@@ -157,6 +166,7 @@ WORKING-STORAGE SECTION.
 01 NEW-FILE-STATUS PIC XX.
 01 JOBS-NEW-FILE-STATUS PIC XX.
 01 JOBS-TEMP-FILE-STATUS PIC XX.
+01 APPLICATIONS-FILE-STATUS PIC XX.
 
 01 CONNECTIONS-FILE-STATUS PIC XX.
 
@@ -246,6 +256,59 @@ WORKING-STORAGE SECTION.
 *> Menus
 77 CHOICE      PIC 9 VALUE 0.
 77 SKILLCHOICE PIC 9 VALUE 0.
+77 WS-JOB-MENU-CHOICE PIC 9 VALUE 0.
+77 WS-JOB-COUNT        PIC 9(4) VALUE 0.
+77 WS-JOBS-FILE-READY  PIC A    VALUE 'N'.
+77 WS-JOB-CURRENT-INDEX PIC 9(4) VALUE 0.
+77 WS-JOB-MAX-SLOTS      PIC 9(4) VALUE 100.
+77 WS-JOB-LOOP-INDEX     PIC 9(4) VALUE 0.
+77 WS-JOB-SELECTION-NUM  PIC 9(4) VALUE 0.
+77 WS-JOB-DETAIL-INDEX   PIC 9(4) VALUE 0.
+77 WS-APP-COUNT          PIC 9(4) VALUE 0.
+77 WS-JOB-MAX-ID         PIC 9(4) VALUE 0.
+77 WS-JOB-JOIN-ID        PIC 9(4) VALUE 0.
+77 WS-JOB-JOIN-LOOP      PIC 9(4) VALUE 0.
+77 WS-JOB-JOIN-FOUND     PIC A    VALUE 'N'.
+77 WS-APP-FILE-MODE      PIC X    VALUE 'E'.
+
+01 WS-JOB-EXIT        PIC A(1) VALUE 'N'.
+01 WS-JOB-DETAIL-EXIT PIC A(1) VALUE 'N'.
+01 WS-JOB-IN-PROGRESS PIC A(1) VALUE 'N'.
+01 WS-JOB-SELECTION       PIC X(40).
+01 WS-JOB-SELECTION-UPPER PIC X(40).
+01 WS-JOB-SELECTION-CHECK PIC X(40).
+01 WS-JOB-SELECTION-TAIL  PIC X(40).
+01 WS-JOB-INDEX-DISPLAY   PIC Z(3)9.
+01 WS-JOB-ID-DISPLAY      PIC Z(3)9.
+01 WS-JOB-DETAIL-ID       PIC 9(4) VALUE 0.
+01 WS-JOB-DETAIL-FOUND    PIC A(1) VALUE 'N'.
+
+01 WS-JOB-TABLE.
+   05 WS-JOB-ENTRY OCCURS 100 TIMES.
+      10 WS-JOB-ID-NUM      PIC 9(4).
+      10 WS-JOB-TITLE-TEXT  PIC X(60).
+      10 WS-JOB-DESC-TEXT   PIC X(256).
+      10 WS-JOB-EMP-TEXT    PIC X(60).
+      10 WS-JOB-LOC-TEXT    PIC X(60).
+      10 WS-JOB-SALARY-TEXT PIC X(32).
+
+01 WS-APPLICATION-LINE    PIC X(400).
+01 WS-APP-USER            PIC X(20).
+01 WS-APP-JOBID           PIC X(10).
+01 WS-APP-TITLE           PIC X(60).
+01 WS-APP-EMPLOYER        PIC X(60).
+01 WS-APP-LOCATION        PIC X(60).
+01 WS-APP-SALARY          PIC X(32).
+01 WS-APP-TIMESTAMP       PIC X(32).
+01 WS-APP-DISPLAY-TITLE     PIC X(60).
+01 WS-APP-DISPLAY-EMPLOYER  PIC X(60).
+01 WS-APP-DISPLAY-LOCATION  PIC X(60).
+01 WS-APPLY-DATE          PIC 9(8).
+01 WS-APPLY-TIME          PIC 9(6).
+01 WS-APPLY-TIMESTAMP     PIC X(19).
+01 WS-APPLY-ALREADY       PIC A(1) VALUE 'N'.
+01 WS-APPLY-JOBID-TXT     PIC X(10).
+01 WS-UNSTRING-PTR        PIC 9(4) VALUE 1.
 
 *> In-memory profile
 01 P-REC.
@@ -272,7 +335,7 @@ WORKING-STORAGE SECTION.
 
 *> In-memory profile
 01 JOB-REC.
-   05 JOB-ID       PIC 99(4).
+   05 JOB-ID       PIC 9(4).
    05 JOB-TITLE      PIC X(30).
    05 JOB-DESCRIPTION    PIC X(120).
    05 JOB-EMPLOYER     PIC X(20).
@@ -288,6 +351,8 @@ WORKING-STORAGE SECTION.
 PROCEDURE DIVISION.
 *> Entry point: init files, then menu
 MAIN.
+    CALL "SYSTEM" USING BY CONTENT "cmd /c if not exist src mkdir src"
+
     OPEN INPUT  INPUT-FILE
 
     *> Output path is fixed here
@@ -353,8 +418,19 @@ MAIN.
         END-IF
     END-IF
 
+    *> Make sure applications file exists
+    OPEN INPUT APPLICATIONS-FILE
+    IF APPLICATIONS-FILE-STATUS = "00"
+        CLOSE APPLICATIONS-FILE
+    ELSE
+        IF APPLICATIONS-FILE-STATUS = "35"
+            OPEN OUTPUT APPLICATIONS-FILE
+            CLOSE APPLICATIONS-FILE
+        END-IF
+    END-IF
 
-    *> Count existing accounts
+
+*> Count existing accounts
     MOVE 0 TO WS-NUMACCOUNTS
     OPEN INPUT USERINFO
     IF UINFO-FILE-STATUS = "00"
@@ -950,8 +1026,8 @@ NAV-MENU.
         MOVE "  6. View My Pending Connection Requests" TO SAVE-TEXT PERFORM SHOW
         MOVE "  7. View My Network"        TO SAVE-TEXT PERFORM SHOW
         MOVE "  9. Log Out / Exit"         TO SAVE-TEXT PERFORM SHOW
-        MOVE "  Enter your choice:"        TO SAVE-TEXT PERFORM SHOW
         MOVE "--------------------------"  TO SAVE-TEXT PERFORM SHOW
+        MOVE "  Enter your choice:"        TO SAVE-TEXT PERFORM SHOW
 
         READ INPUT-FILE INTO INPUT-TEXT
             AT END
@@ -1257,41 +1333,83 @@ VIEW-PROFILE.
     END-IF.
 
 VIEW-JOBS.
-    *> Load and show the current user's profile
-    OPEN INPUT JOBS-FILE
+    *> Job search / internship menu loop
+    MOVE 0 TO WS-JOB-MENU-CHOICE
 
-    MOVE "  1. Post a Job/Internships" TO SAVE-TEXT PERFORM SHOW
-    MOVE "  2. Browse Jobs/Internships"        TO SAVE-TEXT PERFORM SHOW
-    MOVE "  3. Back to Main Menu"       TO SAVE-TEXT PERFORM SHOW
+    PERFORM UNTIL WS-JOB-MENU-CHOICE = 4 OR WS-INPUT-EOF = 'Y'
+        MOVE "  1. Post a Job/Internships" TO SAVE-TEXT PERFORM SHOW
+        MOVE "  2. Browse Jobs/Internships"        TO SAVE-TEXT PERFORM SHOW
+        MOVE "  3. View My Applications"   TO SAVE-TEXT PERFORM SHOW
+        MOVE "  4. Back to Main Menu"       TO SAVE-TEXT PERFORM SHOW
 
-    READ INPUT-FILE INTO INPUT-TEXT
-        AT END
-            MOVE "No input. Exiting." TO SAVE-TEXT
-            PERFORM SHOW
-            EXIT PARAGRAPH
-        NOT AT END
-            EVALUATE FUNCTION TRIM(INPUT-TEXT)
-                WHEN "1"
-                    PERFORM POST-JOBS
-                WHEN "POST JOBS"
-                    PERFORM POST-JOBS
-                WHEN "2"
-                    PERFORM BROWSE-JOBS
-                WHEN "BROWSE JOBS"
-                    PERFORM BROWSE-JOBS
-                WHEN "3"
-                   EXIT PARAGRAPH
-               WHEN "BACK TO MAIN MENU"
-                   EXIT PARAGRAPH
-                WHEN OTHER
+        READ INPUT-FILE INTO INPUT-TEXT
+            AT END
+                MOVE "No input. Exiting." TO SAVE-TEXT
+                PERFORM SHOW
+                MOVE 4 TO WS-JOB-MENU-CHOICE
+                EXIT PERFORM
+            NOT AT END
+                IF FUNCTION LENGTH(FUNCTION TRIM(INPUT-TEXT)) = 0
                     MOVE "Invalid choice." TO SAVE-TEXT PERFORM SHOW
-            END-EVALUATE
-    END-READ.
+                ELSE
+                    MOVE FUNCTION UPPER-CASE(FUNCTION TRIM(INPUT-TEXT)) TO WS-BUF
+                    EVALUATE TRUE
+                        WHEN WS-BUF = "1"
+                             OR WS-BUF = "POST"
+                             OR WS-BUF = "POST JOBS"
+                             OR WS-BUF = "POST A JOB"
+                             OR WS-BUF = "POST A JOB/INTERNSHIPS"
+                            PERFORM POST-JOBS
+                        WHEN WS-BUF = "2"
+                             OR WS-BUF = "BROWSE"
+                             OR WS-BUF = "BROWSE JOBS"
+                             OR WS-BUF = "BROWSE JOBS/INTERNSHIPS"
+                            PERFORM BROWSE-JOBS
+                        WHEN WS-BUF = "3"
+                             OR WS-BUF = "VIEW"
+                             OR WS-BUF = "VIEW APPLICATIONS"
+                             OR WS-BUF = "VIEW MY APPLICATIONS"
+                             OR WS-BUF = "MY APPLICATIONS"
+                             OR WS-BUF = "APPLICATIONS"
+                            PERFORM VIEW-MY-APPLICATIONS
+                        WHEN WS-BUF = "4"
+                             OR WS-BUF = "BACK"
+                             OR WS-BUF = "BACK TO MAIN MENU"
+                             OR WS-BUF = "MAIN MENU"
+                            MOVE 4 TO WS-JOB-MENU-CHOICE
+                        WHEN OTHER
+                            MOVE "Invalid choice." TO SAVE-TEXT PERFORM SHOW
+                    END-EVALUATE
+                END-IF
+        END-READ
+    END-PERFORM.
 
 POST-JOBS.
 *> Collect and validate profile fields
     MOVE "     Post a Job/Internship     " TO SAVE-TEXT PERFORM SHOW
     MOVE "--------------------------" TO SAVE-TEXT PERFORM SHOW
+
+    *> Generate a unique job ID
+    MOVE 0 TO JOB-ID
+    OPEN INPUT JOBS-FILE
+    IF JOBS-FILE-STATUS = "00"
+        MOVE "00" TO JOBS-FILE-STATUS
+        PERFORM UNTIL JOBS-FILE-STATUS = "10"
+            READ JOBS-FILE INTO JOBS-LINE
+                AT END EXIT PERFORM
+            END-READ
+            IF JOBS-LINE(1:4) = "ID: "
+                MOVE JOBS-LINE(5:) TO WS-BUF
+                IF FUNCTION LENGTH(FUNCTION TRIM(WS-BUF)) > 0
+                    IF JOB-ID < FUNCTION NUMVAL(FUNCTION TRIM(WS-BUF))
+                        MOVE FUNCTION NUMVAL(FUNCTION TRIM(WS-BUF)) TO JOB-ID
+                    END-IF
+                END-IF
+            END-IF
+        END-PERFORM
+        CLOSE JOBS-FILE
+    END-IF
+    ADD 1 TO JOB-ID
 
     MOVE SPACES TO JOB-TITLE
     MOVE SPACES TO JOB-DESCRIPTION
@@ -1353,6 +1471,7 @@ POST-JOBS.
 
     *> Location (required)
     PERFORM UNTIL FUNCTION LENGTH(FUNCTION TRIM(JOB-LOCATION)) > 0
+       MOVE "  Enter Job Location:" TO SAVE-TEXT PERFORM SHOW
        READ INPUT-FILE INTO INPUT-TEXT
            AT END
                MOVE 'Y' TO WS-INPUT-EOF
@@ -1382,53 +1501,23 @@ POST-JOBS.
     END-IF
 
 
-    *> Rewrite via temp: copy everything, replacing just this job's block
+    *> Rewrite via temp: copy everything, then add new job
+    OPEN INPUT JOBS-FILE
     OPEN OUTPUT JOBS-TEMP-FILE
 
+    *> Copy all existing jobs
     PERFORM UNTIL JOBS-FILE-STATUS = "10"
         READ JOBS-FILE INTO JOBS-LINE
             AT END EXIT PERFORM
         END-READ
-
-        IF JOBS-LINE(1:6) = "JOB: "
-            MOVE JOBS-LINE(7:) TO WS-BUF
-            IF FUNCTION NUMVAL(WS-BUF) = JOB-ID
-                *> Skip the old block for this user
-                PERFORM UNTIL JOBS-LINE = "END" OR JOBS-LINE = "-----END-----"
-                    READ JOBS-FILE INTO JOBS-LINE
-                        AT END EXIT PERFORM
-                    END-READ
-                END-PERFORM
-                *> Write the updated block
-                PERFORM WRITE-JOB-BLOCK
-                MOVE "Y" TO PROFILE-FOUND
-            ELSE
-                *> Copy other users as-is
-                MOVE JOBS-LINE TO JOBS-TEMP-LINE
-                WRITE JOBS-TEMP-LINE
-                PERFORM UNTIL JOBS-LINE = "END" OR JOBS-LINE = "-----END-----"
-                    READ JOBS-FILE INTO JOBS-LINE
-                        AT END EXIT PERFORM
-                    END-READ
-                    IF JOBS-LINE = "END" OR JOBS-LINE = "-----END-----"
-                        MOVE "-----END-----" TO JOBS-TEMP-LINE
-                    ELSE
-                        MOVE JOBS-LINE TO JOBS-TEMP-LINE
-                    END-IF
-                    WRITE JOBS-TEMP-LINE
-                END-PERFORM
-            END-IF
-        ELSE
-            MOVE JOBS-LINE TO JOBS-TEMP-LINE
-            WRITE JOBS-TEMP-LINE
-        END-IF
+        MOVE JOBS-LINE TO JOBS-TEMP-LINE
+        WRITE JOBS-TEMP-LINE
     END-PERFORM
 
     CLOSE JOBS-FILE
 
-    IF JOB-FOUND NOT = "Y"
-        PERFORM WRITE-JOB-BLOCK
-    END-IF
+    *> Add the new job
+    PERFORM WRITE-JOB-BLOCK
 
     CLOSE JOBS-TEMP-FILE
 
@@ -1450,37 +1539,760 @@ POST-JOBS.
 
 
 BROWSE-JOBS.
+    MOVE 'N' TO WS-JOBS-FILE-READY
+    MOVE 0 TO WS-JOB-COUNT
+    OPEN INPUT JOBS-FILE
+    EVALUATE JOBS-FILE-STATUS
+        WHEN "00"
+            MOVE 'Y' TO WS-JOBS-FILE-READY
+        WHEN "41"
+            MOVE "00" TO JOBS-FILE-STATUS
+            MOVE 'Y' TO WS-JOBS-FILE-READY
+        WHEN "35"
+            MOVE "--------------------------------" TO SAVE-TEXT PERFORM SHOW
+            MOVE "     Browse Jobs/Internships     " TO SAVE-TEXT PERFORM SHOW
+            MOVE "Title | Employer | Location | ID" TO SAVE-TEXT PERFORM SHOW
+            MOVE "--------------------------------" TO SAVE-TEXT PERFORM SHOW
+            MOVE "No job or internship postings are available at this time." TO SAVE-TEXT PERFORM SHOW
+            EXIT PARAGRAPH
+        WHEN OTHER
+            MOVE "Unable to read job postings right now. Please try again later." TO SAVE-TEXT PERFORM SHOW
+            EXIT PARAGRAPH
+    END-EVALUATE
+
+    IF WS-JOBS-FILE-READY = 'Y'
+        PERFORM LOAD-JOBS-FROM-FILE
+        CLOSE JOBS-FILE
+        MOVE 'N' TO WS-JOBS-FILE-READY
+    END-IF
+
+    IF WS-JOB-COUNT = 0
+        MOVE "--------------------------------" TO SAVE-TEXT PERFORM SHOW
+        MOVE "     Browse Jobs/Internships     " TO SAVE-TEXT PERFORM SHOW
+        MOVE "Title | Employer | Location | ID" TO SAVE-TEXT PERFORM SHOW
+        MOVE "--------------------------------" TO SAVE-TEXT PERFORM SHOW
+        MOVE "No job or internship postings are available at this time." TO SAVE-TEXT PERFORM SHOW
+        EXIT PARAGRAPH
+    END-IF
+
+    MOVE 'N' TO WS-JOB-EXIT
+
+    PERFORM UNTIL WS-JOB-EXIT = 'Y' OR WS-INPUT-EOF = 'Y'
+        PERFORM DISPLAY-JOB-LIST
+        PERFORM PROMPT-JOB-SELECTION
+    END-PERFORM.
+
+RESET-JOB-TABLE.
+    PERFORM VARYING WS-JOB-LOOP-INDEX FROM 1 BY 1
+            UNTIL WS-JOB-LOOP-INDEX > WS-JOB-MAX-SLOTS
+        MOVE 0 TO WS-JOB-ID-NUM (WS-JOB-LOOP-INDEX)
+        MOVE SPACES TO WS-JOB-TITLE-TEXT (WS-JOB-LOOP-INDEX)
+        MOVE SPACES TO WS-JOB-DESC-TEXT (WS-JOB-LOOP-INDEX)
+        MOVE SPACES TO WS-JOB-EMP-TEXT (WS-JOB-LOOP-INDEX)
+        MOVE SPACES TO WS-JOB-LOC-TEXT (WS-JOB-LOOP-INDEX)
+        MOVE SPACES TO WS-JOB-SALARY-TEXT (WS-JOB-LOOP-INDEX)
+    END-PERFORM.
+
+LOAD-JOBS-FROM-FILE.
+    PERFORM RESET-JOB-TABLE
+    MOVE 0 TO WS-JOB-COUNT
+    MOVE 0 TO WS-JOB-CURRENT-INDEX
+    MOVE 'N' TO WS-JOB-IN-PROGRESS
+    MOVE 0 TO WS-JOB-MAX-ID
+    MOVE "00" TO JOBS-FILE-STATUS
+
+    PERFORM UNTIL JOBS-FILE-STATUS = "10"
+        READ JOBS-FILE INTO JOBS-LINE
+            AT END EXIT PERFORM
+        END-READ
+
+        EVALUATE TRUE
+            WHEN JOBS-LINE(1:4) = "ID: "
+                IF WS-JOB-COUNT < WS-JOB-MAX-SLOTS
+                    COMPUTE WS-JOB-CURRENT-INDEX = WS-JOB-COUNT + 1
+                    MOVE 'Y' TO WS-JOB-IN-PROGRESS
+                    MOVE 0 TO WS-JOB-ID-NUM (WS-JOB-CURRENT-INDEX)
+                    MOVE SPACES TO WS-JOB-TITLE-TEXT (WS-JOB-CURRENT-INDEX)
+                    MOVE SPACES TO WS-JOB-DESC-TEXT (WS-JOB-CURRENT-INDEX)
+                    MOVE SPACES TO WS-JOB-EMP-TEXT (WS-JOB-CURRENT-INDEX)
+                    MOVE SPACES TO WS-JOB-LOC-TEXT (WS-JOB-CURRENT-INDEX)
+                    MOVE SPACES TO WS-JOB-SALARY-TEXT (WS-JOB-CURRENT-INDEX)
+                    MOVE JOBS-LINE(5:) TO WS-BUF
+                    IF FUNCTION LENGTH(FUNCTION TRIM(WS-BUF)) > 0
+                        MOVE FUNCTION NUMVAL(FUNCTION TRIM(WS-BUF))
+                            TO WS-JOB-ID-NUM (WS-JOB-CURRENT-INDEX)
+                        IF WS-JOB-MAX-ID < WS-JOB-ID-NUM (WS-JOB-CURRENT-INDEX)
+                            MOVE WS-JOB-ID-NUM (WS-JOB-CURRENT-INDEX) TO WS-JOB-MAX-ID
+                        END-IF
+                    END-IF
+                ELSE
+                    MOVE 0 TO WS-JOB-CURRENT-INDEX
+                    MOVE 'N' TO WS-JOB-IN-PROGRESS
+                END-IF
+            WHEN JOBS-LINE(1:7) = "Title: "
+                IF WS-JOB-IN-PROGRESS = 'Y' AND WS-JOB-CURRENT-INDEX > 0
+                    MOVE JOBS-LINE(8:) TO WS-BUF
+                    MOVE FUNCTION TRIM(WS-BUF)
+                        TO WS-JOB-TITLE-TEXT (WS-JOB-CURRENT-INDEX)
+                END-IF
+            WHEN JOBS-LINE(1:13) = "Description: "
+                IF WS-JOB-IN-PROGRESS = 'Y' AND WS-JOB-CURRENT-INDEX > 0
+                    MOVE JOBS-LINE(14:) TO WS-BUF
+                    MOVE FUNCTION TRIM(WS-BUF)
+                        TO WS-JOB-DESC-TEXT (WS-JOB-CURRENT-INDEX)
+                END-IF
+            WHEN JOBS-LINE(1:10) = "Employer: "
+                IF WS-JOB-IN-PROGRESS = 'Y' AND WS-JOB-CURRENT-INDEX > 0
+                    MOVE JOBS-LINE(11:) TO WS-BUF
+                    MOVE FUNCTION TRIM(WS-BUF)
+                        TO WS-JOB-EMP-TEXT (WS-JOB-CURRENT-INDEX)
+                END-IF
+            WHEN JOBS-LINE(1:10) = "Location: "
+                IF WS-JOB-IN-PROGRESS = 'Y' AND WS-JOB-CURRENT-INDEX > 0
+                    MOVE JOBS-LINE(11:) TO WS-BUF
+                    MOVE FUNCTION TRIM(WS-BUF)
+                        TO WS-JOB-LOC-TEXT (WS-JOB-CURRENT-INDEX)
+                END-IF
+            WHEN JOBS-LINE(1:8) = "Salary: "
+                IF WS-JOB-IN-PROGRESS = 'Y' AND WS-JOB-CURRENT-INDEX > 0
+                    MOVE JOBS-LINE(9:) TO WS-BUF
+                    MOVE FUNCTION TRIM(WS-BUF)
+                        TO WS-JOB-SALARY-TEXT (WS-JOB-CURRENT-INDEX)
+                END-IF
+            WHEN JOBS-LINE = "-----END-----"
+                IF WS-JOB-IN-PROGRESS = 'Y' AND WS-JOB-CURRENT-INDEX > 0
+                    IF FUNCTION LENGTH(
+                           FUNCTION TRIM(WS-JOB-TITLE-TEXT (WS-JOB-CURRENT-INDEX))
+                       ) > 0
+                        IF WS-JOB-ID-NUM (WS-JOB-CURRENT-INDEX) = 0
+                            ADD 1 TO WS-JOB-MAX-ID
+                            MOVE WS-JOB-MAX-ID TO WS-JOB-ID-NUM (WS-JOB-CURRENT-INDEX)
+                        END-IF
+                        ADD 1 TO WS-JOB-COUNT
+                    END-IF
+                END-IF
+                MOVE 0 TO WS-JOB-CURRENT-INDEX
+                MOVE 'N' TO WS-JOB-IN-PROGRESS
+            WHEN OTHER
+                CONTINUE
+        END-EVALUATE
+    END-PERFORM
+
+    MOVE 0 TO WS-JOB-CURRENT-INDEX
+    MOVE 'N' TO WS-JOB-IN-PROGRESS.
+
+DISPLAY-JOB-LIST.
+    MOVE "--------------------------------" TO SAVE-TEXT PERFORM SHOW
+    MOVE "     Browse Jobs/Internships     " TO SAVE-TEXT PERFORM SHOW
+    MOVE "Title | Employer | Location | ID" TO SAVE-TEXT PERFORM SHOW
+    MOVE "--------------------------------" TO SAVE-TEXT PERFORM SHOW
+
+    PERFORM VARYING WS-JOB-LOOP-INDEX FROM 1 BY 1
+            UNTIL WS-JOB-LOOP-INDEX > WS-JOB-COUNT
+        MOVE WS-JOB-LOOP-INDEX TO WS-JOB-INDEX-DISPLAY
+        MOVE WS-JOB-ID-NUM (WS-JOB-LOOP-INDEX) TO WS-JOB-ID-DISPLAY
+        MOVE SPACES TO SAVE-TEXT
+        STRING WS-IND1                                DELIMITED BY SIZE
+               FUNCTION TRIM(WS-JOB-INDEX-DISPLAY)    DELIMITED BY SIZE
+               ". "                                   DELIMITED BY SIZE
+               FUNCTION TRIM(WS-JOB-TITLE-TEXT (WS-JOB-LOOP-INDEX))
+                                                      DELIMITED BY SIZE
+               " | "                                 DELIMITED BY SIZE
+               FUNCTION TRIM(WS-JOB-EMP-TEXT (WS-JOB-LOOP-INDEX))
+                                                      DELIMITED BY SIZE
+               " | "                                 DELIMITED BY SIZE
+               FUNCTION TRIM(WS-JOB-LOC-TEXT (WS-JOB-LOOP-INDEX))
+                                                      DELIMITED BY SIZE
+               " (ID: "                              DELIMITED BY SIZE
+               FUNCTION TRIM(WS-JOB-ID-DISPLAY)      DELIMITED BY SIZE
+               ")"                                   DELIMITED BY SIZE
+               INTO SAVE-TEXT
+        END-STRING
+        PERFORM SHOW
+    END-PERFORM
+
+    MOVE "----------------------------------------------------------------" TO SAVE-TEXT PERFORM SHOW.
+
+PROMPT-JOB-SELECTION.
+    MOVE "Enter job number or ID to view details (or BACK to Job Menu):" TO SAVE-TEXT
+    PERFORM SHOW
+
+    READ INPUT-FILE INTO INPUT-TEXT
+        AT END
+            MOVE 'Y' TO WS-INPUT-EOF
+            MOVE 'Y' TO WS-JOB-EXIT
+            EXIT PARAGRAPH
+        NOT AT END
+            MOVE FUNCTION TRIM(INPUT-TEXT) TO WS-JOB-SELECTION
+    END-READ
+
+    IF FUNCTION LENGTH(WS-JOB-SELECTION) = 0
+        MOVE "Invalid choice." TO SAVE-TEXT PERFORM SHOW
+        EXIT PARAGRAPH
+    END-IF
+
+    MOVE FUNCTION UPPER-CASE(WS-JOB-SELECTION) TO WS-JOB-SELECTION-UPPER
+
+    IF WS-JOB-SELECTION-UPPER = "BACK"
+        MOVE 'Y' TO WS-JOB-EXIT
+        EXIT PARAGRAPH
+    END-IF
+
+    IF WS-JOB-SELECTION-UPPER = "B"
+        MOVE 'Y' TO WS-JOB-EXIT
+        EXIT PARAGRAPH
+    END-IF
+
+    MOVE WS-JOB-SELECTION TO WS-JOB-SELECTION-CHECK
+    INSPECT WS-JOB-SELECTION-CHECK REPLACING ALL ":" BY SPACE
+    MOVE FUNCTION TRIM(WS-JOB-SELECTION-CHECK) TO WS-JOB-SELECTION-CHECK
+
+    MOVE WS-JOB-SELECTION-CHECK TO WS-BUF
+    INSPECT WS-BUF CONVERTING "0123456789" TO SPACES
+
+    IF FUNCTION LENGTH(FUNCTION TRIM(WS-BUF)) = 0
+        MOVE FUNCTION NUMVAL(WS-JOB-SELECTION-CHECK) TO WS-JOB-SELECTION-NUM
+        IF WS-JOB-SELECTION-NUM >= 1 AND WS-JOB-SELECTION-NUM <= WS-JOB-COUNT
+            MOVE WS-JOB-SELECTION-NUM TO WS-JOB-DETAIL-INDEX
+            PERFORM SHOW-JOB-DETAILS
+            EXIT PARAGRAPH
+        END-IF
+        MOVE WS-JOB-SELECTION-NUM TO WS-JOB-DETAIL-ID
+        PERFORM FIND-JOB-BY-ID
+        IF WS-JOB-DETAIL-FOUND = 'Y'
+            PERFORM SHOW-JOB-DETAILS
+        ELSE
+            MOVE "No job found with that number or ID." TO SAVE-TEXT PERFORM SHOW
+        END-IF
+        EXIT PARAGRAPH
+    END-IF
+
+    IF WS-JOB-SELECTION-UPPER(1:2) = "ID"
+        MOVE SPACES TO WS-JOB-SELECTION-TAIL
+        IF FUNCTION LENGTH(WS-JOB-SELECTION) > 2
+            MOVE WS-JOB-SELECTION(3:) TO WS-JOB-SELECTION-TAIL
+        END-IF
+        INSPECT WS-JOB-SELECTION-TAIL REPLACING ALL ":" BY SPACE
+        MOVE FUNCTION TRIM(WS-JOB-SELECTION-TAIL) TO WS-JOB-SELECTION-TAIL
+        MOVE WS-JOB-SELECTION-TAIL TO WS-BUF
+        INSPECT WS-BUF CONVERTING "0123456789" TO SPACES
+        IF FUNCTION LENGTH(FUNCTION TRIM(WS-BUF)) = 0
+            MOVE FUNCTION NUMVAL(WS-JOB-SELECTION-TAIL) TO WS-JOB-DETAIL-ID
+            PERFORM FIND-JOB-BY-ID
+            IF WS-JOB-DETAIL-FOUND = 'Y'
+                PERFORM SHOW-JOB-DETAILS
+            ELSE
+                MOVE "No job found with that number or ID." TO SAVE-TEXT PERFORM SHOW
+            END-IF
+            EXIT PARAGRAPH
+        END-IF
+    END-IF
+
+    MOVE "Invalid choice." TO SAVE-TEXT PERFORM SHOW.
+
+FIND-JOB-BY-ID.
+    MOVE 'N' TO WS-JOB-DETAIL-FOUND
+    MOVE 0 TO WS-JOB-DETAIL-INDEX
+    PERFORM VARYING WS-JOB-LOOP-INDEX FROM 1 BY 1
+            UNTIL WS-JOB-LOOP-INDEX > WS-JOB-COUNT
+        IF WS-JOB-ID-NUM (WS-JOB-LOOP-INDEX) = WS-JOB-DETAIL-ID
+            MOVE WS-JOB-LOOP-INDEX TO WS-JOB-DETAIL-INDEX
+            MOVE 'Y' TO WS-JOB-DETAIL-FOUND
+            EXIT PERFORM
+        END-IF
+    END-PERFORM.
+
+SHOW-JOB-DETAILS.
+    IF WS-JOB-DETAIL-INDEX < 1 OR WS-JOB-DETAIL-INDEX > WS-JOB-COUNT
+        MOVE "Unable to show job details right now." TO SAVE-TEXT PERFORM SHOW
+        EXIT PARAGRAPH
+    END-IF
+
+    MOVE WS-JOB-ID-NUM (WS-JOB-DETAIL-INDEX) TO WS-JOB-DETAIL-ID
+    MOVE WS-JOB-ID-NUM (WS-JOB-DETAIL-INDEX) TO WS-JOB-ID-DISPLAY
+    MOVE WS-JOB-DETAIL-INDEX TO WS-JOB-INDEX-DISPLAY
+
+    MOVE "----------------------------------------------------------------" TO SAVE-TEXT PERFORM SHOW
+    MOVE SPACES TO SAVE-TEXT
+    STRING WS-IND1                      DELIMITED BY SIZE
+           "Job "                       DELIMITED BY SIZE
+           FUNCTION TRIM(WS-JOB-INDEX-DISPLAY)
+                                         DELIMITED BY SIZE
+           " (ID: "                     DELIMITED BY SIZE
+           FUNCTION TRIM(WS-JOB-ID-DISPLAY)
+                                         DELIMITED BY SIZE
+           ")"                          DELIMITED BY SIZE
+           INTO SAVE-TEXT
+    END-STRING
+    PERFORM SHOW
+
+    MOVE SPACES TO SAVE-TEXT
+    STRING WS-IND1 "Title: " DELIMITED BY SIZE
+           FUNCTION TRIM(WS-JOB-TITLE-TEXT (WS-JOB-DETAIL-INDEX))
+                               DELIMITED BY SIZE
+           INTO SAVE-TEXT
+    END-STRING
+    PERFORM SHOW
+
+    MOVE SPACES TO SAVE-TEXT
+    STRING WS-IND1 "Employer: " DELIMITED BY SIZE
+           FUNCTION TRIM(WS-JOB-EMP-TEXT (WS-JOB-DETAIL-INDEX))
+                               DELIMITED BY SIZE
+           INTO SAVE-TEXT
+    END-STRING
+    PERFORM SHOW
+
+    MOVE SPACES TO SAVE-TEXT
+    STRING WS-IND1 "Location: " DELIMITED BY SIZE
+           FUNCTION TRIM(WS-JOB-LOC-TEXT (WS-JOB-DETAIL-INDEX))
+                               DELIMITED BY SIZE
+           INTO SAVE-TEXT
+    END-STRING
+    PERFORM SHOW
+
+    MOVE SPACES TO SAVE-TEXT
+    STRING WS-IND1 "Description: " DELIMITED BY SIZE
+           FUNCTION TRIM(WS-JOB-DESC-TEXT (WS-JOB-DETAIL-INDEX))
+                                   DELIMITED BY SIZE
+           INTO SAVE-TEXT
+    END-STRING
+    PERFORM SHOW
+
+    IF FUNCTION LENGTH(
+           FUNCTION TRIM(WS-JOB-SALARY-TEXT (WS-JOB-DETAIL-INDEX))
+       ) > 0
+        MOVE SPACES TO SAVE-TEXT
+        STRING WS-IND1 "Salary: " DELIMITED BY SIZE
+               FUNCTION TRIM(WS-JOB-SALARY-TEXT (WS-JOB-DETAIL-INDEX))
+                                       DELIMITED BY SIZE
+               INTO SAVE-TEXT
+        END-STRING
+        PERFORM SHOW
+    ELSE
+        MOVE SPACES TO SAVE-TEXT
+        STRING WS-IND1 "Salary: Not provided" DELIMITED BY SIZE
+               INTO SAVE-TEXT
+        END-STRING
+        PERFORM SHOW
+    END-IF
+
+    MOVE 'N' TO WS-JOB-DETAIL-EXIT
+    PERFORM UNTIL WS-JOB-DETAIL-EXIT = 'Y' OR WS-INPUT-EOF = 'Y'
+        MOVE SPACES TO SAVE-TEXT
+        STRING WS-IND2 "1. Apply for this Job" INTO SAVE-TEXT
+        END-STRING
+        PERFORM SHOW
+        MOVE SPACES TO SAVE-TEXT
+        STRING WS-IND2 "2. Back to Job List" INTO SAVE-TEXT
+        END-STRING
+        PERFORM SHOW
+
+        READ INPUT-FILE INTO INPUT-TEXT
+            AT END
+                MOVE 'Y' TO WS-INPUT-EOF
+                MOVE 'Y' TO WS-JOB-DETAIL-EXIT
+                EXIT PERFORM
+            NOT AT END
+                MOVE FUNCTION TRIM(INPUT-TEXT) TO WS-JOB-SELECTION
+        END-READ
+
+        IF WS-JOB-DETAIL-EXIT = 'Y'
+            EXIT PERFORM
+        END-IF
+
+        MOVE FUNCTION UPPER-CASE(WS-JOB-SELECTION) TO WS-JOB-SELECTION-UPPER
+
+        EVALUATE TRUE
+            WHEN WS-JOB-SELECTION-UPPER = "1"
+                 OR WS-JOB-SELECTION-UPPER = "APPLY"
+                 OR WS-JOB-SELECTION-UPPER = "APPLY FOR THIS JOB"
+                PERFORM APPLY-TO-JOB
+            WHEN WS-JOB-SELECTION-UPPER = "2"
+                 OR WS-JOB-SELECTION-UPPER = "BACK"
+                 OR WS-JOB-SELECTION-UPPER = "BACK TO JOB LIST"
+                MOVE 'Y' TO WS-JOB-DETAIL-EXIT
+            WHEN OTHER
+                MOVE "Invalid choice." TO SAVE-TEXT PERFORM SHOW
+        END-EVALUATE
+    END-PERFORM
+
+    MOVE " " TO SAVE-TEXT
+    PERFORM SHOW.
+
+VIEW-MY-APPLICATIONS.
+    IF WS-LOGGEDIN NOT = 'Y'
+        MOVE "Please log in before viewing applications." TO SAVE-TEXT PERFORM SHOW
+        EXIT PARAGRAPH
+    END-IF
+
+    MOVE 0 TO WS-APP-COUNT
+
+    OPEN INPUT APPLICATIONS-FILE
+    EVALUATE APPLICATIONS-FILE-STATUS
+        WHEN "00"
+            CONTINUE
+        WHEN "35"
+            PERFORM PRINT-APPLICATIONS-HEADER
+            MOVE "No applications submitted yet." TO SAVE-TEXT PERFORM SHOW
+            MOVE WS-APP-COUNT TO WS-JOB-INDEX-DISPLAY
+            IF WS-APP-COUNT = 0
+                MOVE "0" TO WS-JOB-INDEX-DISPLAY
+            END-IF
+            MOVE SPACES TO SAVE-TEXT
+            STRING WS-IND1 "Total Applications: "
+                   FUNCTION TRIM(WS-JOB-INDEX-DISPLAY)
+                   INTO SAVE-TEXT
+            END-STRING
+            PERFORM SHOW
+            MOVE " " TO SAVE-TEXT
+            PERFORM SHOW
+            EXIT PARAGRAPH
+        WHEN OTHER
+            MOVE "Unable to read applications right now. Please try again later." TO SAVE-TEXT PERFORM SHOW
+            EXIT PARAGRAPH
+    END-EVALUATE
+
+    PERFORM PRINT-APPLICATIONS-HEADER
+
+    MOVE "00" TO APPLICATIONS-FILE-STATUS
+    PERFORM UNTIL APPLICATIONS-FILE-STATUS = "10"
+        READ APPLICATIONS-FILE INTO APPLICATIONS-LINE
+            AT END EXIT PERFORM
+        END-READ
+
+        IF FUNCTION LENGTH(FUNCTION TRIM(APPLICATIONS-LINE)) = 0
+            CONTINUE
+        END-IF
+
+        MOVE 1 TO WS-UNSTRING-PTR
+        MOVE SPACES TO WS-APP-USER
+        MOVE SPACES TO WS-APP-JOBID
+        MOVE SPACES TO WS-APP-TITLE
+        MOVE SPACES TO WS-APP-EMPLOYER
+        MOVE SPACES TO WS-APP-LOCATION
+        MOVE SPACES TO WS-APP-SALARY
+        MOVE SPACES TO WS-APP-TIMESTAMP
+
+        UNSTRING APPLICATIONS-LINE DELIMITED BY "|"
+            INTO WS-APP-USER
+                 WS-APP-JOBID
+                 WS-APP-TITLE
+                 WS-APP-EMPLOYER
+                 WS-APP-LOCATION
+                 WS-APP-SALARY
+                 WS-APP-TIMESTAMP
+            WITH POINTER WS-UNSTRING-PTR
+        END-UNSTRING
+
+        MOVE FUNCTION TRIM(WS-APP-USER) TO WS-APP-USER
+        MOVE FUNCTION TRIM(WS-APP-JOBID) TO WS-APP-JOBID
+        MOVE FUNCTION TRIM(WS-APP-TITLE) TO WS-APP-TITLE
+        MOVE FUNCTION TRIM(WS-APP-EMPLOYER) TO WS-APP-EMPLOYER
+        MOVE FUNCTION TRIM(WS-APP-LOCATION) TO WS-APP-LOCATION
+        MOVE FUNCTION TRIM(WS-APP-SALARY) TO WS-APP-SALARY
+
+        MOVE WS-APP-TITLE TO WS-APP-DISPLAY-TITLE
+        MOVE WS-APP-EMPLOYER TO WS-APP-DISPLAY-EMPLOYER
+        MOVE WS-APP-LOCATION TO WS-APP-DISPLAY-LOCATION
+
+        PERFORM POPULATE-APP-DISPLAY-FROM-JOBS
+
+        IF FUNCTION TRIM(WS-APP-USER) = FUNCTION TRIM(WS-NAME)
+            ADD 1 TO WS-APP-COUNT
+            MOVE SPACES TO SAVE-TEXT
+            STRING WS-IND1 DELIMITED BY SIZE
+                   "- " DELIMITED BY SIZE
+                   FUNCTION TRIM(WS-APP-DISPLAY-TITLE) DELIMITED BY SIZE
+                   " | " DELIMITED BY SIZE
+                   FUNCTION TRIM(WS-APP-DISPLAY-EMPLOYER) DELIMITED BY SIZE
+                   " | " DELIMITED BY SIZE
+                   FUNCTION TRIM(WS-APP-DISPLAY-LOCATION) DELIMITED BY SIZE
+                   INTO SAVE-TEXT
+            END-STRING
+
+            IF FUNCTION LENGTH(FUNCTION TRIM(WS-APP-JOBID)) > 0
+                MOVE SPACES TO WS-BUF
+                STRING SAVE-TEXT DELIMITED BY SIZE
+                       " (Job ID: " DELIMITED BY SIZE
+                       FUNCTION TRIM(WS-APP-JOBID) DELIMITED BY SIZE
+                       ")" DELIMITED BY SIZE
+                       INTO WS-BUF
+                END-STRING
+                MOVE WS-BUF TO SAVE-TEXT
+            END-IF
+
+            PERFORM SHOW
+        END-IF
+    END-PERFORM
+
+    CLOSE APPLICATIONS-FILE
+
+    IF WS-APP-COUNT = 0
+        MOVE "No applications submitted yet." TO SAVE-TEXT PERFORM SHOW
+    ELSE
+        MOVE "----------------------------------------------------------------" TO SAVE-TEXT PERFORM SHOW
+    END-IF
+
+    MOVE WS-APP-COUNT TO WS-JOB-INDEX-DISPLAY
+    IF WS-APP-COUNT = 0
+        MOVE "0" TO WS-JOB-INDEX-DISPLAY
+    END-IF
+    MOVE SPACES TO SAVE-TEXT
+    STRING WS-IND1 "Total Applications: "
+           FUNCTION TRIM(WS-JOB-INDEX-DISPLAY)
+           INTO SAVE-TEXT
+    END-STRING
+    PERFORM SHOW.
+
+POPULATE-APP-DISPLAY-FROM-JOBS.
+    MOVE 'N' TO WS-JOB-JOIN-FOUND
+    MOVE FUNCTION TRIM(WS-APP-JOBID) TO WS-BUF
+
+    IF FUNCTION LENGTH(WS-BUF) = 0
+        EXIT PARAGRAPH
+    END-IF
+
+    MOVE 0 TO WS-JOB-JOIN-ID
+    COMPUTE WS-JOB-JOIN-ID = FUNCTION NUMVAL(WS-BUF)
+
+    PERFORM VARYING WS-JOB-JOIN-LOOP FROM 1 BY 1
+            UNTIL WS-JOB-JOIN-LOOP > WS-JOB-COUNT
+               OR WS-JOB-JOIN-FOUND = 'Y'
+        IF WS-JOB-ID-NUM (WS-JOB-JOIN-LOOP) = WS-JOB-JOIN-ID
+            MOVE FUNCTION TRIM(WS-JOB-TITLE-TEXT (WS-JOB-JOIN-LOOP))
+                 TO WS-APP-DISPLAY-TITLE
+            MOVE FUNCTION TRIM(WS-JOB-EMP-TEXT (WS-JOB-JOIN-LOOP))
+                 TO WS-APP-DISPLAY-EMPLOYER
+            MOVE FUNCTION TRIM(WS-JOB-LOC-TEXT (WS-JOB-JOIN-LOOP))
+                 TO WS-APP-DISPLAY-LOCATION
+            MOVE 'Y' TO WS-JOB-JOIN-FOUND
+        END-IF
+    END-PERFORM.
+
+PRINT-APPLICATIONS-HEADER.
+    MOVE "--------------------------------" TO SAVE-TEXT PERFORM SHOW
+    MOVE "     My Applications     " TO SAVE-TEXT PERFORM SHOW
+    MOVE "Title | Employer | Location | Job ID" TO SAVE-TEXT PERFORM SHOW.
+
+APPLY-TO-JOB.
+    IF WS-LOGGEDIN NOT = 'Y'
+        MOVE "Please log in before applying to a job." TO SAVE-TEXT PERFORM SHOW
+        MOVE 'Y' TO WS-JOB-DETAIL-EXIT
+        EXIT PARAGRAPH
+    END-IF
+
+    IF WS-JOB-DETAIL-INDEX < 1 OR WS-JOB-DETAIL-INDEX > WS-JOB-COUNT
+        MOVE "Unable to submit application right now." TO SAVE-TEXT PERFORM SHOW
+        MOVE 'Y' TO WS-JOB-DETAIL-EXIT
+        EXIT PARAGRAPH
+    END-IF
+
+    MOVE FUNCTION TRIM(WS-NAME) TO WS-APP-USER
+    MOVE WS-JOB-ID-NUM (WS-JOB-DETAIL-INDEX) TO WS-APPLY-JOBID-TXT
+    MOVE FUNCTION TRIM(WS-JOB-TITLE-TEXT (WS-JOB-DETAIL-INDEX)) TO WS-APP-TITLE
+    MOVE FUNCTION TRIM(WS-JOB-EMP-TEXT (WS-JOB-DETAIL-INDEX)) TO WS-APP-EMPLOYER
+    MOVE FUNCTION TRIM(WS-JOB-LOC-TEXT (WS-JOB-DETAIL-INDEX)) TO WS-APP-LOCATION
+
+    IF FUNCTION LENGTH(FUNCTION TRIM(WS-JOB-SALARY-TEXT (WS-JOB-DETAIL-INDEX))) > 0
+        MOVE FUNCTION TRIM(WS-JOB-SALARY-TEXT (WS-JOB-DETAIL-INDEX)) TO WS-APP-SALARY
+    ELSE
+        MOVE "Not provided" TO WS-APP-SALARY
+    END-IF
+
+    MOVE 'N' TO WS-APPLY-ALREADY
+
+    OPEN INPUT APPLICATIONS-FILE
+    EVALUATE APPLICATIONS-FILE-STATUS
+        WHEN "00"
+            PERFORM UNTIL APPLICATIONS-FILE-STATUS = "10" OR WS-APPLY-ALREADY = 'Y'
+                READ APPLICATIONS-FILE INTO APPLICATIONS-LINE
+                    AT END EXIT PERFORM
+                END-READ
+                MOVE 1 TO WS-UNSTRING-PTR
+                MOVE SPACES TO WS-APP-USER
+                MOVE SPACES TO WS-APP-JOBID
+                MOVE SPACES TO WS-APP-TITLE
+                MOVE SPACES TO WS-APP-EMPLOYER
+                MOVE SPACES TO WS-APP-LOCATION
+                MOVE SPACES TO WS-APP-SALARY
+                MOVE SPACES TO WS-APP-TIMESTAMP
+                UNSTRING APPLICATIONS-LINE DELIMITED BY "|"
+                    INTO WS-APP-USER
+                         WS-APP-JOBID
+                         WS-APP-TITLE
+                         WS-APP-EMPLOYER
+                         WS-APP-LOCATION
+                         WS-APP-SALARY
+                         WS-APP-TIMESTAMP
+                    WITH POINTER WS-UNSTRING-PTR
+                END-UNSTRING
+                MOVE FUNCTION TRIM(WS-APP-USER) TO WS-APP-USER
+                MOVE FUNCTION TRIM(WS-APP-JOBID) TO WS-APP-JOBID
+                IF FUNCTION LENGTH(FUNCTION TRIM(WS-APP-JOBID)) > 0
+                   AND FUNCTION LENGTH(FUNCTION TRIM(WS-APP-USER)) > 0
+                   AND FUNCTION TRIM(WS-APP-USER) = FUNCTION TRIM(WS-NAME)
+                   AND FUNCTION NUMVAL(FUNCTION TRIM(WS-APP-JOBID))
+                       = WS-JOB-ID-NUM (WS-JOB-DETAIL-INDEX)
+                    MOVE 'Y' TO WS-APPLY-ALREADY
+                END-IF
+            END-PERFORM
+            CLOSE APPLICATIONS-FILE
+        WHEN "35"
+            MOVE "00" TO APPLICATIONS-FILE-STATUS
+        WHEN OTHER
+            MOVE "Unable to read applications right now. Please try again later." TO SAVE-TEXT PERFORM SHOW
+            MOVE 'Y' TO WS-JOB-DETAIL-EXIT
+            EXIT PARAGRAPH
+    END-EVALUATE
+
+    IF WS-APPLY-ALREADY = 'Y'
+        MOVE "----------------------------------------------------------------" TO SAVE-TEXT PERFORM SHOW
+        MOVE SPACES TO SAVE-TEXT
+        STRING "You have already applied to "
+               FUNCTION TRIM(WS-JOB-TITLE-TEXT (WS-JOB-DETAIL-INDEX))
+               " at "
+               FUNCTION TRIM(WS-JOB-EMP-TEXT (WS-JOB-DETAIL-INDEX))
+               "." INTO SAVE-TEXT
+        END-STRING
+        PERFORM SHOW
+        MOVE "----------------------------------------------------------------" TO SAVE-TEXT PERFORM SHOW
+        MOVE 'Y' TO WS-JOB-DETAIL-EXIT
+        EXIT PARAGRAPH
+    END-IF
+
+
+    MOVE FUNCTION TRIM(WS-NAME) TO WS-APP-USER
+    MOVE WS-JOB-ID-NUM (WS-JOB-DETAIL-INDEX) TO WS-APPLY-JOBID-TXT
+    MOVE FUNCTION TRIM(WS-JOB-TITLE-TEXT (WS-JOB-DETAIL-INDEX)) TO WS-APP-TITLE
+    MOVE FUNCTION TRIM(WS-JOB-EMP-TEXT (WS-JOB-DETAIL-INDEX)) TO WS-APP-EMPLOYER
+    MOVE FUNCTION TRIM(WS-JOB-LOC-TEXT (WS-JOB-DETAIL-INDEX)) TO WS-APP-LOCATION
+
+    IF FUNCTION LENGTH(FUNCTION TRIM(WS-JOB-SALARY-TEXT (WS-JOB-DETAIL-INDEX))) > 0
+        MOVE FUNCTION TRIM(WS-JOB-SALARY-TEXT (WS-JOB-DETAIL-INDEX)) TO WS-APP-SALARY
+    ELSE
+        MOVE "Not provided" TO WS-APP-SALARY
+    END-IF
+
+    MOVE 'E' TO WS-APP-FILE-MODE
+
+    OPEN EXTEND APPLICATIONS-FILE
+    DISPLAY "DBG APP OPEN STATUS=" APPLICATIONS-FILE-STATUS
+    EVALUATE APPLICATIONS-FILE-STATUS
+        WHEN "00"
+            CONTINUE
+        WHEN "30"
+            OPEN OUTPUT APPLICATIONS-FILE
+            DISPLAY "DBG APP CREATE STATUS=" APPLICATIONS-FILE-STATUS
+            IF APPLICATIONS-FILE-STATUS = "00"
+                MOVE 'O' TO WS-APP-FILE-MODE
+            END-IF
+        WHEN "35"
+            OPEN OUTPUT APPLICATIONS-FILE
+            DISPLAY "DBG APP CREATE STATUS=" APPLICATIONS-FILE-STATUS
+            IF APPLICATIONS-FILE-STATUS = "00"
+                MOVE 'O' TO WS-APP-FILE-MODE
+            END-IF
+        WHEN OTHER
+            CONTINUE
+    END-EVALUATE
+
+    IF APPLICATIONS-FILE-STATUS NOT = "00"
+        MOVE SPACES TO SAVE-TEXT
+        STRING "Unable to save your application. FILE STATUS "
+               APPLICATIONS-FILE-STATUS
+               INTO SAVE-TEXT
+        END-STRING
+        PERFORM SHOW
+        MOVE 'Y' TO WS-JOB-DETAIL-EXIT
+        EXIT PARAGRAPH
+    END-IF
+
+    ACCEPT WS-APPLY-DATE FROM DATE YYYYMMDD
+    ACCEPT WS-APPLY-TIME FROM TIME
+
+    MOVE SPACES TO WS-APPLY-TIMESTAMP
+    STRING WS-APPLY-DATE(1:4) DELIMITED BY SIZE
+           "-"                 DELIMITED BY SIZE
+           WS-APPLY-DATE(5:2)  DELIMITED BY SIZE
+           "-"                 DELIMITED BY SIZE
+           WS-APPLY-DATE(7:2)  DELIMITED BY SIZE
+           " "                 DELIMITED BY SIZE
+           WS-APPLY-TIME(1:2)  DELIMITED BY SIZE
+           ":"                 DELIMITED BY SIZE
+           WS-APPLY-TIME(3:2)  DELIMITED BY SIZE
+           ":"                 DELIMITED BY SIZE
+           WS-APPLY-TIME(5:2)  DELIMITED BY SIZE
+           INTO WS-APPLY-TIMESTAMP
+    END-STRING
+
+    MOVE SPACES TO WS-APPLICATION-LINE
+    STRING FUNCTION TRIM(WS-NAME)                DELIMITED BY SIZE
+           "|"                                   DELIMITED BY SIZE
+           FUNCTION TRIM(WS-APPLY-JOBID-TXT)     DELIMITED BY SIZE
+           "|"                                   DELIMITED BY SIZE
+           FUNCTION TRIM(WS-JOB-TITLE-TEXT (WS-JOB-DETAIL-INDEX))
+                                                 DELIMITED BY SIZE
+           "|"                                   DELIMITED BY SIZE
+           FUNCTION TRIM(WS-JOB-EMP-TEXT (WS-JOB-DETAIL-INDEX))
+                                                 DELIMITED BY SIZE
+           "|"                                   DELIMITED BY SIZE
+           FUNCTION TRIM(WS-JOB-LOC-TEXT (WS-JOB-DETAIL-INDEX))
+                                                 DELIMITED BY SIZE
+           "|"                                   DELIMITED BY SIZE
+           FUNCTION TRIM(WS-APP-SALARY)          DELIMITED BY SIZE
+           "|"                                   DELIMITED BY SIZE
+           FUNCTION TRIM(WS-APPLY-TIMESTAMP)     DELIMITED BY SIZE
+           INTO WS-APPLICATION-LINE
+    END-STRING
+
+    MOVE WS-APPLICATION-LINE TO APPLICATIONS-LINE
+    WRITE APPLICATIONS-LINE
+    DISPLAY "DBG APP WRITE STATUS=" APPLICATIONS-FILE-STATUS
+
+    CLOSE APPLICATIONS-FILE
+
+    MOVE "----------------------------------------------------------------" TO SAVE-TEXT PERFORM SHOW
+    MOVE SPACES TO SAVE-TEXT
+    STRING "Application submitted for "
+           FUNCTION TRIM(WS-JOB-TITLE-TEXT (WS-JOB-DETAIL-INDEX))
+           " at "
+           FUNCTION TRIM(WS-JOB-EMP-TEXT (WS-JOB-DETAIL-INDEX))
+           "." INTO SAVE-TEXT
+    END-STRING
+    PERFORM SHOW
+
+    MOVE 'Y' TO WS-JOB-DETAIL-EXIT.
 
 WRITE-JOB-BLOCK.
-    *> Persist the in-memory profile (P-REC) as text
-    MOVE SPACES TO TEMP-LINE
-    STRING "ID: "  JOB-ID   INTO TEMP-LINE END-STRING
-    WRITE JOBS-TEMP-LINE FROM TEMP-LINE
+    *> Persist the in-memory job (JOB-REC) as text
+    MOVE SPACES TO JOBS-TEMP-LINE
+    STRING "ID: "  JOB-ID   INTO JOBS-TEMP-LINE END-STRING
+    WRITE JOBS-TEMP-LINE
 
-    MOVE SPACES TO TEMP-LINE
-    STRING "Title: "  JOB-TITLE   INTO TEMP-LINE END-STRING
-    WRITE JOBS-TEMP-LINE FROM TEMP-LINE
+    MOVE SPACES TO JOBS-TEMP-LINE
+    STRING "Title: "  JOB-TITLE   INTO JOBS-TEMP-LINE END-STRING
+    WRITE JOBS-TEMP-LINE
 
-    MOVE SPACES TO TEMP-LINE
-    STRING "Description: "    JOB-DESCRIPTION INTO TEMP-LINE END-STRING
-    WRITE JOBS-TEMP-LINE FROM TEMP-LINE
+    MOVE SPACES TO JOBS-TEMP-LINE
+    STRING "Description: "    JOB-DESCRIPTION INTO JOBS-TEMP-LINE END-STRING
+    WRITE JOBS-TEMP-LINE
 
-    MOVE SPACES TO TEMP-LINE
-    STRING "Employer: "    JOB-EMPLOYER  INTO TEMP-LINE END-STRING
-    WRITE JOBS-TEMP-LINE FROM TEMP-LINE
+    MOVE SPACES TO JOBS-TEMP-LINE
+    STRING "Employer: "    JOB-EMPLOYER  INTO JOBS-TEMP-LINE END-STRING
+    WRITE JOBS-TEMP-LINE
 
-    MOVE SPACES TO TEMP-LINE
-    STRING "Location: "  JOB-LOCATION INTO TEMP-LINE END-STRING
-    WRITE JOBS-TEMP-LINE FROM TEMP-LINE
+    MOVE SPACES TO JOBS-TEMP-LINE
+    STRING "Location: "  JOB-LOCATION INTO JOBS-TEMP-LINE END-STRING
+    WRITE JOBS-TEMP-LINE
 
-    *> Only write salary if it’s not empty
+    *> Only write salary if it's not empty
     IF FUNCTION LENGTH(FUNCTION TRIM(JOB-SALARY)) > 0
-           MOVE SPACES TO TEMP-LINE
-           STRING "Salary: " JOB-SALARY      INTO TEMP-LINE END-STRING
-           WRITE JOBS-TEMP-LINE FROM TEMP-LINE
+           MOVE SPACES TO JOBS-TEMP-LINE
+           STRING "Salary: " JOB-SALARY      INTO JOBS-TEMP-LINE END-STRING
+           WRITE JOBS-TEMP-LINE
     END-IF
-    MOVE "-----END-----" TO TEMP-LINE
-    WRITE JOBS-TEMP-LINE FROM TEMP-LINE.
+    MOVE "-----END-----" TO JOBS-TEMP-LINE
+    WRITE JOBS-TEMP-LINE.
 
 SKILL-MENU.
     *> Stub skills menu (under construction)

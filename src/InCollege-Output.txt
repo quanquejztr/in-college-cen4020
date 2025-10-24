@@ -7,7 +7,7 @@ Enter your choice:
 Please enter your username:
 Please enter your password:
 You have successfully logged in.
-Welcome, alice!
+Welcome, cuong!
 --------------------------
         Menu
 --------------------------
@@ -19,18 +19,76 @@ Welcome, alice!
   6. View My Pending Connection Requests
   7. View My Network
   9. Log Out / Exit
-  Enter your choice:
 --------------------------
+  Enter your choice:
   1. Post a Job/Internships
   2. Browse Jobs/Internships
-  3. Back to Main Menu
-     Post a Job/Internship
---------------------------
-  Enter Job Title:
-  Enter Job Description:
-  Enter Employer:
-  Enter Salary (optional, max 16 chars, enter blank line to skip):
-Job posted successfully!
+  3. View My Applications
+  4. Back to Main Menu
+--------------------------------
+     Browse Jobs/Internships
+Title | Employer | Location | ID
+--------------------------------
+    1. Pilot | American Airlines | LA, California (ID: 1)
+    2. Chef | KFC | Brandon, Tampa (ID: 2)
+----------------------------------------------------------------
+Enter job number or ID to view details (or BACK to Job Menu):
+----------------------------------------------------------------
+    Job 1 (ID: 1)
+    Title: Pilot
+    Employer: American Airlines
+    Location: LA, California
+    Description: Get to fly big planes daily
+    Salary: Not provided
+        1. Apply for this Job
+        2. Back to Job List
+----------------------------------------------------------------
+You have already applied to Pilot at American Airlines.
+----------------------------------------------------------------
+
+--------------------------------
+     Browse Jobs/Internships
+Title | Employer | Location | ID
+--------------------------------
+    1. Pilot | American Airlines | LA, California (ID: 1)
+    2. Chef | KFC | Brandon, Tampa (ID: 2)
+----------------------------------------------------------------
+Enter job number or ID to view details (or BACK to Job Menu):
+----------------------------------------------------------------
+    Job 1 (ID: 1)
+    Title: Pilot
+    Employer: American Airlines
+    Location: LA, California
+    Description: Get to fly big planes daily
+    Salary: Not provided
+        1. Apply for this Job
+        2. Back to Job List
+----------------------------------------------------------------
+You have already applied to Pilot at American Airlines.
+----------------------------------------------------------------
+
+--------------------------------
+     Browse Jobs/Internships
+Title | Employer | Location | ID
+--------------------------------
+    1. Pilot | American Airlines | LA, California (ID: 1)
+    2. Chef | KFC | Brandon, Tampa (ID: 2)
+----------------------------------------------------------------
+Enter job number or ID to view details (or BACK to Job Menu):
+  1. Post a Job/Internships
+  2. Browse Jobs/Internships
+  3. View My Applications
+  4. Back to Main Menu
+--------------------------------
+     My Applications
+Title | Employer | Location | Job ID
+    - Pilot | American Airlines | LA, California
+----------------------------------------------------------------
+    Total Applications: 1
+  1. Post a Job/Internships
+  2. Browse Jobs/Internships
+  3. View My Applications
+  4. Back to Main Menu
 --------------------------
         Menu
 --------------------------
@@ -42,6 +100,6 @@ Job posted successfully!
   6. View My Pending Connection Requests
   7. View My Network
   9. Log Out / Exit
-  Enter your choice:
 --------------------------
+  Enter your choice:
 --- END_OF_PROGRAM_EXECUTION ---
