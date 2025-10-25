@@ -11,3 +11,17 @@ Employer: KFC
 Location: Brandon, Tampa
 Salary: 40$/hour
 -----END-----
+ID: 00000
+Title: Computer Programmer
+Description: Program computers that program computers that program you.
+Employer: Microsoft
+Location: Tampa, FL
+Salary: $72/hr
+-----END-----
+ID: 00000
+Title: Computer Programmer
+Description: Program computers that program computers that program you.
+Employer: Microsoft
+Location: Tampa, FL
+Salary: $72/hr
+-----END-----
