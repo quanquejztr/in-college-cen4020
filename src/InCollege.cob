@@ -1472,7 +1472,7 @@ POST-JOBS.
 
     *> Location (required)
     PERFORM UNTIL FUNCTION LENGTH(FUNCTION TRIM(JOB-LOCATION)) > 0
-       MOVE "  Enter Job Location:" TO SAVE-TEXT PERFORM SHOW
+       MOVE "  Enter Location:" TO SAVE-TEXT PERFORM SHOW
        READ INPUT-FILE INTO INPUT-TEXT
            AT END
                MOVE 'Y' TO WS-INPUT-EOF
