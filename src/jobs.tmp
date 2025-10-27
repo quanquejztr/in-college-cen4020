@@ -18,10 +18,10 @@ Employer: Microsoft
 Location: Tampa, FL
 Salary: $72/hr
 -----END-----
-ID: 00000
-Title: Computer Programmer
-Description: Program computers that program computers that program you.
-Employer: Microsoft
-Location: Tampa, FL
-Salary: $72/hr
+ID: 0003
+Title: Flight Engineer
+Description: Keep aircraft systems running smoothly.
+Employer: Delta Air Lines
+Location: Atlanta, GA
+Salary: $85,000/year
 -----END-----
