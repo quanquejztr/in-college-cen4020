@@ -1337,6 +1337,7 @@ VIEW-JOBS.
     MOVE 0 TO WS-JOB-MENU-CHOICE
 
     PERFORM UNTIL WS-JOB-MENU-CHOICE = 4 OR WS-INPUT-EOF = 'Y'
+        MOVE "Enter your choice:"           TO SAVE-TEXT PERFORM SHOW
         MOVE "  1. Post a Job/Internships" TO SAVE-TEXT PERFORM SHOW
         MOVE "  2. Browse Jobs/Internships"        TO SAVE-TEXT PERFORM SHOW
         MOVE "  3. View My Applications"   TO SAVE-TEXT PERFORM SHOW
@@ -1549,30 +1550,23 @@ BROWSE-JOBS.
             MOVE "00" TO JOBS-FILE-STATUS
             MOVE 'Y' TO WS-JOBS-FILE-READY
         WHEN "35"
-            MOVE "--------------------------------" TO SAVE-TEXT PERFORM SHOW
-            MOVE "     Browse Jobs/Internships     " TO SAVE-TEXT PERFORM SHOW
-            MOVE "Title | Employer | Location | ID" TO SAVE-TEXT PERFORM SHOW
-            MOVE "--------------------------------" TO SAVE-TEXT PERFORM SHOW
-            MOVE "No job or internship postings are available at this time." TO SAVE-TEXT PERFORM SHOW
+            PERFORM SHOW-NO-JOBS-MESSAGE
+            PERFORM CLOSE-JOBS-FILE-SAFE
             EXIT PARAGRAPH
         WHEN OTHER
             MOVE "Unable to read job postings right now. Please try again later." TO SAVE-TEXT PERFORM SHOW
+            PERFORM CLOSE-JOBS-FILE-SAFE
             EXIT PARAGRAPH
     END-EVALUATE
 
     IF WS-JOBS-FILE-READY = 'Y'
         PERFORM LOAD-JOBS-FROM-FILE
-        CLOSE JOBS-FILE
-        MOVE 'N' TO WS-JOBS-FILE-READY
-    END-IF
-
-    IF WS-JOB-COUNT = 0
-        MOVE "--------------------------------" TO SAVE-TEXT PERFORM SHOW
-        MOVE "     Browse Jobs/Internships     " TO SAVE-TEXT PERFORM SHOW
-        MOVE "Title | Employer | Location | ID" TO SAVE-TEXT PERFORM SHOW
-        MOVE "--------------------------------" TO SAVE-TEXT PERFORM SHOW
-        MOVE "No job or internship postings are available at this time." TO SAVE-TEXT PERFORM SHOW
-        EXIT PARAGRAPH
+        IF WS-JOB-COUNT = 0
+            PERFORM CLOSE-JOBS-FILE-SAFE
+            PERFORM SHOW-NO-JOBS-MESSAGE
+            EXIT PARAGRAPH
+        END-IF
+        PERFORM CLOSE-JOBS-FILE-SAFE
     END-IF
 
     MOVE 'N' TO WS-JOB-EXIT
@@ -1581,6 +1575,21 @@ BROWSE-JOBS.
         PERFORM DISPLAY-JOB-LIST
         PERFORM PROMPT-JOB-SELECTION
     END-PERFORM.
+
+SHOW-NO-JOBS-MESSAGE.
+    MOVE "--------------------------------" TO SAVE-TEXT PERFORM SHOW
+    MOVE "     Browse Jobs/Internships     " TO SAVE-TEXT PERFORM SHOW
+    MOVE "Title | Employer | Location | ID" TO SAVE-TEXT PERFORM SHOW
+    MOVE "--------------------------------" TO SAVE-TEXT PERFORM SHOW
+    MOVE "No Jobs To View!" TO SAVE-TEXT PERFORM SHOW
+    MOVE "--------------------------------" TO SAVE-TEXT PERFORM SHOW.
+
+
+CLOSE-JOBS-FILE-SAFE.
+    IF WS-JOBS-FILE-READY = 'Y'
+        CLOSE JOBS-FILE
+        MOVE 'N' TO WS-JOBS-FILE-READY
+    END-IF.
 
 RESET-JOB-TABLE.
     PERFORM VARYING WS-JOB-LOOP-INDEX FROM 1 BY 1

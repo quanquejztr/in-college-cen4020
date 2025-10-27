@@ -19,11 +19,35 @@ Welcome, cuong!
   6. View My Pending Connection Requests
   7. View My Network
   9. Log Out / Exit
-  Enter your choice:
 --------------------------
+  Enter your choice:
+Enter your choice:
   1. Post a Job/Internships
   2. Browse Jobs/Internships
-  3. Back to Main Menu
+  3. View My Applications
+  4. Back to Main Menu
+--------------------------------
+     Browse Jobs/Internships
+Title | Employer | Location | ID
+--------------------------------
+No Jobs To View!
+--------------------------------
+Enter your choice:
+  1. Post a Job/Internships
+  2. Browse Jobs/Internships
+  3. View My Applications
+  4. Back to Main Menu
+--------------------------------
+     Browse Jobs/Internships
+Title | Employer | Location | ID
+--------------------------------
+No Jobs To View!
+--------------------------------
+Enter your choice:
+  1. Post a Job/Internships
+  2. Browse Jobs/Internships
+  3. View My Applications
+  4. Back to Main Menu
 --------------------------
         Menu
 --------------------------
@@ -35,6 +59,6 @@ Welcome, cuong!
   6. View My Pending Connection Requests
   7. View My Network
   9. Log Out / Exit
-  Enter your choice:
 --------------------------
+  Enter your choice:
 --- END_OF_PROGRAM_EXECUTION ---
