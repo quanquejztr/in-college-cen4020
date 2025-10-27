@@ -2,11 +2,4 @@
 alice
 Password!1
 3
-1
-Flight Engineer
-Keep aircraft systems running smoothly.
-Delta Air Lines
-Atlanta, GA
-$85,000/year
-4
-9
+3

@@ -26,19 +26,14 @@ Enter your choice:
   2. Browse Jobs/Internships
   3. View My Applications
   4. Back to Main Menu
-     Post a Job/Internship
---------------------------
-  Enter Job Title:
-  Enter Job Description:
-  Enter Employer:
-  Enter Location:
-  Enter Salary (optional, max 16 chars, enter blank line to skip):
-Job posted successfully!
-Enter your choice:
-  1. Post a Job/Internships
-  2. Browse Jobs/Internships
-  3. View My Applications
-  4. Back to Main Menu
+--------------------------------
+     My Applications
+Title | Employer | Location | Job ID
+    - Pilot | American Airlines | LA, California
+    - Computer Programmer | Microsoft | Tampa, FL
+    - Chef | KFC | Brandon, Tampa
+----------------------------------------------------------------
+    Total Applications: 3
 --------------------------
         Menu
 --------------------------
@@ -52,4 +47,5 @@ Enter your choice:
   9. Log Out / Exit
 --------------------------
   Enter your choice:
+No more input. Exiting.
 --- END_OF_PROGRAM_EXECUTION ---

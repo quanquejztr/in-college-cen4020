@@ -1361,11 +1361,13 @@ VIEW-JOBS.
                              OR WS-BUF = "POST A JOB"
                              OR WS-BUF = "POST A JOB/INTERNSHIPS"
                             PERFORM POST-JOBS
+                            MOVE 4 TO WS-JOB-MENU-CHOICE
                         WHEN WS-BUF = "2"
                              OR WS-BUF = "BROWSE"
                              OR WS-BUF = "BROWSE JOBS"
                              OR WS-BUF = "BROWSE JOBS/INTERNSHIPS"
                             PERFORM BROWSE-JOBS
+                            MOVE 4 TO WS-JOB-MENU-CHOICE
                         WHEN WS-BUF = "3"
                              OR WS-BUF = "VIEW"
                              OR WS-BUF = "VIEW APPLICATIONS"
@@ -1373,6 +1375,7 @@ VIEW-JOBS.
                              OR WS-BUF = "MY APPLICATIONS"
                              OR WS-BUF = "APPLICATIONS"
                             PERFORM VIEW-MY-APPLICATIONS
+                            MOVE 4 TO WS-JOB-MENU-CHOICE
                         WHEN WS-BUF = "4"
                              OR WS-BUF = "BACK"
                              OR WS-BUF = "BACK TO MAIN MENU"
