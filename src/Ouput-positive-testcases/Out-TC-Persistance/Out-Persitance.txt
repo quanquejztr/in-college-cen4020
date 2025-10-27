@@ -7,7 +7,7 @@ Enter your choice:
 Please enter your username:
 Please enter your password:
 You have successfully logged in.
-Welcome, bob!
+Welcome, alice!
 --------------------------
         Menu
 --------------------------
@@ -28,25 +28,10 @@ Welcome, bob!
 --------------------------------
      My Applications
 Title | Employer | Location | Job ID
-No applications submitted yet.
-    Total Applications: 0
-  1. Post a Job/Internships
-  2. Browse Jobs/Internships
-  3. View My Applications
-  4. Back to Main Menu
---------------------------
-        Menu
---------------------------
-  1. Create/Edit My Profile
-  2. View My Profile
-  3. Search for a job
-  4. Find someone you know
-  5. Learn a New Skill
-  6. View My Pending Connection Requests
-  7. View My Network
-  9. Log Out / Exit
---------------------------
-  Enter your choice:
+    - Pilot | American Airlines | LA, California
+    - Computer Programmer | Microsoft | Tampa, FL
+----------------------------------------------------------------
+    Total Applications: 2
   1. Post a Job/Internships
   2. Browse Jobs/Internships
   3. View My Applications

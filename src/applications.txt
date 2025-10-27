@@ -1,2 +1,5 @@
 
 cuong|0001|Pilot|American Airlines|LA, California|Not provided|2025-10-24 30:53:00
+alice|0001|Pilot|American Airlines|LA, California|Not provided|2025-10-27 23:23:60
+alice|0003|Computer Programmer|Microsoft|Tampa, FL|$72/hr|2025-10-27 25:21:18
+alice|0002|Chef|KFC|Brandon, Tampa|40$/hour|2025-10-27 40:57:86
