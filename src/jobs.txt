@@ -4,24 +4,3 @@ Description: Get to fly big planes daily
 Employer: American Airlines
 Location: LA, California
 -----END-----
-ID: 2
-Title: Chef
-Description: Cook good food
-Employer: KFC
-Location: Brandon, Tampa
-Salary: 40$/hour
------END-----
-ID: 00000
-Title: Computer Programmer
-Description: Program computers that program computers that program you.
-Employer: Microsoft
-Location: Tampa, FL
-Salary: $72/hr
------END-----
-ID: 0003
-Title: Flight Engineer
-Description: Keep aircraft systems running smoothly.
-Employer: Delta Air Lines
-Location: Atlanta, GA
-Salary: $85,000/year
------END-----

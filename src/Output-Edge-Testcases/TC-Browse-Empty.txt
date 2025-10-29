@@ -30,26 +30,32 @@ Enter your choice:
      Browse Jobs/Internships
 Title | Employer | Location | ID
 --------------------------------
-    1. Pilot | American Airlines | LA, California (ID: 1)
-----------------------------------------------------------------
-Enter job number or ID to view details (or BACK to Job Menu):
-----------------------------------------------------------------
-    Job 1 (ID: 1)
-    Title: Pilot
-    Employer: American Airlines
-    Location: LA, California
-    Description: Get to fly big planes daily
-    Salary: Not provided
-        1. Apply for this Job
-        2. Back to Job List
-
+No Jobs To View!
+--------------------------------
+--------------------------
+        Menu
+--------------------------
+  1. Create/Edit My Profile
+  2. View My Profile
+  3. Search for a job
+  4. Find someone you know
+  5. Learn a New Skill
+  6. View My Pending Connection Requests
+  7. View My Network
+  9. Log Out / Exit
+--------------------------
+  Enter your choice:
+Enter your choice:
+  1. Post a Job/Internships
+  2. Browse Jobs/Internships
+  3. View My Applications
+  4. Back to Main Menu
 --------------------------------
      Browse Jobs/Internships
 Title | Employer | Location | ID
 --------------------------------
-    1. Pilot | American Airlines | LA, California (ID: 1)
-----------------------------------------------------------------
-Enter job number or ID to view details (or BACK to Job Menu):
+No Jobs To View!
+--------------------------------
 --------------------------
         Menu
 --------------------------

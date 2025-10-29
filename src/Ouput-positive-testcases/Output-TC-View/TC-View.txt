@@ -31,6 +31,9 @@ Enter your choice:
 Title | Employer | Location | ID
 --------------------------------
     1. Pilot | American Airlines | LA, California (ID: 1)
+    2. Chef | KFC | Brandon, Tampa (ID: 2)
+    3. Computer Programmer | Microsoft | Tampa, FL (ID: 3)
+    4. Flight Engineer | Delta Air Lines | Atlanta, GA (ID: 3)
 ----------------------------------------------------------------
 Enter job number or ID to view details (or BACK to Job Menu):
 ----------------------------------------------------------------
@@ -48,6 +51,9 @@ Enter job number or ID to view details (or BACK to Job Menu):
 Title | Employer | Location | ID
 --------------------------------
     1. Pilot | American Airlines | LA, California (ID: 1)
+    2. Chef | KFC | Brandon, Tampa (ID: 2)
+    3. Computer Programmer | Microsoft | Tampa, FL (ID: 3)
+    4. Flight Engineer | Delta Air Lines | Atlanta, GA (ID: 3)
 ----------------------------------------------------------------
 Enter job number or ID to view details (or BACK to Job Menu):
 --------------------------

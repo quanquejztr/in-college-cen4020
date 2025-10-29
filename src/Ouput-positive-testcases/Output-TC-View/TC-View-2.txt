@@ -1,0 +1,92 @@
+Welcome to InCollege!
+--------------------------
+  1. Log In
+  2. Create New Account
+--------------------------
+Enter your choice:
+Please enter your username:
+Please enter your password:
+You have successfully logged in.
+Welcome, alice!
+--------------------------
+        Menu
+--------------------------
+  1. Create/Edit My Profile
+  2. View My Profile
+  3. Search for a job
+  4. Find someone you know
+  5. Learn a New Skill
+  6. View My Pending Connection Requests
+  7. View My Network
+  9. Log Out / Exit
+--------------------------
+  Enter your choice:
+Enter your choice:
+  1. Post a Job/Internships
+  2. Browse Jobs/Internships
+  3. View My Applications
+  4. Back to Main Menu
+--------------------------------
+     Browse Jobs/Internships
+Title | Employer | Location | ID
+--------------------------------
+    1. Pilot | American Airlines | LA, California (ID: 1)
+    2. Chef | KFC | Brandon, Tampa (ID: 2)
+    3. Computer Programmer | Microsoft | Tampa, FL (ID: 3)
+    4. Flight Engineer | Delta Air Lines | Atlanta, GA (ID: 3)
+----------------------------------------------------------------
+Enter job number or ID to view details (or BACK to Job Menu):
+No job found with that number or ID.
+--------------------------------
+     Browse Jobs/Internships
+Title | Employer | Location | ID
+--------------------------------
+    1. Pilot | American Airlines | LA, California (ID: 1)
+    2. Chef | KFC | Brandon, Tampa (ID: 2)
+    3. Computer Programmer | Microsoft | Tampa, FL (ID: 3)
+    4. Flight Engineer | Delta Air Lines | Atlanta, GA (ID: 3)
+----------------------------------------------------------------
+Enter job number or ID to view details (or BACK to Job Menu):
+No job found with that number or ID.
+--------------------------------
+     Browse Jobs/Internships
+Title | Employer | Location | ID
+--------------------------------
+    1. Pilot | American Airlines | LA, California (ID: 1)
+    2. Chef | KFC | Brandon, Tampa (ID: 2)
+    3. Computer Programmer | Microsoft | Tampa, FL (ID: 3)
+    4. Flight Engineer | Delta Air Lines | Atlanta, GA (ID: 3)
+----------------------------------------------------------------
+Enter job number or ID to view details (or BACK to Job Menu):
+----------------------------------------------------------------
+    Job 2 (ID: 2)
+    Title: Chef
+    Employer: KFC
+    Location: Brandon, Tampa
+    Description: Cook good food
+    Salary: 40$/hour
+        1. Apply for this Job
+        2. Back to Job List
+
+--------------------------------
+     Browse Jobs/Internships
+Title | Employer | Location | ID
+--------------------------------
+    1. Pilot | American Airlines | LA, California (ID: 1)
+    2. Chef | KFC | Brandon, Tampa (ID: 2)
+    3. Computer Programmer | Microsoft | Tampa, FL (ID: 3)
+    4. Flight Engineer | Delta Air Lines | Atlanta, GA (ID: 3)
+----------------------------------------------------------------
+Enter job number or ID to view details (or BACK to Job Menu):
+No job found with that number or ID.
+--------------------------------
+     Browse Jobs/Internships
+Title | Employer | Location | ID
+--------------------------------
+    1. Pilot | American Airlines | LA, California (ID: 1)
+    2. Chef | KFC | Brandon, Tampa (ID: 2)
+    3. Computer Programmer | Microsoft | Tampa, FL (ID: 3)
+    4. Flight Engineer | Delta Air Lines | Atlanta, GA (ID: 3)
+----------------------------------------------------------------
+Enter job number or ID to view details (or BACK to Job Menu):
+--- END_OF_PROGRAM_EXECUTION ---
