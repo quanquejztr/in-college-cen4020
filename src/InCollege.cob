@@ -78,6 +78,12 @@ FILE-CONTROL.
         ACCESS MODE IS SEQUENTIAL
         FILE STATUS IS APPLICATIONS-FILE-STATUS.
 
+    *> Messages file
+    SELECT MESSAGES-FILE ASSIGN TO "src/messages.txt"
+        ORGANIZATION IS LINE SEQUENTIAL
+        ACCESS MODE IS SEQUENTIAL
+        FILE STATUS IS MESSAGES-FILE-STATUS.
+
     *> Temp files for rewriting connections on accept
     SELECT CONN-PROFILES-TEMP-FILE ASSIGN TO "src/connections.tmp"
         ORGANIZATION IS LINE SEQUENTIAL
@@ -153,6 +159,9 @@ FD JOBS-NEW-FILE.
 FD APPLICATIONS-FILE.
 01 APPLICATIONS-LINE PIC X(400).
 
+FD MESSAGES-FILE.
+01 MESSAGES-LINE PIC X(512).
+
 
 *> Variables, flags, and helpers
 WORKING-STORAGE SECTION.
@@ -167,6 +176,7 @@ WORKING-STORAGE SECTION.
 01 JOBS-NEW-FILE-STATUS PIC XX.
 01 JOBS-TEMP-FILE-STATUS PIC XX.
 01 APPLICATIONS-FILE-STATUS PIC XX.
+01 MESSAGES-FILE-STATUS PIC XX.
 
 01 CONNECTIONS-FILE-STATUS PIC XX.
 
@@ -178,6 +188,15 @@ WORKING-STORAGE SECTION.
 01 WS-CONN-SENDER    PIC X(20).
 01 WS-CONN-RECIPIENT PIC X(20).
 01 WS-CONN-FOUND     PIC A(1) VALUE 'N'.
+
+01 WS-MESSAGE-RECIPIENT PIC X(20).
+01 WS-MESSAGE-TEXT      PIC X(300).
+01 WS-MESSAGE-CONN-COUNT PIC 99 VALUE 0.
+01 WS-MESSAGE-CONNECTIONS.
+   05 WS-MESSAGE-CONNECTION OCCURS 20 PIC X(20).
+01 WS-MESSAGE-INDEX PIC 99 VALUE 0.
+01 WS-MESSAGE-VALID PIC A(1) VALUE 'N'.
+01 WS-MESSAGE-USER-FOUND PIC A(1) VALUE 'N'.
 
 01 WS-ACCEPT-NAME    PIC X(20).
 01 WS-PENDING-MATCH  PIC A(1) VALUE 'N'.
@@ -257,6 +276,7 @@ WORKING-STORAGE SECTION.
 77 CHOICE      PIC 9 VALUE 0.
 77 SKILLCHOICE PIC 9 VALUE 0.
 77 WS-JOB-MENU-CHOICE PIC 9 VALUE 0.
+77 WS-MESSAGE-CHOICE PIC 9 VALUE 0.
 77 WS-JOB-COUNT        PIC 9(4) VALUE 0.
 77 WS-JOBS-FILE-READY  PIC A    VALUE 'N'.
 77 WS-JOB-CURRENT-INDEX PIC 9(4) VALUE 0.
@@ -1025,6 +1045,7 @@ NAV-MENU.
         MOVE "  5. Learn a New Skill"      TO SAVE-TEXT PERFORM SHOW
         MOVE "  6. View My Pending Connection Requests" TO SAVE-TEXT PERFORM SHOW
         MOVE "  7. View My Network"        TO SAVE-TEXT PERFORM SHOW
+        MOVE "  8. Messages"               TO SAVE-TEXT PERFORM SHOW
         MOVE "  9. Log Out / Exit"         TO SAVE-TEXT PERFORM SHOW
         MOVE "--------------------------"  TO SAVE-TEXT PERFORM SHOW
         MOVE "  Enter your choice:"        TO SAVE-TEXT PERFORM SHOW
@@ -1053,6 +1074,8 @@ NAV-MENU.
                 PERFORM VIEW-PENDING-REQUESTS
             WHEN CHOICE = 7
                 PERFORM VIEW-MY-NETWORK
+            WHEN CHOICE = 8
+                PERFORM MESSAGES-MENU
             WHEN CHOICE = 9
                 CONTINUE
             WHEN OTHER
@@ -1060,6 +1083,215 @@ NAV-MENU.
                 MOVE 0 TO CHOICE
         END-EVALUATE
     END-PERFORM.
+
+MESSAGES-MENU.
+    *> Provides messaging related options
+    MOVE 0 TO WS-MESSAGE-CHOICE
+    PERFORM UNTIL WS-MESSAGE-CHOICE = 3 OR WS-INPUT-EOF = 'Y'
+        MOVE "--------------------------" TO SAVE-TEXT PERFORM SHOW
+        MOVE "      Messages Menu      " TO SAVE-TEXT PERFORM SHOW
+        MOVE "--------------------------" TO SAVE-TEXT PERFORM SHOW
+        MOVE "  1. Send a New Message" TO SAVE-TEXT PERFORM SHOW
+        MOVE "  2. View My Messages"   TO SAVE-TEXT PERFORM SHOW
+        MOVE "  3. Back to Main Menu"  TO SAVE-TEXT PERFORM SHOW
+        MOVE "--------------------------" TO SAVE-TEXT PERFORM SHOW
+        MOVE "  Enter your choice:"    TO SAVE-TEXT PERFORM SHOW
+
+        READ INPUT-FILE INTO INPUT-TEXT
+            AT END
+                MOVE 'Y' TO WS-INPUT-EOF
+                MOVE 3 TO WS-MESSAGE-CHOICE
+                MOVE "No more input while in Messages menu." TO SAVE-TEXT PERFORM SHOW
+            NOT AT END
+                MOVE FUNCTION NUMVAL(FUNCTION TRIM(INPUT-TEXT)) TO WS-MESSAGE-CHOICE
+        END-READ
+
+        EVALUATE WS-MESSAGE-CHOICE
+            WHEN 1
+                PERFORM SEND-NEW-MESSAGE
+                MOVE 0 TO WS-MESSAGE-CHOICE
+            WHEN 2
+                PERFORM VIEW-MY-MESSAGES
+                MOVE 0 TO WS-MESSAGE-CHOICE
+            WHEN 3
+                CONTINUE
+            WHEN OTHER
+                MOVE "Invalid choice, please try again." TO SAVE-TEXT PERFORM SHOW
+                MOVE 0 TO WS-MESSAGE-CHOICE
+        END-EVALUATE
+    END-PERFORM.
+
+LOAD-MESSAGE-CONNECTIONS.
+    *> Collect usernames of accepted connections for messaging
+    MOVE 0 TO WS-MESSAGE-CONN-COUNT
+    MOVE SPACES TO WS-MESSAGE-CONNECTIONS
+
+    OPEN INPUT FRIENDS-FILE
+    IF FRIENDS-FILE-STATUS = "00"
+        PERFORM UNTIL FRIENDS-FILE-STATUS = "10"
+            READ FRIENDS-FILE INTO FRIEND-REC
+                AT END EXIT PERFORM
+            END-READ
+            IF FUNCTION TRIM(FR-USER) = FUNCTION TRIM(WS-NAME)
+                IF WS-MESSAGE-CONN-COUNT < 20
+                    ADD 1 TO WS-MESSAGE-CONN-COUNT
+                    MOVE FR-FRIEND TO WS-MESSAGE-CONNECTION(WS-MESSAGE-CONN-COUNT)
+                END-IF
+            END-IF
+        END-PERFORM
+        CLOSE FRIENDS-FILE
+    ELSE IF FRIENDS-FILE-STATUS = "35"
+        *> No friends file yet means no connections
+        CONTINUE
+    ELSE
+        MOVE SPACES TO SAVE-TEXT
+        STRING "Unable to read network data (status " DELIMITED BY SIZE
+               FRIENDS-FILE-STATUS DELIMITED BY SIZE
+               ")." DELIMITED BY SIZE
+               INTO SAVE-TEXT
+        END-STRING
+        PERFORM SHOW
+    END-IF.
+
+VERIFY-MESSAGE-RECIPIENT-EXISTS.
+    *> Determine whether the intended recipient exists in USERINFO
+    MOVE 'N' TO WS-MESSAGE-USER-FOUND
+
+    OPEN INPUT USERINFO
+    EVALUATE UINFO-FILE-STATUS
+        WHEN "00"
+            PERFORM UNTIL UINFO-FILE-STATUS = "10" OR WS-MESSAGE-USER-FOUND = 'Y'
+                READ USERINFO INTO USER-REC
+                    AT END EXIT PERFORM
+                    NOT AT END
+                        IF FUNCTION TRIM(IN-USERNAME) = FUNCTION TRIM(WS-MESSAGE-RECIPIENT)
+                            MOVE 'Y' TO WS-MESSAGE-USER-FOUND
+                            EXIT PERFORM
+                        END-IF
+                END-READ
+            END-PERFORM
+            CLOSE USERINFO
+        WHEN "35"
+            *> File does not exist yet; no users recorded
+            CONTINUE
+        WHEN OTHER
+            MOVE SPACES TO SAVE-TEXT
+            STRING "Unable to access user records (status " DELIMITED BY SIZE
+                   UINFO-FILE-STATUS DELIMITED BY SIZE
+                   ")." DELIMITED BY SIZE
+                   INTO SAVE-TEXT
+            END-STRING
+            PERFORM SHOW
+    END-EVALUATE.
+
+SEND-NEW-MESSAGE.
+    *> Prompt for recipient and persist message when valid
+    PERFORM LOAD-MESSAGE-CONNECTIONS
+
+    IF WS-MESSAGE-CONN-COUNT = 0
+        MOVE "You are not connected with anyone yet. Connect with other users to send messages." TO SAVE-TEXT PERFORM SHOW
+        EXIT PARAGRAPH
+    END-IF
+
+    MOVE "Enter the username of the recipient:" TO SAVE-TEXT PERFORM SHOW
+    READ INPUT-FILE INTO INPUT-TEXT
+        AT END
+            MOVE 'Y' TO WS-INPUT-EOF
+            MOVE "No more input while attempting to send a message." TO SAVE-TEXT PERFORM SHOW
+            EXIT PARAGRAPH
+        NOT AT END
+            MOVE FUNCTION TRIM(INPUT-TEXT) TO WS-MESSAGE-RECIPIENT
+    END-READ
+
+    IF FUNCTION LENGTH(FUNCTION TRIM(WS-MESSAGE-RECIPIENT)) = 0
+        MOVE "Recipient username cannot be empty." TO SAVE-TEXT PERFORM SHOW
+        EXIT PARAGRAPH
+    END-IF
+
+    PERFORM VERIFY-MESSAGE-RECIPIENT-EXISTS
+
+    IF WS-MESSAGE-USER-FOUND NOT = 'Y'
+        MOVE "User not found." TO SAVE-TEXT PERFORM SHOW
+        EXIT PARAGRAPH
+    END-IF
+
+    MOVE 'N' TO WS-MESSAGE-VALID
+    PERFORM VARYING WS-MESSAGE-INDEX FROM 1 BY 1
+            UNTIL WS-MESSAGE-INDEX > WS-MESSAGE-CONN-COUNT
+        IF FUNCTION TRIM(WS-MESSAGE-CONNECTION(WS-MESSAGE-INDEX))
+           = FUNCTION TRIM(WS-MESSAGE-RECIPIENT)
+            MOVE 'Y' TO WS-MESSAGE-VALID
+            EXIT PERFORM
+        END-IF
+    END-PERFORM
+
+    IF WS-MESSAGE-VALID NOT = 'Y'
+        MOVE "You can only message users you are connected with." TO SAVE-TEXT PERFORM SHOW
+        EXIT PARAGRAPH
+    END-IF
+
+    MOVE "Enter your message:" TO SAVE-TEXT PERFORM SHOW
+    READ INPUT-FILE INTO INPUT-TEXT
+        AT END
+            MOVE 'Y' TO WS-INPUT-EOF
+            MOVE "No more input while attempting to send a message." TO SAVE-TEXT PERFORM SHOW
+            EXIT PARAGRAPH
+        NOT AT END
+            MOVE FUNCTION TRIM(INPUT-TEXT) TO WS-MESSAGE-TEXT
+    END-READ
+
+    IF FUNCTION LENGTH(FUNCTION TRIM(WS-MESSAGE-TEXT)) = 0
+        MOVE "Message text cannot be empty." TO SAVE-TEXT PERFORM SHOW
+        EXIT PARAGRAPH
+    END-IF
+
+    OPEN EXTEND MESSAGES-FILE
+    IF MESSAGES-FILE-STATUS = "35"
+        OPEN OUTPUT MESSAGES-FILE
+        CLOSE MESSAGES-FILE
+        OPEN EXTEND MESSAGES-FILE
+    END-IF
+
+    IF MESSAGES-FILE-STATUS NOT = "00"
+        MOVE SPACES TO SAVE-TEXT
+        STRING "Unable to save your message (status " DELIMITED BY SIZE
+               MESSAGES-FILE-STATUS DELIMITED BY SIZE
+               ")." DELIMITED BY SIZE
+               INTO SAVE-TEXT
+        END-STRING
+        PERFORM SHOW
+        EXIT PARAGRAPH
+    END-IF
+
+    MOVE SPACES TO MESSAGES-LINE
+    STRING FUNCTION TRIM(WS-NAME) DELIMITED BY SIZE
+           "|" DELIMITED BY SIZE
+           FUNCTION TRIM(WS-MESSAGE-RECIPIENT) DELIMITED BY SIZE
+           "|" DELIMITED BY SIZE
+           FUNCTION TRIM(WS-MESSAGE-TEXT) DELIMITED BY SIZE
+           INTO MESSAGES-LINE
+    END-STRING
+    WRITE MESSAGES-LINE
+
+    IF MESSAGES-FILE-STATUS NOT = "00"
+        MOVE SPACES TO SAVE-TEXT
+        STRING "Failed to write message (status " DELIMITED BY SIZE
+               MESSAGES-FILE-STATUS DELIMITED BY SIZE
+               ")." DELIMITED BY SIZE
+               INTO SAVE-TEXT
+        END-STRING
+        PERFORM SHOW
+        CLOSE MESSAGES-FILE
+        EXIT PARAGRAPH
+    END-IF
+
+    CLOSE MESSAGES-FILE
+
+    MOVE "Message sent successfully!" TO SAVE-TEXT PERFORM SHOW.
+
+VIEW-MY-MESSAGES.
+    *> Under construction per current requirements
+    MOVE "View My Messages is currently under construction." TO SAVE-TEXT PERFORM SHOW.
 
 
 WRITE-PROFILE-BLOCK.
