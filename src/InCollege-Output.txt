@@ -32,7 +32,7 @@ Welcome, alice!
   Enter your choice:
 Enter the username of the recipient:
 Enter your message: (max 200 characters)
-Message sent successfully!
+Message text cannot be too long!
 --------------------------
       Messages Menu
 --------------------------
