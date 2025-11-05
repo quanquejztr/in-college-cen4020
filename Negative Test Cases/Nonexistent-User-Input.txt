@@ -3,7 +3,6 @@ alice
 Password!1
 8
 1
-cuong
-Hello, how are you?
+unknownuser
 3
 9

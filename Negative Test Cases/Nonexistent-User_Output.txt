@@ -31,8 +31,7 @@ Welcome, alice!
 --------------------------
   Enter your choice:
 Enter the username of the recipient:
-Enter your message: (max 200 characters, message will be truncated)
-Message sent successfully!
+User not found. You can only message users you are connected with.
 --------------------------
       Messages Menu
 --------------------------
