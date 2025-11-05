@@ -31,7 +31,7 @@ Welcome, alice!
 --------------------------
   Enter your choice:
 Enter the username of the recipient:
-Enter your message: (max 200 characters, message will be truncated)
+Enter your message: (max 200 characters)
 Message sent successfully!
 --------------------------
       Messages Menu
