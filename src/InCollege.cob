@@ -204,6 +204,8 @@ WORKING-STORAGE SECTION.
 01 WS-MESSAGE-INDEX PIC 99 VALUE 0.
 01 WS-MESSAGE-VALID PIC A(1) VALUE 'N'.
 01 WS-MESSAGE-USER-FOUND PIC A(1) VALUE 'N'.
+01 WS-MESSAGES-FOUND PIC A(1) VALUE 'N'.
+01 WS-FIRST-MESSAGE PIC A(1) VALUE 'Y'.
 
 01 WS-ACCEPT-NAME    PIC X(20).
 01 WS-PENDING-MATCH  PIC A(1) VALUE 'N'.
@@ -256,6 +258,14 @@ WORKING-STORAGE SECTION.
 01 WS-YEAR-NUM          PIC 9(4) VALUE 0.
 01 WS-YEAR-TRIES        PIC 9   VALUE 0.
 01 WS-YEAR-MAX-TRIES    PIC 9   VALUE 3.
+
+01 WS-YEAR     PIC X(4).
+01 WS-MONTH    PIC X(2).
+01 WS-DAY      PIC X(2).
+01 WS-HOUR     PIC X(2).
+01 WS-MINUTE   PIC X(2).
+01 WS-SECOND   PIC X(2).
+
 
 *> Password rule tracking
 01 WS-HASCAPITAL PIC A(1) VALUE 'N'.
@@ -1306,9 +1316,113 @@ SEND-NEW-MESSAGE.
     MOVE "Message sent successfully!" TO SAVE-TEXT PERFORM SHOW.
 
 VIEW-MY-MESSAGES.
-    *> Under construction per current requirements
-    MOVE "View My Messages is currently under construction." TO SAVE-TEXT PERFORM SHOW.
+    *> Display all messages received by the logged-in user
+    MOVE 'N' TO WS-MESSAGES-FOUND
+    MOVE 'Y' TO WS-FIRST-MESSAGE
 
+    *> Display header
+    MOVE "--- Your Messages ---" TO SAVE-TEXT PERFORM SHOW
+    MOVE SPACES TO SAVE-TEXT PERFORM SHOW
+
+    OPEN INPUT MESSAGES-FILE
+    IF MESSAGES-FILE-STATUS = "35"
+        *> File doesn't exist, no messages
+        MOVE "You have no messages at this time." TO SAVE-TEXT PERFORM SHOW
+        EXIT PARAGRAPH
+    END-IF
+
+    IF MESSAGES-FILE-STATUS NOT = "00"
+        MOVE SPACES TO SAVE-TEXT
+        STRING "Unable to read messages (status " DELIMITED BY SIZE
+               MESSAGES-FILE-STATUS DELIMITED BY SIZE
+               ")." DELIMITED BY SIZE
+               INTO SAVE-TEXT
+        END-STRING
+        PERFORM SHOW
+        CLOSE MESSAGES-FILE
+        EXIT PARAGRAPH
+    END-IF
+
+    *> Read through all messages
+    PERFORM UNTIL MESSAGES-FILE-STATUS = "10"
+        READ MESSAGES-FILE INTO MESSAGE-REC
+            AT END
+                CONTINUE
+            NOT AT END
+                *> Check if this message is for the logged-in user
+                IF FUNCTION TRIM(MESSAGE-RECIPIENT-USERNAME) =
+                   FUNCTION TRIM(WS-NAME)
+                    MOVE 'Y' TO WS-MESSAGES-FOUND
+                    *> Display blank line before message (except first)
+                    IF WS-FIRST-MESSAGE = 'N'
+                        MOVE SPACES TO SAVE-TEXT
+                        PERFORM SHOW
+                    END-IF
+                    MOVE 'N' TO WS-FIRST-MESSAGE
+
+                    *> Display sender
+                    MOVE SPACES TO SAVE-TEXT
+                    STRING "From: " DELIMITED BY SIZE
+                           FUNCTION TRIM(MESSAGE-SEND-USERNAME)
+                           DELIMITED BY SIZE
+                           INTO SAVE-TEXT
+                    END-STRING
+                    PERFORM SHOW
+
+                    *> Display message content
+                    MOVE SPACES TO SAVE-TEXT
+                    STRING "Message: " DELIMITED BY SIZE
+                           FUNCTION TRIM(MESSAGE-CONTENT)
+                           DELIMITED BY SIZE
+                           INTO SAVE-TEXT
+                    END-STRING
+                    PERFORM SHOW
+
+                    *> Display timestamp if present and not empty
+                    IF FUNCTION TRIM(MESSAGE-TIMESTAMP) NOT = SPACES
+                        *> Extract timestamp components (YYYYMMDDHHMMSS)
+                        MOVE FUNCTION TRIM(MESSAGE-TIMESTAMP) TO WS-BUF
+                        MOVE WS-BUF(1:4)  TO WS-YEAR
+                        MOVE WS-BUF(5:2)  TO WS-MONTH
+                        MOVE WS-BUF(7:2)  TO WS-DAY
+                        MOVE WS-BUF(9:2)  TO WS-HOUR
+                        MOVE WS-BUF(11:2) TO WS-MINUTE
+                        MOVE WS-BUF(13:2) TO WS-SECOND
+
+                        *> Format readable timestamp: (Sent: YYYY-MM-DD HH:MM:SS)
+                        MOVE SPACES TO SAVE-TEXT
+                        STRING
+                            "(Sent: "        DELIMITED BY SIZE
+                            WS-YEAR          DELIMITED BY SIZE
+                            "-"              DELIMITED BY SIZE
+                            WS-MONTH         DELIMITED BY SIZE
+                            "-"              DELIMITED BY SIZE
+                            WS-DAY           DELIMITED BY SIZE
+                            " "              DELIMITED BY SIZE
+                            WS-HOUR          DELIMITED BY SIZE
+                            ":"              DELIMITED BY SIZE
+                            WS-MINUTE        DELIMITED BY SIZE
+                            ":"              DELIMITED BY SIZE
+                            WS-SECOND        DELIMITED BY SIZE
+                            ")"              DELIMITED BY SIZE
+                            INTO SAVE-TEXT
+                        END-STRING
+                        PERFORM SHOW
+                    END-IF
+
+
+                    *> Display separator
+                    MOVE "---" TO SAVE-TEXT PERFORM SHOW
+                END-IF
+        END-READ
+    END-PERFORM
+
+    CLOSE MESSAGES-FILE
+
+    *> If no messages were found, inform the user
+    IF WS-MESSAGES-FOUND = 'N'
+        MOVE "You have no messages at this time." TO SAVE-TEXT PERFORM SHOW
+    END-IF.
 
 WRITE-PROFILE-BLOCK.
     *> Persist the in-memory profile (P-REC) as text

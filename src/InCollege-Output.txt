@@ -7,7 +7,7 @@ Enter your choice:
 Please enter your username:
 Please enter your password:
 You have successfully logged in.
-Welcome, alice!
+Welcome, cuong!
 --------------------------
         Menu
 --------------------------
@@ -30,9 +30,17 @@ Welcome, alice!
   3. Back to Main Menu
 --------------------------
   Enter your choice:
-Enter the username of the recipient:
-Enter your message: (max 200 characters)
-Message text cannot be too long!
+--- Your Messages ---
+
+From: alice
+Message: hey bro
+(Optional: Sent: 251106  191725)
+---
+
+From: alice
+Message: hey so good to meet You
+(Optional: Sent: 251106  192936)
+---
 --------------------------
       Messages Menu
 --------------------------
