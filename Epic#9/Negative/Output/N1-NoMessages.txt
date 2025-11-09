@@ -32,13 +32,7 @@ Welcome, alice!
   Enter your choice:
 --- Your Messages ---
 
-From: bob
-Message: hello there                                                                                                                                                          251106  191725
----
-
-From: cuong
-Message: this line is truncated
----
+You have no messages at this time.
 --------------------------
       Messages Menu
 --------------------------
@@ -61,4 +55,5 @@ Message: this line is truncated
   9. Log Out / Exit
 --------------------------
   Enter your choice:
+No more input. Exiting.
 --- END_OF_PROGRAM_EXECUTION ---
