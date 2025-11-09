@@ -1,0 +1,2 @@
+bob                 alice               hello there                                                                                                                                                          251106  191725
+bob            alice               overlap short test                                                                                                                                                251106  191800

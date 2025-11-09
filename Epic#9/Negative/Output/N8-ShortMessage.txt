@@ -32,7 +32,9 @@ Welcome, alice!
   Enter your choice:
 --- Your Messages ---
 
-You have no messages at this time.
+From: bob
+Message: hello there                                                                                                                                                          251106  191725
+---
 --------------------------
       Messages Menu
 --------------------------

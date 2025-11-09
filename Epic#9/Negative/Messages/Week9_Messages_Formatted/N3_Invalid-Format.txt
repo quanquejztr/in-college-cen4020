@@ -1,4 +1,2 @@
-bob                 alice               hello                                                                                                                                                 251106  191725
-this-is-a-bad-line-without-pipes
-cuong               alice               no timestamp present                                                                                                                                    
-alice               bob                 valid for another user                                                                                                                                251106  191725
+badline
+bob|alice

@@ -1,2 +1,1 @@
-bob                 alice               hello there                                                                                                                                                          251106  191725
-cuong               alice               this line is truncated
+averylongsendernameXXXXalice               hello should not align                                                                                                                                        251106  191900
