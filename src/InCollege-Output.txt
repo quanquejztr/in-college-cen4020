@@ -22,41 +22,22 @@ Welcome, alice!
   9. Log Out / Exit
 --------------------------
   Enter your choice:
+--- Pending Connection Requests ---
+You have no pending connection requests at this time.
+-----------------------------------
 --------------------------
-      Messages Menu
+        Menu
 --------------------------
-  1. Send a New Message
-  2. View My Messages
-  3. Back to Main Menu
---------------------------
-  Enter your choice:
---- Your Messages ---
-
-From: bob
-Message: This is a message from another sender!
-(Sent: 2511-10-   15:46:00)
----
-
-From: cuong
-Message: This is also a message from another sender!
-(Sent: 2511-10-   15:47:55)
----
---------------------------
-      Messages Menu
---------------------------
-  1. Send a New Message
-  2. View My Messages
-  3. Back to Main Menu
+  1. Create/Edit My Profile
+  2. View My Profile
+  3. Search for a job
+  4. Find someone you know
+  5. Learn a New Skill
+  6. View My Pending Connection Requests
+  7. View My Network
+  8. Messages
+  9. Log Out / Exit
 --------------------------
   Enter your choice:
-Invalid choice, please try again.
---------------------------
-      Messages Menu
---------------------------
-  1. Send a New Message
-  2. View My Messages
-  3. Back to Main Menu
---------------------------
-  Enter your choice:
-No more input while in Messages menu.
+No more input. Exiting.
 --- END_OF_PROGRAM_EXECUTION ---

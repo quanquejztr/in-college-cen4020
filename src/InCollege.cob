@@ -1288,7 +1288,7 @@ SEND-NEW-MESSAGE.
     MOVE WS-NAME TO MESSAGE-SEND-USERNAME
     MOVE WS-MESSAGE-RECIPIENT TO MESSAGE-RECIPIENT-USERNAME
     MOVE WS-MESSAGE-TEXT TO MESSAGE-CONTENT
-    ACCEPT WS-MESSAGE-LOADDATE FROM DATE
+    ACCEPT WS-MESSAGE-LOADDATE FROM DATE YYYYMMDD
     ACCEPT WS-MESSAGE-TIMESTAMP FROM TIME      *> This is in GMT time!!! So hours will be +5.
     MOVE WS-MESSAGE-LOADDATE(1:8) TO WS-MESSAGE-DATESTAMP
     MOVE SPACES TO WS-MESSAGE-LOADDATE
@@ -1380,34 +1380,91 @@ VIEW-MY-MESSAGES.
 
                     *> Display timestamp if present and not empty
                     IF FUNCTION TRIM(MESSAGE-TIMESTAMP) NOT = SPACES
-                        *> Extract timestamp components (YYYYMMDDHHMMSS)
                         MOVE FUNCTION TRIM(MESSAGE-TIMESTAMP) TO WS-BUF
-                        MOVE WS-BUF(1:4)  TO WS-YEAR
-                        MOVE WS-BUF(5:2)  TO WS-MONTH
-                        MOVE WS-BUF(7:2)  TO WS-DAY
-                        MOVE WS-BUF(9:2)  TO WS-HOUR
-                        MOVE WS-BUF(11:2) TO WS-MINUTE
-                        MOVE WS-BUF(13:2) TO WS-SECOND
 
-                        *> Format readable timestamp: (Sent: YYYY-MM-DD HH:MM:SS)
-                        MOVE SPACES TO SAVE-TEXT
-                        STRING
-                            "(Sent: "        DELIMITED BY SIZE
-                            WS-YEAR          DELIMITED BY SIZE
-                            "-"              DELIMITED BY SIZE
-                            WS-MONTH         DELIMITED BY SIZE
-                            "-"              DELIMITED BY SIZE
-                            WS-DAY           DELIMITED BY SIZE
-                            " "              DELIMITED BY SIZE
-                            WS-HOUR          DELIMITED BY SIZE
-                            ":"              DELIMITED BY SIZE
-                            WS-MINUTE        DELIMITED BY SIZE
-                            ":"              DELIMITED BY SIZE
-                            WS-SECOND        DELIMITED BY SIZE
-                            ")"              DELIMITED BY SIZE
-                            INTO SAVE-TEXT
-                        END-STRING
-                        PERFORM SHOW
+                        *> Support both 14-char YYYYMMDDHHMMSS and legacy 12-char YYMMDDHHMMSS
+                        IF FUNCTION LENGTH(WS-BUF) >= 14
+                            *> Detect legacy "YYMMDD  HHMMSS" (two spaces between date and time)
+                            IF WS-BUF(7:2) = "  "
+                                MOVE SPACES TO WS-YEAR
+                                MOVE "20"       TO WS-YEAR(1:2)
+                                MOVE WS-BUF(1:2) TO WS-YEAR(3:2)
+                                MOVE WS-BUF(3:2) TO WS-MONTH
+                                MOVE WS-BUF(5:2) TO WS-DAY
+                                MOVE WS-BUF(9:2)  TO WS-HOUR
+                                MOVE WS-BUF(11:2) TO WS-MINUTE
+                                MOVE WS-BUF(13:2) TO WS-SECOND
+                            ELSE
+                                *> Standard 14-char format: YYYYMMDDHHMMSS
+                                MOVE WS-BUF(1:4)  TO WS-YEAR
+                                MOVE WS-BUF(5:2)  TO WS-MONTH
+                                MOVE WS-BUF(7:2)  TO WS-DAY
+                                MOVE WS-BUF(9:2)  TO WS-HOUR
+                                MOVE WS-BUF(11:2) TO WS-MINUTE
+                                MOVE WS-BUF(13:2) TO WS-SECOND
+                            END-IF
+
+                            *> Format readable timestamp: (Sent: YYYY-MM-DD HH:MM:SS)
+                            MOVE SPACES TO SAVE-TEXT
+                            STRING
+                                "(Sent: "        DELIMITED BY SIZE
+                                WS-YEAR          DELIMITED BY SIZE
+                                "-"              DELIMITED BY SIZE
+                                WS-MONTH         DELIMITED BY SIZE
+                                "-"              DELIMITED BY SIZE
+                                WS-DAY           DELIMITED BY SIZE
+                                " "              DELIMITED BY SIZE
+                                WS-HOUR          DELIMITED BY SIZE
+                                ":"              DELIMITED BY SIZE
+                                WS-MINUTE        DELIMITED BY SIZE
+                                ":"              DELIMITED BY SIZE
+                                WS-SECOND        DELIMITED BY SIZE
+                                ")"              DELIMITED BY SIZE
+                                INTO SAVE-TEXT
+                            END-STRING
+                            PERFORM SHOW
+                        ELSE
+                            IF FUNCTION LENGTH(WS-BUF) = 12
+                                *> Legacy format: YYMMDDHHMMSS → prefix century '20'
+                                MOVE SPACES TO WS-YEAR
+                                MOVE "20" TO WS-YEAR(1:2)
+                                MOVE WS-BUF(1:2) TO WS-YEAR(3:2)
+                                MOVE WS-BUF(3:2)  TO WS-MONTH
+                                MOVE WS-BUF(5:2)  TO WS-DAY
+                                MOVE WS-BUF(7:2)  TO WS-HOUR
+                                MOVE WS-BUF(9:2)  TO WS-MINUTE
+                                MOVE WS-BUF(11:2) TO WS-SECOND
+
+                                *> Format readable timestamp: (Sent: YYYY-MM-DD HH:MM:SS)
+                                MOVE SPACES TO SAVE-TEXT
+                                STRING
+                                    "(Sent: "        DELIMITED BY SIZE
+                                    WS-YEAR          DELIMITED BY SIZE
+                                    "-"              DELIMITED BY SIZE
+                                    WS-MONTH         DELIMITED BY SIZE
+                                    "-"              DELIMITED BY SIZE
+                                    WS-DAY           DELIMITED BY SIZE
+                                    " "              DELIMITED BY SIZE
+                                    WS-HOUR          DELIMITED BY SIZE
+                                    ":"              DELIMITED BY SIZE
+                                    WS-MINUTE        DELIMITED BY SIZE
+                                    ":"              DELIMITED BY SIZE
+                                    WS-SECOND        DELIMITED BY SIZE
+                                    ")"              DELIMITED BY SIZE
+                                    INTO SAVE-TEXT
+                                END-STRING
+                                PERFORM SHOW
+                            ELSE
+                                *> Unknown format: print raw
+                                MOVE SPACES TO SAVE-TEXT
+                                STRING "(Sent: " DELIMITED BY SIZE
+                                       FUNCTION TRIM(MESSAGE-TIMESTAMP) DELIMITED BY SIZE
+                                       ")" DELIMITED BY SIZE
+                                       INTO SAVE-TEXT
+                                END-STRING
+                                PERFORM SHOW
+                            END-IF
+                        END-IF
                     END-IF
 
 
