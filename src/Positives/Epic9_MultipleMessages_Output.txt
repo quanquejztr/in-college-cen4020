@@ -7,7 +7,7 @@ Enter your choice:
 Please enter your username:
 Please enter your password:
 You have successfully logged in.
-Welcome, alice!
+Welcome, cuong!
 --------------------------
         Menu
 --------------------------
@@ -32,14 +32,14 @@ Welcome, alice!
   Enter your choice:
 --- Your Messages ---
 
-From: bob
-Message: This is a message from another sender!
-(Sent: 2511-10-   15:46:00)
+From: alice
+Message: hey bro
+(Sent: 2511-06-   19:17:25)
 ---
 
-From: cuong
-Message: This is also a message from another sender!
-(Sent: 2511-10-   15:47:55)
+From: alice
+Message: hey so good to meet You
+(Sent: 2511-06-   19:29:36)
 ---
 --------------------------
       Messages Menu
@@ -49,14 +49,18 @@ Message: This is also a message from another sender!
   3. Back to Main Menu
 --------------------------
   Enter your choice:
-Invalid choice, please try again.
 --------------------------
-      Messages Menu
+        Menu
 --------------------------
-  1. Send a New Message
-  2. View My Messages
-  3. Back to Main Menu
+  1. Create/Edit My Profile
+  2. View My Profile
+  3. Search for a job
+  4. Find someone you know
+  5. Learn a New Skill
+  6. View My Pending Connection Requests
+  7. View My Network
+  8. Messages
+  9. Log Out / Exit
 --------------------------
   Enter your choice:
-No more input while in Messages menu.
 --- END_OF_PROGRAM_EXECUTION ---
