@@ -1771,6 +1771,7 @@ VIEW-JOBS.
             NOT AT END
                 IF FUNCTION LENGTH(FUNCTION TRIM(INPUT-TEXT)) = 0
                     MOVE "Invalid choice." TO SAVE-TEXT PERFORM SHOW
+                    MOVE 4 TO WS-JOB-MENU-CHOICE
                 ELSE
                     MOVE FUNCTION UPPER-CASE(FUNCTION TRIM(INPUT-TEXT)) TO WS-BUF
                     EVALUATE TRUE
@@ -1802,6 +1803,7 @@ VIEW-JOBS.
                             MOVE 4 TO WS-JOB-MENU-CHOICE
                         WHEN OTHER
                             MOVE "Invalid choice." TO SAVE-TEXT PERFORM SHOW
+                            MOVE 4 TO WS-JOB-MENU-CHOICE
                     END-EVALUATE
                 END-IF
         END-READ
