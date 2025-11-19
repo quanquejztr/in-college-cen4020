@@ -1,0 +1,49 @@
+Welcome to InCollege!
+--------------------------
+  1. Log In
+  2. Create New Account
+--------------------------
+Enter your choice:
+Please enter your username:
+Please enter your password:
+You have successfully logged in.
+Welcome, bob!
+--------------------------
+        Menu
+--------------------------
+  1. Create/Edit My Profile
+  2. View My Profile
+  3. Search for a job
+  4. Find someone you know
+  5. Learn a New Skill
+  6. View My Pending Connection Requests
+  7. View My Network
+  8. Messages
+  9. Log Out / Exit
+--------------------------
+  Enter your choice:
+--- Pending Connection Requests ---
+[01] Request from: alice
+For request #01: (1) Accept  (2) Reject
+You are now connected with alice.
+-----------------------------------
+--------------------------
+        Menu
+--------------------------
+  1. Create/Edit My Profile
+  2. View My Profile
+  3. Search for a job
+  4. Find someone you know
+  5. Learn a New Skill
+  6. View My Pending Connection Requests
+  7. View My Network
+  8. Messages
+  9. Log Out / Exit
+--------------------------
+  Enter your choice:
+     Create/Edit Profile
+--------------------------
+  Enter First Name:
+  Enter Last Name:
+Ran out of input while setting up the profile.
+--- END_OF_PROGRAM_EXECUTION ---

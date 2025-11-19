@@ -27,7 +27,184 @@ Enter your choice:
   2. Browse Jobs/Internships
   3. View My Applications
   4. Back to Main Menu
-Invalid choice.
+--------------------------------
+     Browse Jobs/Internships
+Title | Employer | Location | ID
+--------------------------------
+    1. Pilot | American Airlines | LA, California (ID: 1)
+    2. Software Engineer Intern | Google | Mountain View (ID: 2)
+    3. A | C | D (ID: 3)
+    4. A | C | D (ID: 4)
+    5. Chef | Amazon | Tampa (ID: 5)
+    6. Chef | Amazon | Tampa (ID: 6)
+    7. Chef | Amazon | Tampa (ID: 7)
+    8. AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA | CCCCCCCCCCCCCCCCCCCC | DDDDDDDDDDDDDDDDDDDD (ID: 8)
+    9. AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA | CCCCCCCCCCCCCCCCCCCC | DDDDDDDDDDDDDDDDDDDD (ID: 9)
+    10. AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA | CCCCCCCCCCCCCCCCCCCC | DDDDDDDDDDDDDDDDDDDD (ID: 10)
+----------------------------------------------------------------
+Enter job number or ID to view details (or BACK to Job Menu):
+----------------------------------------------------------------
+    Job 1 (ID: 1)
+    Title: Pilot
+    Employer: American Airlines
+    Location: LA, California
+    Description: Get to fly big planes daily
+    Salary: Not provided
+        1. Apply for this Job
+        2. Back to Job List
+----------------------------------------------------------------
+You have already applied to Pilot at American Airlines.
+----------------------------------------------------------------
+
+--------------------------------
+     Browse Jobs/Internships
+Title | Employer | Location | ID
+--------------------------------
+    1. Pilot | American Airlines | LA, California (ID: 1)
+    2. Software Engineer Intern | Google | Mountain View (ID: 2)
+    3. A | C | D (ID: 3)
+    4. A | C | D (ID: 4)
+    5. Chef | Amazon | Tampa (ID: 5)
+    6. Chef | Amazon | Tampa (ID: 6)
+    7. Chef | Amazon | Tampa (ID: 7)
+    8. AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA | CCCCCCCCCCCCCCCCCCCC | DDDDDDDDDDDDDDDDDDDD (ID: 8)
+    9. AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA | CCCCCCCCCCCCCCCCCCCC | DDDDDDDDDDDDDDDDDDDD (ID: 9)
+    10. AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA | CCCCCCCCCCCCCCCCCCCC | DDDDDDDDDDDDDDDDDDDD (ID: 10)
+----------------------------------------------------------------
+Enter job number or ID to view details (or BACK to Job Menu):
+----------------------------------------------------------------
+    Job 2 (ID: 2)
+    Title: Software Engineer Intern
+    Employer: Google
+    Location: Mountain View
+    Description: Work with the development team to build features.
+    Salary: 85000
+        1. Apply for this Job
+        2. Back to Job List
+
+--------------------------------
+     Browse Jobs/Internships
+Title | Employer | Location | ID
+--------------------------------
+    1. Pilot | American Airlines | LA, California (ID: 1)
+    2. Software Engineer Intern | Google | Mountain View (ID: 2)
+    3. A | C | D (ID: 3)
+    4. A | C | D (ID: 4)
+    5. Chef | Amazon | Tampa (ID: 5)
+    6. Chef | Amazon | Tampa (ID: 6)
+    7. Chef | Amazon | Tampa (ID: 7)
+    8. AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA | CCCCCCCCCCCCCCCCCCCC | DDDDDDDDDDDDDDDDDDDD (ID: 8)
+    9. AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA | CCCCCCCCCCCCCCCCCCCC | DDDDDDDDDDDDDDDDDDDD (ID: 9)
+    10. AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA | CCCCCCCCCCCCCCCCCCCC | DDDDDDDDDDDDDDDDDDDD (ID: 10)
+----------------------------------------------------------------
+Enter job number or ID to view details (or BACK to Job Menu):
+--------------------------
+        Menu
+--------------------------
+  1. Create/Edit My Profile
+  2. View My Profile
+  3. Search for a job
+  4. Find someone you know
+  5. Learn a New Skill
+  6. View My Pending Connection Requests
+  7. View My Network
+  8. Messages
+  9. Log Out / Exit
+--------------------------
+  Enter your choice:
+Enter the full name of the person you are looking for:
+--- Found User Profile ---
+--------------------------
+Name: Bob Builder
+University: West Coast Uni
+Major: Business
+Graduation Year: 2027
+About Me: None
+Experience: None
+Education: None
+-------------------------
+  1. Send Connection Request
+  2. Back to Main Menu
+Enter your choice:
+--------------------------
+        Menu
+--------------------------
+  1. Create/Edit My Profile
+  2. View My Profile
+  3. Search for a job
+  4. Find someone you know
+  5. Learn a New Skill
+  6. View My Pending Connection Requests
+  7. View My Network
+  8. Messages
+  9. Log Out / Exit
+--------------------------
+  Enter your choice:
+--- Pending Connection Requests ---
+You have no pending connection requests at this time.
+-----------------------------------
+--------------------------
+        Menu
+--------------------------
+  1. Create/Edit My Profile
+  2. View My Profile
+  3. Search for a job
+  4. Find someone you know
+  5. Learn a New Skill
+  6. View My Pending Connection Requests
+  7. View My Network
+  8. Messages
+  9. Log Out / Exit
+--------------------------
+  Enter your choice:
+--- My Network ---
+ - Stephen Hawking
+        University: University of Central Florida
+        Major: Computer Science
+ - Bob Builder
+        University: West Coast Uni
+        Major: Business
+--------------------------
+        Menu
+--------------------------
+  1. Create/Edit My Profile
+  2. View My Profile
+  3. Search for a job
+  4. Find someone you know
+  5. Learn a New Skill
+  6. View My Pending Connection Requests
+  7. View My Network
+  8. Messages
+  9. Log Out / Exit
+--------------------------
+  Enter your choice:
+--------------------------
+      Messages Menu
+--------------------------
+  1. Send a New Message
+  2. View My Messages
+  3. Back to Main Menu
+--------------------------
+  Enter your choice:
+--- Your Messages ---
+
+From: bob
+Message: This is a message from another sender!
+(Sent: 2025-11-10 15:46:00)
+---
+
+From: cuong
+Message: This is also a message from another sender!
+(Sent: 2025-11-10 15:47:55)
+---
+--------------------------
+      Messages Menu
+--------------------------
+  1. Send a New Message
+  2. View My Messages
+  3. Back to Main Menu
+--------------------------
+  Enter your choice:
 --------------------------
         Menu
 --------------------------
